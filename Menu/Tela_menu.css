@@ -1,0 +1,51 @@
+.text-purple-800 {
+    color: #6b21a8 !important;
+}
+
+.bg-purple-800 {
+    background-color: #6b21a8 !important;
+}
+
+
+.text-poetsen {
+    font-family: 'Poetsen One', sans-serif;
+}
+
+.btn-custom {
+    width: 100%;
+    height: 60px;
+    max-width: 200px;
+    font-size: 14px;
+}
+
+/* só pra deixar mais bonito o butão */
+.btn-custom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-custom .bi {
+    font-size: 1.2em;
+}
+
+/* infelizmente não encontrei essas animações, vinda no boostrap, então usei css mesmo */
+.btn-custom {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.btn-custom.right:hover {
+    transform: translateX(10px);
+}
+
+
+.btn-custom.left:hover {
+    transform: translateX(-10px);
+}
+
+.btn-custom .bi {
+    margin-right: 8px;
+}

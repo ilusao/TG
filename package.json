@@ -1,6 +1,18 @@
 {
   "dependencies": {
     "bootstrap": "^5.3.3",
-    "bootstrap-icons": "^1.11.3"
-  }
+    "bootstrap-icons": "^1.11.3",
+    "express": "^4.19.2",
+    "mongoose": "^8.5.4"
+  },
+  "name": "tg",
+  "version": "1.0.0",
+  "description": "Esta é a primeira versão do TG 2, que inclui os passos iniciais do projeto. Nesta versão, foram implementadas as telas de login e de cadastro de funcionários.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

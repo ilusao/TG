@@ -1,0 +1,38 @@
+body {
+    background-color: #E0E0E0;
+}
+
+
+h2 {
+    background-color: #C3BEDA;
+    color: #000;
+    padding: 30px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.form-control {
+    border-radius: 0;
+    border: none;
+    border-bottom: 2px solid #CCC;
+    background-color: transparent;
+}
+
+.btn-dark {
+    background-color: #000;
+    border: none;
+}
+
+.dropdown-toggle {
+    background-color: #C3BEDA;
+    color: #000;
+    border: none;
+}
+.dropdown-item {
+    color: #000;
+}
+
+.dropdown-item:hover {
+    background-color: #C0C0C0;
+    color: #000;
+}

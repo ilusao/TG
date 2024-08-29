@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Localidade do Produto</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #EAE6EF;
+        }
+        .header {
+            background-color: #8E81A2;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+        .map-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 20px;
+        }
+        .map-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        .form-overlay {
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            width: 300px;
+        }
+        .destination-section {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+        .destination-box {
+            background-color: white;
+            padding: 15px;
+            width: 48%;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .menu {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #8E81A2;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .menu ul {
+            list-style: none;
+            padding: 0;
+        }
+        .menu ul li {
+            margin: 5px 0;
+        }
+        .menu ul li a {
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>LOCALIDADE DO PRODUTO</h1>
+    </div>
+
+
+
+    <div class="menu">
+
+        <a class="btn btn-secondary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">    
+            Menu
+        </a>
+
+        <ul class="dropdown-menu" style="background-color: #8E81A2;">
+
+            <h4 style="font-style: italic;">
+                <li><a href="#">Início</a></li>
+                <li><a href="#">Estoque</a></li>
+                <li><a href="#">Centro Fornecedor</a></li>
+                <li><a href="#">Detalhe</a></li>
+                <li><a href="#">Cadastrar Produto</a></li>
+                <li><a href="#">Cadastrar Fornecedor</a></li>
+                <li><a href="#">Gerar Balança</a></li>
+                <li><a href="#">Cadastrar Funcionário</a></li>
+                <li><a href="#">Localizar Produto</a></li>
+            </h4>
+           
+        </ul>
+    </div>
+
+    <div class="map-container">
+        <img src="https://www.cnnbrasil.com.br/wp-content/uploads/sites/12/2024/02/google-maps-e1707316052388.png?w=1200&h=900&crop=1" alt="Mapa">
+        <div class="form-overlay">
+            <div class="mb-2">
+                <label for="codigoProduto" class="form-label">Código do Produto</label>
+                <input type="text" class="form-control" id="codigoProduto">
+            </div>
+            <div class="mb-2">
+                <label for="descricao" class="form-label">Descrição</label>
+                <input type="text" class="form-control" id="descricao">
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label for="inflamavel" class="form-label">Inflamável</label>
+                    <select id="inflamavel" class="form-select">
+                        <option value="nao">Não</option>
+                        <option value="sim">Sim</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <label for="fragil" class="form-label">Frágil</label>
+                    <select id="fragil" class="form-select">
+                        <option value="nao">Não</option>
+                        <option value="sim">Sim</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-2">
+                <label for="localizacao" class="form-label">Localização</label>
+                <input type="text" class="form-control" id="localizacao">
+            </div>
+            <div class="mb-2">
+                <label for="destino" class="form-label">Destino</label>
+                <input type="text" class="form-control" id="destino">
+            </div>
+        </div>
+    </div>
+
+    <br><br>
+
+    <div class="destination-section">
+        <div class="destination-box">
+            DESTINO SAÍDA
+            <input type="text" class="form-control mt-2" placeholder="">
+        </div>
+        <div class="destination-box">
+            DESTINO FINAL
+            <input type="text" class="form-control mt-2" placeholder="">
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
