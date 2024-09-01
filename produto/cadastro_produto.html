@@ -143,6 +143,8 @@
                     </div>
                 </div>
                 <button type="submit" class="btn btn-register w-100">Registrar</button>
+                <br> <br>
+                <button type="submit" id="Consult" class="btn btn-register w-100" disabled>Consultar</button>
             </form>
         </div>
     </div>
@@ -212,6 +214,38 @@
                 form.classList.add('was-validated');
             });
         })();
+
+        document.addEventListener('DOMContentLoaded', function() {
+        // Seleciona o formulário, o botão "Consultar" e todos os campos de input e select dentro do formulário
+        const form = document.getElementById('productForm');
+        const consultButton = document.getElementById('Consult');
+        const inputs = form.querySelectorAll('input, select');
+
+        // Função para verificar se todos os campos obrigatórios estão preenchidos
+        function checkForm() {
+            let allFilled = true;
+
+            // Verifica cada campo de input e select
+            inputs.forEach(function(input) {
+                // Se o campo for obrigatório e estiver vazio, a variável allFilled é definida como false
+                if (input.hasAttribute('required') && !input.value) {
+                    allFilled = false;
+                }
+            });
+
+            // Ativa o botão "Consultar" se todos os campos obrigatórios estiverem preenchidos
+            // Caso contrário, o botão permanece desativado
+            consultButton.disabled = !allFilled;
+        }
+
+        // Adiciona um event listener para cada campo de input e select
+        // Ele será acionado toda vez que o conteúdo de um campo for alterado
+        inputs.forEach(function(input) {
+            input.addEventListener('input', checkForm); // Para inputs de texto, número, etc.
+            input.addEventListener('change', checkForm); // Para selects e inputs de data
+        });
+    });
+
     </script>
 </body>
 </html>
