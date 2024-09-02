@@ -61,16 +61,24 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="grupo" class="form-label">Grupo</label>
-                        <input type="text" class="form-control" id="grupo" required>
-                        <div class="invalid-feedback">Por favor, insira o grupo.</div>
+                    <div class="col-md-6 mb-3" id="group">
+                        <label for="groupSelect" class="form-label">Grupo</label>
+                        <select id="groupSelect" class="form-select">
+                            <option value="materias_primas">Matérias-Primas</option>
+                            <option value="componentes_pecas">Componentes e Peças</option>
+                            <option value="produtos_semiacabados">Produtos Semiacabados</option>
+                            <option value="materiais_manutencao">Materiais de Manutenção</option>
+                            <option value="materiais_auxiliares">Materiais Auxiliares</option>
+                        </select>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="subgrupo" class="form-label">Sub-Grupo</label>
-                        <input type="text" class="form-control" id="subgrupo" required>
-                        <div class="invalid-feedback">Por favor, insira o sub-grupo.</div>
+                    
+                    <div class="col-md-6 mb-3" id="sub_group">
+                        <label for="subgroupSelect" class="form-label">Sub-Grupo</label>
+                        <select id="subgroupSelect" class="form-select">
+                            <!-- Subgrupos serão inseridos dinamicamente aqui -->
+                        </select>
                     </div>
+                    
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-3">
@@ -244,6 +252,46 @@
             input.addEventListener('input', checkForm); // Para inputs de texto, número, etc.
             input.addEventListener('change', checkForm); // Para selects e inputs de data
         });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const groupSelect = document.getElementById('groupSelect');
+        const subgroupSelect = document.getElementById('subgroupSelect');
+
+        // Mapeamento dos sub-grupos para cada grupo
+        const subgroups = {
+            materias_primas: ['Metais', 'Polímeros', 'Cerâmicas', 'Madeiras', 'Têxteis', 'Químicos'],
+            componentes_pecas: ['Mecânicos', 'Elétricos', 'Eletrônicos', 'Hidráulicos'],
+            produtos_semiacabados: ['Perfis de Metal', 'Componentes Plásticos', 'Subconjuntos Mecânicos'],
+            materiais_manutencao: ['Lubrificantes', 'Produtos de Limpeza', 'Revestimentos e Pinturas', 'Equipamentos de Proteção Individual (EPI)'],
+            materiais_auxiliares: ['Ferramentas', 'Embalagens', 'Suprimentos de Escritório']
+        };
+
+        // Função para atualizar o subgrupo com base no grupo selecionado
+        function updateSubgroups() {
+            // Limpa as opções de subgrupo existentes
+            subgroupSelect.innerHTML = '';
+
+            // Obtém o grupo selecionado
+            const selectedGroup = groupSelect.value;
+
+            // Verifica se há subgrupos para o grupo selecionado
+            if (subgroups[selectedGroup]) {
+                // Adiciona as novas opções de subgrupo
+                subgroups[selectedGroup].forEach(function(subgroup) {
+                    const option = document.createElement('option');
+                    option.value = subgroup;
+                    option.textContent = subgroup;
+                    subgroupSelect.appendChild(option);
+                });
+            }
+        }
+
+        // Atualiza os subgrupos ao alterar o grupo selecionado
+        groupSelect.addEventListener('change', updateSubgroups);
+
+        // Chama a função inicialmente para popular os subgrupos baseados na primeira opção
+        updateSubgroups();
     });
 
     </script>
