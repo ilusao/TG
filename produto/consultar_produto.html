@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultar Produto</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f7f7f7;
+        }
+
+        h1 {
+            background-color: #7d6da9;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .left-panel {
+            background-color: #e0e0e0;
+            padding: 20px;
+        }
+
+        .left-panel img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 20px;
+        }
+
+        .right-panel {
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+
+        .form-label {
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background-color: #7d6da9;
+            border-color: #7d6da9;
+        }
+
+        .btn-primary:hover {
+            background-color: #6c5c9b;
+            border-color: #6c5c9b;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Consultar Produto</h1>
+
+    <div class="container">
+        <div class="row">
+            <!-- Painel esquerdo -->
+            <div class="col-md-4 left-panel">
+
+                <h4></h4>
+                    <ul class="list-group">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Materiais
+                        </button>
+                          <ul class="dropdown-menu">
+                           
+                        </ul>
+                </ul>
+                <br><br><br>
+                <br><br><br>
+                <br><br><br>
+                <br><br><br>
+                <br><br><br>
+                <br><br><br>
+                <!-- Imagem do produto -->
+                <div class="text-center">
+                    <img src="https://via.placeholder.com/300x150.png?text=Liga+6061" alt="Produto Alumínio">
+                    <p>Liga 6061</p>
+                </div>
+            </div>
+
+            <!-- Painel direito - Formulário -->
+            <div class="col-md-8 right-panel">
+                <form id="productForm">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="nome" class="form-label">Nome</label>
+                            <input type="text" class="form-control" id="nome" name="nome" value="Liga 6061" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="descricao" class="form-label">Descrição PDV</label>
+                            <input type="text" class="form-control" id="descricao" name="descricao">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="subgrupo" class="form-label">Sub-Grupo</label>
+                            <input type="text" class="form-control" id="subgrupo" name="subgrupo">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="almoxerifado" class="form-label">Almoxerifado</label>
+                            <input type="text" class="form-control" id="almoxerifado" name="almoxerifado">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="grupo" class="form-label">Grupo</label>
+                            <input type="text" class="form-control" id="grupo" name="grupo">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="fornecedor" class="form-label">Fornecedor</label>
+                            <input type="text" class="form-control" id="fornecedor" name="fornecedor">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="marca" class="form-label">Marca</label>
+                            <input type="text" class="form-control" id="marca" name="marca">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="codigo" class="form-label">Código do Produto</label>
+                            <input type="text" class="form-control" id="codigo" name="codigo" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="gtin" class="form-label">GTIN</label>
+                            <input type="text" class="form-control" id="gtin" name="gtin">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="servico" class="form-label">Serviço</label>
+                            <select class="form-select" id="servico" name="servico">
+                                <option value="nao">Não</option>
+                                <option value="sim">Sim</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="preco" class="form-label">Preço Proprietário</label>
+                            <input type="text" class="form-control" id="preco" name="preco" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="tipo" class="form-label">Tipo</label>
+                            <select class="form-select" id="tipo" name="tipo">
+                                <option value="vendas">Vendas</option>
+                                <option value="compra">Compra</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="inativo" class="form-label">Inativo</label>
+                            <select class="form-select" id="inativo" name="inativo">
+                                <option value="nao">Não</option>
+                                <option value="sim">Sim</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="validarFormulario()">Salvar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JavaScript de validação -->
+    <script src="consultar_produto.js"></script>
+
+</body>
+
+</html>
