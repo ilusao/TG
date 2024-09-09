@@ -157,6 +157,47 @@
         </div>
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Função para verificar os inputs
+            function verificarInputs() {
+                // Verificando o campo 'nome'
+                const nomeInput = document.getElementById('nome');
+                if (nomeInput.value.trim() === "") {
+                    nomeInput.classList.add('is-invalid');
+                } else {
+                    nomeInput.classList.remove('is-invalid');
+                    nomeInput.classList.add('is-valid');
+                }
+        
+                // Verificando o campo 'descricao'
+                const descricaoInput = document.getElementById('descricao');
+                if (descricaoInput.value.trim() === "") {
+                    descricaoInput.classList.add('is-invalid');
+                } else {
+                    descricaoInput.classList.remove('is-invalid');
+                    descricaoInput.classList.add('is-valid');
+                }
+        
+                // Verificando o campo 'fornecedor'
+                const fornecedorInput = document.getElementById('fornecedor');
+                if (fornecedorInput.value.trim() === "") {
+                    fornecedorInput.classList.add('is-invalid');
+                } else {
+                    fornecedorInput.classList.remove('is-invalid');
+                    fornecedorInput.classList.add('is-valid');
+                }
+        
+                // Verifique outros campos de forma semelhante...
+            }
+        
+            // Configurando a verificação constante
+            setInterval(verificarInputs, 1000); // Verifica os inputs a cada 1 segundo
+        });
+        </script>
+        
+        
+
     <!-- Bootstrap JS and dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 

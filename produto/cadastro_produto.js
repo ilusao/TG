@@ -104,6 +104,8 @@
             materiais_auxiliares: ['Ferramentas', 'Embalagens', 'Suprimentos de Escritório']
         };
 
+        
+
         // Função para atualizar o subgrupo com base no grupo selecionado
         function updateSubgroups() {
             // Limpa as opções de subgrupo existentes
@@ -123,6 +125,8 @@
                 });
             }
         }
+
+        
 
         // Atualiza os subgrupos ao alterar o grupo selecionado
         groupSelect.addEventListener('change', updateSubgroups);
