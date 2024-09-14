@@ -1,3 +1,0 @@
-TG 2
-MongoDB: username: TG
-para entrar: mongodb+srv://TG:ilusao.com@funcionarios.avocc.mongodb.net/
