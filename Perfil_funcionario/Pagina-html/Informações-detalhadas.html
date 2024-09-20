@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informações Detalhadas do Funcionário</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="C:\TG\Perfil_funcionario\Pagina-css\Informções-detalhadas.css">
+    
+   
+</head>
+<body>
+
+    <div class="container mt-4">
+        <!-- Botão de Voltar -->
+        <a href="perfil-funcionario.html" class="btn btn-back mb-4">
+            <i class="bi bi-arrow-left-circle-fill"></i> Voltar ao Perfil
+        </a>
+
+        <!-- Título da Página -->
+        <h2 class="text-center section-title">Informações Detalhadas do Funcionário</h2>
+
+        <!-- Seção: Datas -->
+        <div class="info-box">
+            <h4 class="section-title">Datas Importantes</h4>
+            <hr class="black-line">
+            <p><strong>Data de Contratação:</strong> 15/01/2018</p>
+            <p><strong>Data de Promoção:</strong> 20/06/2022</p>
+            <p><strong>Tempo na Empresa:</strong> 6 anos e 3 meses</p>
+        </div>
+
+        <!-- Seção: Comportamento do Funcionário -->
+        <div class="info-box">
+            <h4 class="section-title">Comportamento do Funcionário</h4>
+            <hr class="black-line">
+            <p>Jessica é uma funcionária dedicada e mantém uma postura profissional exemplar. Ela demonstra habilidades de liderança, especialmente após a promoção para a área de produtos.</p>
+        </div>
+
+        <!-- Seção: Registro de Desempenho -->
+        <div class="info-box">
+            <h4 class="section-title">Registro de Desempenho (Mês/Ano)</h4>
+            <hr class="black-line">
+            <table class="table table-striped table-performance">
+                <thead class="bg-purple text-white">
+                    <tr>
+                        <th>Mês</th>
+                        <th>Ano</th>
+                        <th>Desempenho (%)</th>
+                        <th>Meta Cumprida</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Janeiro</td>
+                        <td>2024</td>
+                        <td>95%</td>
+                        <td>Sim</td>
+                    </tr>
+                    <tr>
+                        <td>Fevereiro</td>
+                        <td>2024</td>
+                        <td>92%</td>
+                        <td>Sim</td>
+                    </tr>
+                    <tr>
+                        <td>Março</td>
+                        <td>2024</td>
+                        <td>88%</td>
+                        <td>Não</td>
+                    </tr>
+                    <!-- Adicione mais meses conforme necessário -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Seção: Metas Cumpridas -->
+        <div class="info-box">
+            <h4 class="section-title">Metas Cumpridas</h4>
+            <hr class="black-line">
+            <ul>
+                <li>Aumento de 20% na produtividade em 2023</li>
+                <li>Implementação de um novo sistema de controle de estoque</li>
+                <li>Redução de erros no envio de produtos em 15% em 2022</li>
+            </ul>
+        </div>
+
+        <!-- Seção: Gráfico de Desempenho -->
+        <div class="chart-box">
+            <h4 class="chart-title">Gráfico de Desempenho</h4>
+            <canvas id="performanceChart"></canvas>
+            <div class="text-center mt-3">
+                <span class="badge badge-promotion">Recomendação: Merece Promoção</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js para o gráfico -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Gráfico de Desempenho com Chart.js
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        const performanceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Desempenho (%)',
+                    data: [95, 92, 88, 85, 90, 93, 96, 97, 91, 89, 94, 98],
+                    backgroundColor: 'rgba(98, 52, 184, 0.6)', 
+                    borderColor: '#4B0082',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>
