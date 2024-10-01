@@ -27,7 +27,7 @@
                     <div class="card-header text-white text-center bg-purple" style="border-radius: 40px 40px 0 0;">
                         <i class="bi bi-telephone fs-4" style="position: absolute; left: 15px;"></i>
                         <span>Contato</span>
-                        <button class="btn btn-light float-end" title="Editar Contato">
+                        <button class="btn btn-light float-end" title="Editar Contato" onclick="openEditModal('contato')">
                             <i class="bi bi-pencil"></i>
                         </button>
                     </div>
@@ -38,10 +38,9 @@
 
                 <!-- Horário de trabalho -->
                 <div class="card mt-2 bg-light-purple" style="border-radius: 40px; max-width: 310px; height: 120px;">
-                    <div class="card-header text-white text-center bg-purple" style="border-radius: 40px 40px 0 0;">
-                        <i class="bi bi-clock fs-4" style="position: absolute; left: 15px;"></i>
-                        <span>Horário de Trabalho</span>
-                        <button class="btn btn-light float-end" title="Editar Horário">
+                    <div class="card-header text-white text-center bg-purple fs-5" style="border-radius: 40px 40px 0 0;">
+                        <i class="bi bi-clock fs-4" style="position: absolute; left: 15px;"></i> Horário de Trabalho
+                        <button class="btn btn-light float-end" title="Editar Horário" onclick="openEditModal('horario-trabalho')">
                             <i class="bi bi-pencil"></i>
                         </button>
                     </div>
@@ -51,11 +50,11 @@
                 </div>
 
                 <!-- Código do Funcionário -->
-                <div class="card mt-2 bg-danger" style="border-radius: 40px; max-width: 310px; height: 120px;">
-                    <div class="card-header text-white text-center bg-purple" style="border-radius: 40px 40px 0 0;">
+                <div class="card mt-2 bg-danger" style="border-radius: 40px; max-width: 310px; height: 120px;"> 
+                    <div class="card-header text-white text-center bg-purple fs-5" style="border-radius: 40px 40px 0 0;">
                         <i class="bi bi-person-badge-fill fs-4" style="position: absolute; left: 15px;"></i>
                         <span>Código do Funcionário</span>
-                        <button class="btn btn-light float-end" title="Editar Código">
+                        <button class="btn btn-light float-end" title="Editar Código" onclick="openEditModal('codigo-funcionario')">
                             <i class="bi bi-pencil"></i>
                         </button>
                     </div>
@@ -77,7 +76,7 @@
                     <div class="text-center bg-purple" style="border-radius: 40px 40px 0 0; padding: 20px;">
                         <h2 class="text-white">
                             PERFIL
-                            <button class="btn btn-light float-end fs-4" title="Editar Perfil">
+                            <button class="btn btn-light float-end fs-4" title="Editar Perfil" onclick="openEditModal('nome-funcionario')">
                                 <i class="bi bi-pencil"></i>
                             </button>
                         </h2>
@@ -112,23 +111,47 @@
         </div>
     </div>
 
+    <!-- Modais para Edição -->
+    <!-- Modal de Edição -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="editForm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editModalLabel">Editar Informação</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="editInput" class="form-label">Nova Informação:</label>
+                        <input type="text" id="editInput" class="form-control" required>
+                        <input type="hidden" id="fieldToEdit">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         async function loadFuncionarioInfo() {
             const funcionarioId = localStorage.getItem('funcionarioId'); 
             console.log("ID do Funcionário:", funcionarioId);
-    
+
             if (!funcionarioId) {
                 alert("ID do funcionário não encontrado.");
                 return;
             }
-    
+
             try {
                 const response = await fetch(`/funcionario/${funcionarioId}`);
                 if (!response.ok) {
                     throw new Error('Erro ao buscar informações do funcionário: ' + response.status);
                 }
                 const funcionario = await response.json();
-    
+
                 // Preencher os campos com os dados do funcionário
                 document.getElementById('nome-funcionario').textContent = funcionario.nome;
                 document.getElementById('contato').textContent = funcionario.contato;
@@ -138,52 +161,52 @@
                 document.getElementById('servico').textContent = funcionario.servico;
                 document.getElementById('cargo').textContent = funcionario.cargo;
                 document.getElementById('inatividade').textContent = funcionario.inativo ? 'Sim' : 'Não';
-    
+
                 // Atualize a imagem do perfil
                 const imageUrl = funcionario.fotoPerfil || '/midia/fotooriginal.png';
                 const img = new Image();
-    
+
                 img.src = imageUrl; // Tente carregar a imagem
-    
+
                 img.onload = () => {
                     // Se a imagem carregar corretamente, atualize a src
                     document.getElementById('foto-perfil').src = `${imageUrl}?${new Date().getTime()}`; // Previne cache
                 };
-    
+
                 img.onerror = () => {
                     // Se houver erro ao carregar a imagem, use a imagem padrão
                     document.getElementById('foto-perfil').src = '/midia/fotooriginal.png';
                 };
-    
+
             } catch (error) {
                 console.error(error);
                 alert('Não foi possível carregar as informações do funcionário: ' + error.message);
             }
         }
-        
+
         async function uploadImage() {
             console.log("Função uploadImage chamada.");
             const input = document.getElementById('input-foto');
             const file = input.files[0];
-    
+
             if (!file) return;
-    
+
             const formData = new FormData();
             formData.append('imagem', file);
-    
+
             const funcionarioId = localStorage.getItem('funcionarioId');
             if (!funcionarioId) {
                 alert('ID do funcionário não encontrado.');
                 return;
             }
             formData.append('funcionarioId', funcionarioId);
-    
+
             try {
                 const response = await fetch('/foto/upload', {
                     method: 'POST',
                     body: formData
                 });
-    
+
                 if (response.ok) {
                     const data = await response.json();
                     console.log("Nova URL da imagem:", data.imageUrl); 
@@ -200,12 +223,76 @@
                 console.error('Erro:', error);
             }
         }
-    
+
+        // Função para abrir o modal de edição
+        function openEditModal(field) {
+            const modal = new bootstrap.Modal(document.getElementById('editModal'));
+            document.getElementById('editModalLabel').textContent = `Editar ${capitalizeFirstLetter(field.replace('-', ' '))}`;
+            document.getElementById('editInput').value = document.getElementById(field).textContent;
+            document.getElementById('fieldToEdit').value = field;
+            modal.show();
+        }
+
+        // Função para tratar a submissão do formulário de edição
+        document.getElementById('editForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const newValue = document.getElementById('editInput').value.trim();
+            const field = document.getElementById('fieldToEdit').value;
+            const funcionarioId = localStorage.getItem('funcionarioId');
+
+            if (!newValue) {
+                alert('O campo não pode estar vazio.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/funcionario/${funcionarioId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ [mapFieldToDb(field)]: newValue })
+                });
+
+                if (response.ok) {
+                    const updatedFuncionario = await response.json();
+                    // Atualiza o campo na página
+                    document.getElementById(field).textContent = updatedFuncionario[mapFieldToDb(field)] || 'Não informado';
+                    // Fecha o modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+                    modal.hide();
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Erro ao atualizar informação.');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Não foi possível atualizar a informação: ' + error.message);
+            }
+        });
+
+        // Função para mapear os campos do HTML para os campos do banco de dados
+        function mapFieldToDb(field) {
+            const mapping = {
+                'contato': 'contato',
+                'horario-trabalho': 'turno',
+                'codigo-funcionario': 'codigoFuncionario',
+                'nome-funcionario': 'nome'
+                // Adicione mais mapeamentos conforme necessário
+            };
+            return mapping[field] || field;
+        }
+
+        // Função para capitalizar a primeira letra
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
         // Carrega as informações do funcionário quando a página é carregada
         window.onload = loadFuncionarioInfo;
     </script>
-    
-    
-    
+
+    <!-- Scripts Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

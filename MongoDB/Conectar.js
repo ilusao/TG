@@ -100,6 +100,41 @@ app.get('/funcionario/search/:searchTerm', async (req, res) => {
     }
 });
 
+// Rota para atualizar informações de um funcionário pelo ID
+app.put('/funcionario/:id', async (req, res) => {
+    try {
+        const funcionarioId = req.params.id;
+        const updates = req.body;
+
+        // Opcional: Valide os campos que podem ser atualizados
+        const allowedUpdates = ['nome', 'contato', 'turno', 'codigoFuncionario', 'departamento', 'servico', 'cargo', 'inativo', 'fotoPerfil'];
+        const actualUpdates = Object.keys(updates);
+        const isValidOperation = actualUpdates.every(update => allowedUpdates.includes(update));
+
+        if (!isValidOperation) {
+            return res.status(400).json({ message: 'Atualizações inválidas!' });
+        }
+
+        const funcionario = await Funcionario.findById(funcionarioId);
+
+        if (!funcionario) {
+            return res.status(404).json({ message: 'Funcionário não encontrado' });
+        }
+
+        // Atualiza os campos
+        actualUpdates.forEach(update => {
+            funcionario[update] = updates[update];
+        });
+
+        await funcionario.save();
+
+        res.json(funcionario);
+    } catch (error) {
+        console.error('Erro ao atualizar funcionário:', error);
+        res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+});
+
 // Rota principal
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'Login', 'Tela_login.html'));
