@@ -2,60 +2,110 @@ const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const Funcionario = require('./Funcionarios');
+const fotoRouter = require('./Foto');
 const app = express();
 const port = 3000;
 
+// Configurações do MongoDB
 const mongoURI = 'mongodb+srv://TG:ilusao.com@funcionarios.avocc.mongodb.net/';
 const options = {
     maxPoolSize: 10,
-    minPoolSize: 1  
+    minPoolSize: 1
 };
 
+// Conexão ao MongoDB
 mongoose.connect(mongoURI, options)
     .then(() => console.log('Conectado ao MongoDB'))
     .catch(err => console.error('Erro ao conectar ao MongoDB:', err));
 
+// Middleware
 app.use(express.json());
+app.use('/foto', fotoRouter);
 app.use(express.static('C:/TG/Login'));
-app.use(express.static('C:/TG/Menu')); 
+app.use(express.static('C:/TG/Perfil_funcionario'));
+app.use(express.static('C:/TG/Menu'));
 app.use(express.static('C:/TG/Cadastro'));
 app.use(express.static('C:/TG/fornecedor'));
 app.use(express.static('C:/TG/Funcionário'));
 app.use(express.static('C:/TG/localidade'));
 app.use(express.static('C:/TG/produto'));
+app.use('/midia', express.static('C:/TG/Midia'));
 
+// Rota de login
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
     try {
+        // Busca o funcionário pelo nome e código
         const funcionario = await Funcionario.findOne({ nome: username, codigoFuncionario: password });
-
         if (funcionario) {
-            res.redirect('/Tela_menu.html');
-        } else {
-            res.status(401).send('Usuário ou senha incorretos');
+            return res.json({ funcionarioId: funcionario._id });
         }
+        return res.status(401).send('Usuário ou senha incorretos');
     } catch (error) {
         console.error('Erro ao autenticar:', error);
-        res.status(500).send('Erro interno do servidor');
+        return res.status(500).json('Erro interno do servidor');
     }
 });
 
+// Rota para registrar funcionários
 app.post('/funcionarios', async (req, res) => {
     try {
         const funcionario = new Funcionario(req.body);
         await funcionario.save();
-        res.status(201).send('Funcionário registrado com sucesso!');
+        return res.status(201).send('Funcionário registrado com sucesso!');
     } catch (err) {
-        res.status(400).send('Erro ao registrar funcionário: ' + err.message);
+        return res.status(400).send('Erro ao registrar funcionário: ' + err.message);
     }
 });
 
-// Só pra colocar a Tela_login.html como a primeira tela...
+// Rota para buscar informações de um funcionário pelo ID
+app.get('/funcionario/:id', async (req, res) => {
+    try {
+        const funcionarioId = req.params.id;
+        const funcionario = await Funcionario.findById(funcionarioId);
+
+        if (!funcionario) {
+            return res.status(404).send('Funcionário não encontrado');
+        }
+
+        // Retorna os dados do funcionário
+        res.json(funcionario);
+    } catch (error) {
+        console.error('Erro ao buscar funcionário:', error);
+        res.status(500).send('Erro interno do servidor');
+    }
+});
+
+// Rota para buscar informações de um funcionário pelo nome ou código
+app.get('/funcionario/search/:searchTerm', async (req, res) => {
+    try {
+        const searchTerm = req.params.searchTerm;
+
+        const funcionario = await Funcionario.findOne({
+            $or: [
+                { nome: searchTerm },
+                { codigoFuncionario: searchTerm }
+            ]
+        });
+
+        if (!funcionario) {
+            return res.status(404).send('Funcionário não encontrado');
+        }
+
+        res.json(funcionario);
+    } catch (error) {
+        console.error('Erro ao buscar funcionário:', error);
+        res.status(500).send('Erro interno do servidor');
+    }
+});
+
+// Rota principal
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'Login', 'Tela_login.html'));
 });
 
+// Inicializa o servidor
 app.listen(port, () => {
     console.log(`Servidor rodando na porta ${port}`);
 });

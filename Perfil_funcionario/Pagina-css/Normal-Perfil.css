@@ -3,28 +3,33 @@ body {
     font-family: 'Arial', sans-serif;
 }
 
-
 .bg-purple {
-    background-color: #4B0082 !important; 
+    background-color: #4B0082 !important;
 }
 
 .bg-light-purple {
-    background-color: rgba(98, 52, 184, 0.6) !important; 
-}
-
-.btn-custom {
-    background-color: #6a0dad;
-    color: white;
-    border-radius: 15px;
-    padding: 10px 20px;
-    font-weight: bold;
-}
-
-.btn-custom:hover {
-    background-color: #4B0082;
+    background-color: rgba(98, 52, 184, 0.6) !important;
 }
 
 .black-line {
     border: 1px solid black;
     margin: 10px 0;
+}
+
+.modal-content {
+    background-color: rgba(98, 52, 184, 0.9);
+    color: white;
+}
+
+.modal-header {
+    background-color: #4B0082;
+}
+
+.modal-footer .btn-secondary {
+    background-color: #4B0082;
+    border: none;
+}
+
+.modal-footer .btn {
+    color: white;
 }

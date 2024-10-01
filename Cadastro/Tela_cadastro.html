@@ -13,6 +13,7 @@
     <header class="bg-custom text-center text-dark py-3 mb-4">
         <h2 class="mb-0">CADASTRAR FUNCIONÁRIO</h2>
     </header>
+
     <div class="dropdown position-absolute top-0 end-0 m-3">
         <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
             Opções
@@ -21,7 +22,7 @@
             <li><a class="dropdown-item" href="#">Menu</a></li>
             <li><a class="dropdown-item" href="#">Estoque</a></li>
             <li><a class="dropdown-item" href="#">Fornecedor</a></li>
-            <li><a class="dropdown-item" href="#">Detalhes</a></li>
+            <li><a class="dropdown-item" href="#">Contato</a></li>
             <li><a class="dropdown-item" href="#">Cadastrar Produto</a></li>
             <li><a class="dropdown-item" href="#">Cadastrar Fornecedor</a></li>
             <li><a class="dropdown-item" href="#">Localizar Produto</a></li>
@@ -38,8 +39,8 @@
                             <input type="text" class="form-control" id="nome" placeholder="Nome do Funcionário">
                         </div>
                         <div class="col-md-6">
-                            <label for="observacoes" class="form-label">Observações</label>
-                            <input type="text" class="form-control" id="observacoes" placeholder="Observações">
+                            <label for="contato" class="form-label">Contato</label>
+                            <input type="tel" class="form-control" id="contato" placeholder="Contato">
                         </div>
                     </div>
 
@@ -62,7 +63,11 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <label for="turno" class="form-label">Turno</label>
-                                    <input type="text" class="form-control" id="turno">
+                                    <select class="form-select custom-select" id="turno">
+                                        <option value="manhã">Manhã</option>
+                                        <option value="tarde">Tarde</option>
+                                        <option value="noite">Noite</option>
+                                    </select>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="servico" class="form-label">Serviço</label>
@@ -74,16 +79,31 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <label for="inativo" class="form-label">Inativo</label>
-                                    <input type="text" class="form-control" id="inativo" placeholder="Sim/Não">
+                                    <div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="inativo" id="inativoSim" value="sim">
+                                            <label class="form-check-label" for="inativoSim">Sim</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="inativo" id="inativoNao" value="nao" checked>
+                                            <label class="form-check-label" for="inativoNao">Não</label>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="cargo" class="form-label">Cargo</label>
                                     <input type="text" class="form-control" id="cargo" placeholder="Cargo">
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="checkbox" id="gerenteSuperior" value="sim">
+                                        <label class="form-check-label" for="gerenteSuperior">
+                                            Gerente ou Superior
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <br><br><br><br>
+
                     <div class="d-flex justify-content-center mt-4">
                         <button type="button" class="btn btn-dark" onclick="registrarFuncionario()">Registrar</button>
                     </div>
@@ -98,15 +118,16 @@
         async function registrarFuncionario() {
             const funcionarioData = {
                 nome: document.getElementById('nome').value,
-                observacoes: document.getElementById('observacoes').value,
+                contato: document.getElementById('contato').value,
                 departamento: document.getElementById('departamento').value,
                 codigoFuncionario: document.getElementById('codigoFuncionario').value,
                 turno: document.getElementById('turno').value,
                 servico: document.getElementById('servico').value,
-                inativo: document.getElementById('inativo').value.toLowerCase() === 'sim',
-                cargo: document.getElementById('cargo').value
+                inativo: document.querySelector('input[name="inativo"]:checked').value === 'sim',
+                cargo: document.getElementById('cargo').value,
+                gerenteOuSuperior: document.getElementById('gerenteSuperior').checked // Verifica se é gerente
             };
-    
+
             try {
                 const response = await fetch('/funcionarios', {
                     method: 'POST',
@@ -115,7 +136,7 @@
                     },
                     body: JSON.stringify(funcionarioData)
                 });
-    
+
                 if (response.ok) {
                     alert('Funcionário registrado com sucesso!');
                     document.getElementById('cadastroFuncionarioForm').reset();
@@ -129,7 +150,7 @@
         }
     </script>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

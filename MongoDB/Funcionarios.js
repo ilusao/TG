@@ -2,13 +2,14 @@ const mongoose = require('mongoose');
 
 const funcionarioSchema = new mongoose.Schema({
     nome: { type: String, required: true },
-    observacoes: String,
+    contato: String,
     departamento: String,
     codigoFuncionario: String,
     turno: String,
     servico: String,
     inativo: Boolean,
-    cargo: String
+    cargo: String,
+    fotoPerfil: String
 });
 
 const Funcionario = mongoose.model('Funcionario', funcionarioSchema);

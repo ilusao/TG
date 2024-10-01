@@ -10,11 +10,12 @@ body {
     color: #4D4D4D;
 }
 
-.form-control {
+.form-control, .custom-select {
     border-radius: 0;
     border: none;
     border-bottom: 2px solid #CCC;
     background-color: transparent;
+    color: #000;
 }
 
 .btn-dark {
@@ -39,4 +40,11 @@ body {
 .dropdown-item:hover {
     background-color: #C0C0C0;
     color: #000;
+}
+
+.custom-select {
+    background-color: #E0E0E0;
+    color: #000;
+    border: none;
+    border-bottom: 2px solid #CCC;
 }

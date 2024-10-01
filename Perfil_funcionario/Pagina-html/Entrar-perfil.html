@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login de Funcionários</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.cdnfonts.com/css/poetsen-one" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../Pagina-css/Entrar-perfil.css" rel="stylesheet">
+   
+</head>
+
+<body class="d-flex justify-content-center align-items-center vh-100">
+    <!-- Parte de cima, circulo -->
+    <div class="z-2 position-relative">
+        <div class="bg-purple-800 rounded-circle" style="width: 350px; height: 350px; opacity: 0.9; position: absolute; top: -500px; right: -300px;"></div>
+    </div>
+
+    <div class="z-1 position-relative">
+        <div class="bg-purple-800 rounded-circle" style="width: 350px; height: 350px; opacity: 0.7; position: absolute; top: -460px; right: -330px;"></div>
+    </div>
+
+    <div class="z-2 position-absolute top-50 start-0"> 
+        <div class="rounded-5 bg-purple-800" style="width: 350px; height: 350px; transform: rotate(-70deg); opacity: 0.7; margin-top: -50px; margin-left: 45%"></div> 
+    </div>
+    <div class="z-1 position-absolute top-50 start-0"> 
+        <div class="rounded-5 bg-purple-800" style="width: 350px; height: 350px; transform: rotate(-70deg); opacity: 0.9; margin-top: -30px; margin-left: 50%"></div> 
+    </div>
+
+    <div class="position-absolute top-0 end-0">
+        <div class="triangle z-2 rounded-5 bg-purple-800 text-white d-flex justify-content-center align-items-center"
+             style="width: 350px; height: 350px; transform: rotate(45deg); opacity: 0.9; margin-left: -60%; margin-top: 30%;">
+            <h3 class="fw-bold fs-1 text-center text-poetsen" style="transform: rotate(-45deg);">
+                BEM VINDO<br>A TELA<br>DE PERFIL!
+            </h3>
+        </div>
+    </div>
+    <div class="z-3 position-absolute top-0 end-0">
+        <div class="rounded-5 bg-purple-800" style="width: 350px; height: 350px; transform: rotate(45deg); opacity: 0.7; margin-left: -50%; margin-top: 35%;"></div>
+    </div>
+
+    <div class="z-1 bg-white rounded-4 shadow mx-auto col-4" style="height: 300px;">
+        <h2 class="fw-bold text-center text-poetsen fs-5">
+            <br>
+            <span class="text-purple-800">SEU</span> 
+            <span>perfil ou de</span>
+            <span class="text-purple-800">OUTRO</span>
+            <span>Funcionário</span>
+            <br><br>
+        </h2>
+        <br><br>
+        <div id="loginForm" class="text-center">
+            <button onclick="redirectToProfile('seu')" class="btn bg-purple-800 w-75 text-white" style="height: 45px;">Seu perfil</button>
+            <br><br>
+            <button onclick="openModal()" class="btn bg-purple-800 w-75 text-white" style="height: 45px;">Outro Funcionário</button>
+        </div>
+    </div>
+        
+    <footer class="bg-light text-center text-muted py-3 mt-auto">
+        <p class="mb-0">&copy; 2024 Seu Site. Primeira Versão</p>
+    </footer>
+
+    <!-- Modal -->
+    <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-poetsen" id="searchModalLabel">Buscar Funcionário</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="searchInput" class="form-label text-poetsen">Digite o nome ou código do funcionário:</label>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Código ou Nome" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary text-white" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn bg-purple-800 text-white" onclick="redirectToNormalProfile()">Entrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal() {
+            // Usando Bootstrap para mostrar o modal
+            var modal = new bootstrap.Modal(document.getElementById('searchModal'));
+            modal.show();
+        }
+
+        function redirectToProfile(profile) {
+            if (profile === 'seu') {
+                window.location.href = 'Funcionario-Perfil.html';
+            } else {
+                openModal(); // Chama a função para abrir o modal
+            }
+        }
+
+        function redirectToNormalProfile() {
+            const searchInput = document.getElementById('searchInput').value.trim();
+            if (searchInput) {
+                // Enviar uma requisição para buscar o funcionário pelo nome ou código
+                fetch(`/funcionario/search/${searchInput}`)
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json(); 
+                        } else {
+                            throw new Error('Funcionário não encontrado');
+                        }
+                    })
+                    .then(funcionario => {
+                        // Armazena o ID do funcionário visualizado no localStorage
+                        localStorage.setItem('viewedFuncionarioId', funcionario._id);
+                        window.location.href = 'Normal-Perfil.html';
+                    })
+                    .catch(error => {
+                        alert(error.message);
+                    });
+            } else {
+                alert('Por favor, insira um código ou nome válido.');
+            }
+        }
+    </script>
+
+    <!-- Scripts Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

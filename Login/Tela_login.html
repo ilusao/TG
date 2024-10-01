@@ -18,7 +18,7 @@
 <body class="d-flex justify-content-center align-items-center vh-100">
      <!-- Parte de cima, circulo -->
      <div class="z-2 position-relative">
-        <div class=" rounded-circle" 
+        <div class="bg-purple-800 rounded-circle" 
              style="width: 350px; height: 350px;opacity: 0.9; position: absolute; top: -500px; right: -300px;">
         </div>
     </div>
@@ -91,37 +91,45 @@
         <p class="mb-0">&copy; 2024 Seu Site. Primeira Verção</p>
     </footer>
 
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', function(event) {
-            event.preventDefault();
+<script>
+   document.getElementById('loginForm').addEventListener('submit', function(event) {
+    event.preventDefault();
 
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
 
-            fetch('/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username, password })
-            })
-            .then(response => {
-                if (response.redirected) {
-                    window.location.href = response.url;
-                } else {
-                    return response.text();
-                }
-            })
-            .then(text => {
-                if (text) {
-                    alert(text);
-                }
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-            });
-        });
-    </script>
+    fetch('/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, password })
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            return response.text();
+        }
+    })
+    .then(data => {
+        if (data.funcionarioId) {
+            // Armazena o ID do funcionário no localStorage
+            localStorage.setItem('funcionarioId', data.funcionarioId);
+            
+            window.location.href = 'Tela_menu.html'; 
+        } else {
+            alert(data);
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+    });
+});
+
+</script>
+
+
     
 </body>
 

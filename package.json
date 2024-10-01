@@ -3,7 +3,8 @@
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
     "express": "^4.19.2",
-    "mongoose": "^8.5.4"
+    "mongoose": "^8.5.4",
+    "multer": "^1.4.5-lts.1"
   },
   "name": "tg",
   "version": "1.0.0",

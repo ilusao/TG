@@ -4,26 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfil do Funcionário</title>
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="C:\TG\Perfil_funcionario\Pagina-css\Funcionario-Perfil.css">
+    <link rel="stylesheet" href="../Pagina-css/Funcionario-Perfil.css">
 </head>
 <body>
     <div class="container mt-3">
         <div class="row justify-content-center">
             <div class="col-md-4">
-                <!-- Imagem do perfil com Bootstrap -->
                 <div class="position-relative">
-                    <img src="C:\TG\Midia\mulher.jpg" alt="Foto de Perfil" class="img-fluid rounded-4" style="max-width: 310px; height: 300px;">
-                    <button class="btn btn-light position-absolute" style="top: 10px; right: 10px; background-color: rgba(255, 255, 255, 0.7);" title="Editar Foto">
+                    <img id="foto-perfil" src="/midia/fotooriginal.png" alt="Foto de Perfil" class="img-fluid rounded-4" style="max-width: 310px; height: 300px;">
+                    <button id="editar-foto" class="btn btn-light position-absolute" style="top: 8px; right: 115px;" title="Editar Foto" onclick="document.getElementById('input-foto').click();">
                         <i class="bi bi-camera fs-5"></i>
                     </button>
+                    <form id="form-foto" style="display: none;">
+                        <input type="file" id="input-foto" name="fotoPerfil" accept="image/*" onchange="uploadImage()">
+                    </form>
                 </div>
-                
+
                 <!-- Contato -->
-                <div class="card mt-2 bg-light-purple" style="border-radius: 40px; max-width: 310px;">
+                <div class="card mt-2 bg-light-purple" style="border-radius: 40px; max-width: 310px; height: 120px;">
                     <div class="card-header text-white text-center bg-purple" style="border-radius: 40px 40px 0 0;">
                         <i class="bi bi-telephone fs-4" style="position: absolute; left: 15px;"></i>
                         <span>Contato</span>
@@ -32,12 +32,12 @@
                         </button>
                     </div>
                     <div class="card-body text-center text-white">
-                        <p>+55 11 11111-1111</p>
+                        <p id="contato">Carregando...</p>
                     </div>
                 </div>
 
                 <!-- Horário de trabalho -->
-                <div class="card mt-2 bg-light-purple" style="border-radius: 40px; max-width: 310px;">
+                <div class="card mt-2 bg-light-purple" style="border-radius: 40px; max-width: 310px; height: 120px;">
                     <div class="card-header text-white text-center bg-purple" style="border-radius: 40px 40px 0 0;">
                         <i class="bi bi-clock fs-4" style="position: absolute; left: 15px;"></i>
                         <span>Horário de Trabalho</span>
@@ -46,12 +46,12 @@
                         </button>
                     </div>
                     <div class="card-body text-center text-white">
-                        <p>Das 8:00 às 13:30</p>
+                        <p id="horario-trabalho">Carregando...</p>
                     </div>
                 </div>
 
                 <!-- Código do Funcionário -->
-                <div class="card mt-2 bg-danger" style="border-radius: 40px; max-width: 310px;">
+                <div class="card mt-2 bg-danger" style="border-radius: 40px; max-width: 310px; height: 120px;">
                     <div class="card-header text-white text-center bg-purple" style="border-radius: 40px 40px 0 0;">
                         <i class="bi bi-person-badge-fill fs-4" style="position: absolute; left: 15px;"></i>
                         <span>Código do Funcionário</span>
@@ -59,8 +59,8 @@
                             <i class="bi bi-pencil"></i>
                         </button>
                     </div>
-                    <div class="card-body text-center text-white">
-                        <p>123MK45</p>
+                    <div class="card-body text-center text-white bor">
+                        <p id="codigo-funcionario">Carregando...</p>
                     </div>
                 </div>
 
@@ -68,7 +68,6 @@
                 <div class="mt-2" style="max-width: 310px;">
                     <a href="#" class="btn btn-custom d-block">
                         <i class="bi bi-info-circle-fill" style="position: absolute; left: 150px;"></i> Informações Detalhadas
-                        
                     </a>
                 </div>
             </div>
@@ -78,7 +77,7 @@
                     <div class="text-center bg-purple" style="border-radius: 40px 40px 0 0; padding: 20px;">
                         <h2 class="text-white">
                             PERFIL
-                            <button class="btn btn-light float-end" title="Editar Perfil">
+                            <button class="btn btn-light float-end fs-4" title="Editar Perfil">
                                 <i class="bi bi-pencil"></i>
                             </button>
                         </h2>
@@ -89,23 +88,23 @@
                             <hr class="black-line">
                             <h4>NOME:</h4>
                             <br>
-                            <h4 class="info-text-data">Jessica Almeida dos Santos</h4>
+                            <h4 id="nome-funcionario" class="info-text-data">Carregando...</h4>
                             <hr class="black-line">
                             <h4>DEPARTAMENTO:</h4>
                             <br>
-                            <h4>Almoxarifado da Sessão 2</h4>
+                            <h4 id="departamento">Carregando...</h4>
                             <hr class="black-line">
                             <h4>SERVIÇO:</h4>
                             <br>
-                            <h4>Recebimento e envio de produtos</h4>
+                            <h4 id="servico">Carregando...</h4>
                             <hr class="black-line">
                             <h4>CARGO:</h4>
                             <br>
-                            <h4>Atuando como Gerente na área de Produtos</h4>
+                            <h4 id="cargo">Carregando...</h4>
                             <hr class="black-line">
                             <h4>Inatividade:</h4>
                             <br>
-                            <h4>Não</h4>
+                            <h4 id="inatividade">Carregando...</h4>
                         </div>
                     </div>
                 </div>
@@ -113,7 +112,100 @@
         </div>
     </div>
 
-    <!-- Scripts Bootstrap -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function loadFuncionarioInfo() {
+            const funcionarioId = localStorage.getItem('funcionarioId'); 
+            console.log("ID do Funcionário:", funcionarioId);
+    
+            if (!funcionarioId) {
+                alert("ID do funcionário não encontrado.");
+                return;
+            }
+    
+            try {
+                const response = await fetch(`/funcionario/${funcionarioId}`);
+                if (!response.ok) {
+                    throw new Error('Erro ao buscar informações do funcionário: ' + response.status);
+                }
+                const funcionario = await response.json();
+    
+                // Preencher os campos com os dados do funcionário
+                document.getElementById('nome-funcionario').textContent = funcionario.nome;
+                document.getElementById('contato').textContent = funcionario.contato;
+                document.getElementById('codigo-funcionario').textContent = funcionario.codigoFuncionario;
+                document.getElementById('horario-trabalho').textContent = funcionario.turno;
+                document.getElementById('departamento').textContent = funcionario.departamento;
+                document.getElementById('servico').textContent = funcionario.servico;
+                document.getElementById('cargo').textContent = funcionario.cargo;
+                document.getElementById('inatividade').textContent = funcionario.inativo ? 'Sim' : 'Não';
+    
+                // Atualize a imagem do perfil
+                const imageUrl = funcionario.fotoPerfil || '/midia/fotooriginal.png';
+                const img = new Image();
+    
+                img.src = imageUrl; // Tente carregar a imagem
+    
+                img.onload = () => {
+                    // Se a imagem carregar corretamente, atualize a src
+                    document.getElementById('foto-perfil').src = `${imageUrl}?${new Date().getTime()}`; // Previne cache
+                };
+    
+                img.onerror = () => {
+                    // Se houver erro ao carregar a imagem, use a imagem padrão
+                    document.getElementById('foto-perfil').src = '/midia/fotooriginal.png';
+                };
+    
+            } catch (error) {
+                console.error(error);
+                alert('Não foi possível carregar as informações do funcionário: ' + error.message);
+            }
+        }
+        
+        async function uploadImage() {
+            console.log("Função uploadImage chamada.");
+            const input = document.getElementById('input-foto');
+            const file = input.files[0];
+    
+            if (!file) return;
+    
+            const formData = new FormData();
+            formData.append('imagem', file);
+    
+            const funcionarioId = localStorage.getItem('funcionarioId');
+            if (!funcionarioId) {
+                alert('ID do funcionário não encontrado.');
+                return;
+            }
+            formData.append('funcionarioId', funcionarioId);
+    
+            try {
+                const response = await fetch('/foto/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+    
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log("Nova URL da imagem:", data.imageUrl); 
+                    document.getElementById('foto-perfil').src = `${data.imageUrl}?${new Date().getTime()}`; // Previne cache
+                    
+                    // Recarrega as informações do funcionário para atualizar todos os campos
+                    await loadFuncionarioInfo();
+                } else {
+                    const errorData = await response.json();
+                    console.error('Erro ao fazer upload da imagem:', errorData);
+                    alert('Erro ao fazer upload da imagem: ' + errorData.message);
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        }
+    
+        // Carrega as informações do funcionário quando a página é carregada
+        window.onload = loadFuncionarioInfo;
+    </script>
+    
+    
+    
 </body>
 </html>
