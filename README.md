@@ -12,7 +12,7 @@ Esta é a primeira versão do TG 2, que inclui os passos iniciais do projeto. Ne
 
 1. Clone o repositório:
    ```bash
-   git clone https://github.com/ilusao/TG-2.git
+   git clone https://github.com/ilusao/TG.git
 
 ## Installs
 npm install express
@@ -26,3 +26,5 @@ npm install cors
 npm install dotenv
 
 npm install multer
+
+npm install boostrap

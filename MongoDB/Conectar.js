@@ -9,16 +9,16 @@ const port = 3000;
 // Configurações do MongoDB
 const mongoURI = 'mongodb+srv://TG:ilusao.com@funcionarios.avocc.mongodb.net/';
 const options = {
-    maxPoolSize: 10,
+    maxPoolSize: 20,
     minPoolSize: 1
 };
 
-// Conexão ao MongoDB
+
 mongoose.connect(mongoURI, options)
     .then(() => console.log('Conectado ao MongoDB'))
     .catch(err => console.error('Erro ao conectar ao MongoDB:', err));
 
-// Middleware
+
 app.use(express.json());
 app.use('/foto', fotoRouter);
 app.use(express.static('C:/TG/Login'));
@@ -36,7 +36,6 @@ app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
     try {
-        // Busca o funcionário pelo nome e código
         const funcionario = await Funcionario.findOne({ nome: username, codigoFuncionario: password });
         if (funcionario) {
             return res.json({ funcionarioId: funcionario._id });
@@ -69,7 +68,6 @@ app.get('/funcionario/:id', async (req, res) => {
             return res.status(404).send('Funcionário não encontrado');
         }
 
-        // Retorna os dados do funcionário
         res.json(funcionario);
     } catch (error) {
         console.error('Erro ao buscar funcionário:', error);
@@ -106,7 +104,6 @@ app.put('/funcionario/:id', async (req, res) => {
         const funcionarioId = req.params.id;
         const updates = req.body;
 
-        // Opcional: Valide os campos que podem ser atualizados
         const allowedUpdates = ['nome', 'contato', 'turno', 'codigoFuncionario', 'departamento', 'servico', 'cargo', 'inativo', 'fotoPerfil'];
         const actualUpdates = Object.keys(updates);
         const isValidOperation = actualUpdates.every(update => allowedUpdates.includes(update));

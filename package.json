@@ -9,11 +9,13 @@
   "name": "tg",
   "version": "1.0.0",
   "description": "Esta é a primeira versão do TG 2, que inclui os passos iniciais do projeto. Nesta versão, foram implementadas as telas de login e de cadastro de funcionários.",
-  "main": "index.js",
+  "main": "Conectar.js",
+  
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node MongoDB/Conectar.js",
+    "dev": "nodemon MongoDB/Conectar.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "andré e joão",
   "license": "ISC"
 }
