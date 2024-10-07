@@ -14,7 +14,7 @@ body {
 .btn-custom {
     background-color: #6a0dad;
     color: white;
-    border-radius: 15px;
+    border-radius: 2px;
     padding: 10px 20px;
     font-weight: bold;
 }
