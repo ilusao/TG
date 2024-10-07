@@ -21,6 +21,7 @@ mongoose.connect(mongoURI, options)
 
 app.use(express.json());
 app.use('/foto', fotoRouter);
+app.use(express.static(path.join(__dirname, '..')));
 app.use(express.static('C:/TG/Login'));
 app.use(express.static('C:/TG/Perfil_funcionario'));
 app.use(express.static('C:/TG/Menu'));
