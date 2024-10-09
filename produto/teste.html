@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Produto</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="teste.css" rel="stylesheet" >
+   
+</head>
+<body>
+    <div class="container">
+        <div class="form-section">
+            <div class="form-title">
+                <h2 class="text-center mb-4">Cadastrar Produto</h2>
+            </div> 
+            <form id="productForm" novalidate>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="nome" class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="nome" placeholder="Cadastro de Produto Teste" required>
+                        <div class="invalid-feedback">Por favor, insira o nome do produto.</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="descricao" class="form-label">Descrição PDV</label>
+                        <input type="text" class="form-control" id="descricao" placeholder="Descrição PDV" required>
+                        <div class="invalid-feedback">Por favor, insira a descrição do PDV.</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3" id="group">
+                        <label for="groupSelect" class="form-label">Grupo</label>
+                        <select id="groupSelect" class="form-select">
+                            <option value="materias_primas">Matérias-Primas</option>
+                            <option value="componentes_pecas">Componentes e Peças</option>
+                            <option value="produtos_semiacabados">Produtos Semiacabados</option>
+                            <option value="materiais_manutencao">Materiais de Manutenção</option>
+                            <option value="materiais_auxiliares">Materiais Auxiliares</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3" id="sub_group">
+                        <label for="subgroupSelect" class="form-label">Sub-Grupo</label>
+                        <select id="subgroupSelect" class="form-select">
+                            <!-- Subgrupos serão inseridos dinamicamente aqui -->
+                        </select>
+                    </div>
+                    
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="fornecedor" class="form-label">Fornecedor</label>
+                        <input type="text" class="form-control" id="fornecedor" required>
+                        <div class="invalid-feedback">Por favor, insira o fornecedor.</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="marca" class="form-label">Marca</label>
+                        <input type="text" class="form-control" id="marca" required>
+                        <div class="invalid-feedback">Por favor, insira a marca.</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="codigoProduto" class="form-label">Código do Produto</label>
+                        <input type="text" class="form-control" id="codigoProduto" required>
+                        <div class="invalid-feedback">Por favor, insira o código do produto.</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="localizacao" class="form-label">Localização</label>
+                        <input type="text" class="form-control" id="localizacao" required>
+                        <div class="invalid-feedback">Por favor, insira a localização.</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="destino" class="form-label">Destino</label>
+                        <input type="text" class="form-control" id="destino" required>
+                        <div class="invalid-feedback">Por favor, insira o destino.</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="almoxerifado" class="form-label">Almoxerifado</label>
+                        <input type="text" class="form-control" id="almoxerifado" required>
+                        <div class="invalid-feedback">Por favor, insira o almoxerifado.</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="dataEntrada" class="form-label">Data Entrada</label>
+                        <input type="date" class="form-control" id="dataEntrada" required>
+                        <div class="invalid-feedback">Por favor, insira a data de entrada.</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="dataSaida" class="form-label">Data Saída</label>
+                        <input type="date" class="form-control" id="dataSaida">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="preco" class="form-label">Preço Proprietário</label>
+                        <input type="number" class="form-control" id="preco" required>
+                        <div class="invalid-feedback">Por favor, insira o preço.</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Inflamável</label><br>
+                        <select id="inflamavel" class="form-select">
+                            <option value="nao">Não</option>
+                            <option value="sim">Sim</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Frágil</label><br>
+                        <select id="fragil" class="form-select">
+                            <option value="nao">Não</option>
+                            <option value="sim">Sim</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-register w-100" style="border-radius: 2px;">Registrar</button>
+                <br> <br>
+                <button type="submit" id="Consult" class="btn btn-register w-100" style="border-radius: 2px;" disabled>Consultar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Função para verificar os inputs
+            function verificarInputs() {
+                // Verificando o campo 'nome'
+                const nomeInput = document.getElementById('nome');
+                if (nomeInput.value.trim() === "") {
+                    nomeInput.classList.add('is-invalid');
+                } else {
+                    nomeInput.classList.remove('is-invalid');
+                    nomeInput.classList.add('is-valid');
+                }
+        
+                // Verificando o campo 'descricao'
+                const descricaoInput = document.getElementById('descricao');
+                if (descricaoInput.value.trim() === "") {
+                    descricaoInput.classList.add('is-invalid');
+                } else {
+                    descricaoInput.classList.remove('is-invalid');
+                    descricaoInput.classList.add('is-valid');
+                }
+        
+                // Verificando o campo 'fornecedor'
+                const fornecedorInput = document.getElementById('fornecedor');
+                if (fornecedorInput.value.trim() === "") {
+                    fornecedorInput.classList.add('is-invalid');
+                } else {
+                    fornecedorInput.classList.remove('is-invalid');
+                    fornecedorInput.classList.add('is-valid');
+                }
+        
+                // Verifique outros campos de forma semelhante...
+            }
+        
+            // Configurando a verificação constante
+            setInterval(verificarInputs, 1000); // Verifica os inputs a cada 1 segundo
+        });
+        </script>
+        
+        
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="cadastro_produto.js"></script>
+</body>
+</html>

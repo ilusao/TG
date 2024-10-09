@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 const Funcionario = require('./Funcionarios');
 const fotoRouter = require('./Foto');
+const Produto = require('./Produto');
 const app = express();
 const port = 3000;
 
@@ -12,7 +13,6 @@ const options = {
     maxPoolSize: 20,
     minPoolSize: 1
 };
-
 
 mongoose.connect(mongoURI, options)
     .then(() => console.log('Conectado ao MongoDB'))
@@ -130,6 +130,28 @@ app.put('/funcionario/:id', async (req, res) => {
     } catch (error) {
         console.error('Erro ao atualizar funcionário:', error);
         res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+});
+
+// Rota para cadastro de produto
+app.post('/api/produto', async (req, res) => {
+    try {
+        const novoProduto = new Produto(req.body);
+        await novoProduto.save();
+        res.status(201).send({ message: 'Produto cadastrado com sucesso!' });
+    } catch (error) {
+        res.status(500).send({ error: 'Erro ao cadastrar o produto' });
+    }
+});
+
+// Rota para listar todos os produtos
+app.get('/api/produtos', async (req, res) => {
+    try {
+        const produtos = await Produto.find();
+        res.json(produtos);
+    } catch (error) {
+        console.error('Erro ao buscar produtos:', error);
+        res.status(500).send('Erro interno do servidor');
     }
 });
 

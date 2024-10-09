@@ -1,14 +1,14 @@
 const mongoose = require('mongoose');
 
 const produtoSchema = new mongoose.Schema({
-    codigo_produto: { type: Number, },
+    codigo_produto: { type: String, required: true },
     nome: { type: String, },
     descricao_pdv: { type: String, },
     grupo: { type: String, },
     sub_grupo: { type: String, },
     fornecedor: { type: String, },
     marca: { type: String, },
-    localizacao: { type: Number, },
+    localizacao: { type: String },
     destino: { type: String, },
     almoxerifado: { type: String, },
     data_entrada: { type: Date, },
