@@ -37,13 +37,63 @@ app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
     try {
-        const funcionario = await Funcionario.findOne({ nome: username, codigoFuncionario: password });
+        // Aqui estamos procurando pelo nome e pela nova senha
+        const funcionario = await Funcionario.findOne({ nome: username, senha: password });
         if (funcionario) {
             return res.json({ funcionarioId: funcionario._id });
         }
         return res.status(401).send('Usuário ou senha incorretos');
     } catch (error) {
         console.error('Erro ao autenticar:', error);
+        return res.status(500).json('Erro interno do servidor');
+    }
+});
+
+// Rota para recuperar a senha
+app.post('/recover', async (req, res) => {
+    const { nome, codigo, contato, cargo } = req.body;
+
+    try {
+        const funcionario = await Funcionario.findOne({ 
+            nome: nome,
+            codigoFuncionario: codigo,
+            contato: contato,
+            cargo: cargo
+        });
+
+        if (!funcionario) {
+            return res.status(404).send('Funcionário não encontrado com essas informações');
+        }
+
+        return res.send(`Sua senha é: ${funcionario.senha}`);
+    } catch (error) {
+        console.error('Erro ao recuperar senha:', error);
+        return res.status(500).json('Erro interno do servidor');
+    }
+});
+
+// Rota para mudar a senha
+app.post('/change-password', async (req, res) => {
+    const { nome, codigo, contato, cargo, newPassword } = req.body;
+
+    try {
+        const funcionario = await Funcionario.findOne({ 
+            nome: nome,
+            codigoFuncionario: codigo,
+            contato: contato,
+            cargo: cargo
+        });
+
+        if (!funcionario) {
+            return res.status(404).send('Funcionário não encontrado com essas informações');
+        }
+
+        funcionario.senha = newPassword;
+        await funcionario.save();
+
+        return res.send('Senha alterada com sucesso!');
+    } catch (error) {
+        console.error('Erro ao mudar senha:', error);
         return res.status(500).json('Erro interno do servidor');
     }
 });
@@ -144,14 +194,73 @@ app.post('/api/produto', async (req, res) => {
     }
 });
 
-// Rota para listar todos os produtos
+
 app.get('/api/produtos', async (req, res) => {
     try {
-        const produtos = await Produto.find();
+        const produtos = await Produto.find(); 
+        res.json(produtos); 
+    } catch (error) {
+        console.error('Erro ao buscar os produtos:', error);
+        res.status(500).json({ message: 'Erro ao buscar os produtos' });
+    }
+});
+
+// Rota para pegar um produto específico pelo código
+app.get('/api/produto/:codigo_produto', async (req, res) => {
+    const { codigo_produto } = req.params;
+
+    try {
+        const produto = await Produto.findOne({ codigo_produto });
+        if (produto) {
+            res.json(produto);
+        } else {
+            res.status(404).json({ message: 'Produto não encontrado' });
+        }
+    } catch (error) {
+        console.error('Erro ao buscar o produto:', error);
+        res.status(500).json({ message: 'Erro ao buscar o produto' });
+    }
+});
+
+// Rota para atualizar informações de um produto pelo código
+app.put('/api/produto/:codigo_produto', async (req, res) => {
+    const { codigo_produto } = req.params;
+    const updates = req.body;
+
+    try {
+        const produto = await Produto.findOneAndUpdate({ codigo_produto }, updates, { new: true });
+
+        if (!produto) {
+            return res.status(404).json({ message: 'Produto não encontrado' });
+        }
+
+        res.json(produto); // Retorna o produto atualizado
+    } catch (error) {
+        console.error('Erro ao atualizar o produto:', error);
+        res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+});
+
+// Rota para buscar produtos com base em critérios como nome, grupo, código e fornecedor
+app.post('/api/buscarProdutos', async (req, res) => {
+    const { nome, grupo, marca, codigo_produto, fornecedor } = req.body;
+
+    try {
+        const query = {};
+        if (nome) query.nome = { $regex: nome, $options: 'i' };
+        if (grupo) query.grupo = { $regex: grupo, $options: 'i' };
+        if (marca) query.marca = { $regex: marca, $options: 'i' };
+        if (codigo_produto) query.codigo_produto = codigo_produto;
+        if (fornecedor) query.fornecedor = { $regex: fornecedor, $options: 'i' };
+
+        const produtos = await Produto.find(query);
+        if (produtos.length === 0) {
+            return res.status(404).json({ message: 'Nenhum produto encontrado com esses critérios' });
+        }
         res.json(produtos);
     } catch (error) {
         console.error('Erro ao buscar produtos:', error);
-        res.status(500).send('Erro interno do servidor');
+        res.status(500).json({ error: 'Erro ao buscar produtos' });
     }
 });
 

@@ -115,6 +115,16 @@
     </div>
 
     <script>
+        function gerarSenhaAleatoria(tamanho = 8) {
+            const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+            let senha = '';
+            for (let i = 0; i < tamanho; i++) {
+                const indice = Math.floor(Math.random() * caracteres.length);
+                senha += caracteres[indice];
+            }
+            return senha;
+        }
+    
         async function registrarFuncionario() {
             const funcionarioData = {
                 nome: document.getElementById('nome').value,
@@ -125,9 +135,10 @@
                 servico: document.getElementById('servico').value,
                 inativo: document.querySelector('input[name="inativo"]:checked').value === 'sim',
                 cargo: document.getElementById('cargo').value,
-                gerenteOuSuperior: document.getElementById('gerenteSuperior').checked // Verifica se é gerente
+                gerenteOuSuperior: document.getElementById('gerenteSuperior').checked, // Verifica se é gerente
+                senha: gerarSenhaAleatoria() // Adiciona a senha aleatória aqui
             };
-
+    
             try {
                 const response = await fetch('/funcionarios', {
                     method: 'POST',
@@ -136,9 +147,9 @@
                     },
                     body: JSON.stringify(funcionarioData)
                 });
-
+    
                 if (response.ok) {
-                    alert('Funcionário registrado com sucesso!');
+                    alert('Funcionário registrado com sucesso! A senha é: ' + funcionarioData.senha);
                     document.getElementById('cadastroFuncionarioForm').reset();
                 } else {
                     const errorText = await response.text();
@@ -149,6 +160,7 @@
             }
         }
     </script>
+    
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

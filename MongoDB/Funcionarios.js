@@ -9,7 +9,8 @@ const funcionarioSchema = new mongoose.Schema({
     servico: String,
     inativo: Boolean,
     cargo: String,
-    fotoPerfil: String
+    fotoPerfil: String,
+    senha: { type: String, required: true }
 });
 
 const Funcionario = mongoose.model('Funcionario', funcionarioSchema);
