@@ -47,19 +47,24 @@
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <label for="groupSelect" class="form-label">Grupo</label>
-                            <select id="groupSelect" class="form-select custom-select">
-                                <option value="materias_primas">Matérias-Primas</option>
-                                <option value="componentes_pecas">Componentes e Peças</option>
-                                <option value="produtos_semiacabados">Produtos Semiacabados</option>
-                                <option value="materiais_manutencao">Materiais de Manutenção</option>
-                                <option value="materiais_auxiliares">Materiais Auxiliares</option>
-                            </select>
+                            <div class="input-group">
+                                <select id="groupSelect" class="form-select custom-select"></select>
+                                <button type="button" id="addGroup" class="btn btn-outline-secondary">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label for="subgroupSelect" class="form-label">Sub-Grupo</label>
-                            <select id="subgroupSelect" class="form-select custom-select"></select>
+                            <div class="input-group">
+                                <select id="subgroupSelect" class="form-select custom-select"></select>
+                                <button type="button" id="addSubgroup" class="btn btn-outline-secondary">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
+
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <label for="fornecedor" class="form-label">Fornecedor</label>
@@ -114,8 +119,8 @@
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <label for="preco" class="form-label">Preço Proprietário</label>
-                            <input type="number" class="form-control" id="preco" required>
-                            <div class="invalid-feedback">Por favor, insira o preço.</div>
+                            <input type="text" class="form-control" id="preco" required pattern="^\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})$">
+                            <div class="invalid-feedback">Por favor, insira o preço no formato correto (0.50 ou 1,000.50).</div>
                         </div>
                         <div class="col-md-6">
                             <label for="inflamavel" class="form-label">Inflamável</label><br>
@@ -145,6 +150,8 @@
         </div>
     </div>
 
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/MongoDB/cadastro_produto.js"></script>
 </body>

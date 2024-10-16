@@ -1,53 +1,52 @@
 // Função para carregar produtos no dropdown
-function carregarProdutosDropdown() {
-    fetch('/api/produtos')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Erro ao buscar produtos');
-            }
-            return response.json();
-        })
-        .then(produtos => {
-            const dropdown = document.getElementById('materiaisSelect');
-            dropdown.innerHTML = '';
+async function carregarProdutosDropdown() {
+    try {
+        const response = await fetch('/api/produtos');
 
-            if (produtos.length === 0) {
-                alert('Nenhum produto disponível');
-                return;
-            }
+        if (!response.ok) {
+            throw new Error('Erro ao buscar produtos');
+        }
 
-            const opcaoPadrao = document.createElement('option');
-            opcaoPadrao.text = 'Selecione um produto';
-            opcaoPadrao.value = '';
-            dropdown.add(opcaoPadrao);
+        const produtos = await response.json();
+        const dropdown = document.getElementById('materiaisSelect');
+        dropdown.innerHTML = '';
 
-          
-            produtos.forEach(produto => {
-                const option = document.createElement('option');
-                option.text = produto.nome;
-                option.value = produto.codigo_produto;
-                dropdown.add(option);
-            });
+        if (produtos.length === 0) {
+            alert('Nenhum produto disponível');
+            return;
+        }
 
-            dropdown.addEventListener('change', function() {
-                const codigoSelecionado = this.value;
+        const opcaoPadrao = new Option('Selecione um produto', '');
+        dropdown.add(opcaoPadrao);
 
-                desabilitarCampos();
-
-                if (codigoSelecionado) {
-                    fetch(`/api/produto/${codigoSelecionado}`)
-                        .then(response => response.json())
-                        .then(produto => {
-                            preencherCamposProduto(produto);
-                        })
-                        .catch(error => console.error('Erro ao carregar os detalhes do produto:', error));
-                }
-            });
-        })
-        .catch(error => {
-            console.error('Erro ao carregar produtos:', error);
-            alert('Erro ao carregar produtos. Tente novamente mais tarde.');
+        produtos.forEach(produto => {
+            const option = new Option(produto.nome, produto.codigo_produto);
+            dropdown.add(option);
         });
+
+        dropdown.addEventListener('change', async function () {
+            const codigoSelecionado = this.value;
+            desabilitarCampos();
+
+            if (codigoSelecionado) {
+                try {
+                    const produtoResponse = await fetch(`/api/produto/${codigoSelecionado}`);
+                    if (!produtoResponse.ok) {
+                        throw new Error('Produto não encontrado');
+                    }
+                    const produto = await produtoResponse.json();
+                    preencherCamposProduto(produto);
+                    atualizarImagemProduto(produto.fotoProduto); // Atualiza a imagem do produto
+                    localStorage.setItem('codigo_produto', produto.codigo_produto); // Armazena o codigo_produto
+                } catch (error) {
+                    console.error('Erro ao carregar os detalhes do produto:', error);
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Erro ao carregar produtos:', error);
+        alert('Erro ao carregar produtos. Tente novamente mais tarde.');
+    }
 }
 
 function preencherCamposProduto(produto) {
@@ -60,6 +59,16 @@ function preencherCamposProduto(produto) {
     document.getElementById('marca').value = produto.marca || '';
     document.getElementById('codigo').value = produto.codigo_produto || '';
     document.getElementById('preco').value = produto.preco || '';
+    atualizarImagemProduto(produto.fotoProduto);
+    localStorage.setItem('codigo_produto', produto.codigo_produto);
+}
+
+// Função para atualizar a imagem do produto
+function atualizarImagemProduto(fotoProduto) {
+    const fotoElemento = document.getElementById('fotoProduto');
+    if (fotoElemento) {
+        fotoElemento.src = `http://localhost:3000/${fotoProduto || 'midia/Produtooriginal.png'}`;
+    }
 }
 
 // Função para habilitar a edição dos campos
@@ -123,17 +132,17 @@ function validarFormulario() {
             },
             body: JSON.stringify(dadosProduto)
         })
-        .then(response => {
-            if (response.ok) {
-                mostrarMensagemSucesso('Produto atualizado com sucesso!');
-            } else {
-                alert('Erro ao atualizar o produto. Tente novamente.');
-            }
-        })
-        .catch(error => {
-            console.error('Erro ao enviar o formulário:', error);
-            alert('Ocorreu um erro ao tentar atualizar o produto.');
-        });
+            .then(response => {
+                if (response.ok) {
+                    mostrarMensagemSucesso('Produto atualizado com sucesso!');
+                } else {
+                    alert('Erro ao atualizar o produto. Tente novamente.');
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao enviar o formulário:', error);
+                alert('Ocorreu um erro ao tentar atualizar o produto.');
+            });
     } else {
         fetch('/api/produto', {
             method: 'POST',
@@ -142,17 +151,17 @@ function validarFormulario() {
             },
             body: JSON.stringify(dadosProduto)
         })
-        .then(response => {
-            if (response.ok) {
-                mostrarMensagemSucesso('Produto salvo com sucesso!');
-            } else {
-                alert('Erro ao salvar o produto. Tente novamente.');
-            }
-        })
-        .catch(error => {
-            console.error('Erro ao enviar o formulário:', error);
-            alert('Ocorreu um erro ao tentar salvar o produto.');
-        });
+            .then(response => {
+                if (response.ok) {
+                    mostrarMensagemSucesso('Produto salvo com sucesso!');
+                } else {
+                    alert('Erro ao salvar o produto. Tente novamente.');
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao enviar o formulário:', error);
+                alert('Ocorreu um erro ao tentar salvar o produto.');
+            });
     }
 }
 
@@ -161,11 +170,8 @@ let buscaAtivada = false;
 
 function habilitarBusca() {
     if (!buscaAtivada) {
-        document.getElementById('nome').removeAttribute('disabled');
-        document.getElementById('grupo').removeAttribute('disabled');
-        document.getElementById('marca').removeAttribute('disabled');
-        document.getElementById('codigo').removeAttribute('disabled');
-        document.getElementById('fornecedor').removeAttribute('disabled');
+        const campos = ['nome', 'grupo', 'marca', 'codigo', 'fornecedor'];
+        campos.forEach(id => document.getElementById(id).removeAttribute('disabled'));
         buscaAtivada = true;
     } else {
         buscarProdutosNoMongo();
@@ -173,27 +179,23 @@ function habilitarBusca() {
 }
 
 function buscarProdutosNoMongo() {
-    const nome = document.getElementById('nome').value;
-    const grupo = document.getElementById('grupo').value;
-    const marca = document.getElementById('marca').value;
-    const codigo = document.getElementById('codigo').value;
-    const fornecedor = document.getElementById('fornecedor').value;
-
     const filtro = {
-        ...(nome && { nome }),
-        ...(grupo && { grupo }),
-        ...(marca && { marca }),
-        ...(codigo && { codigo_produto: codigo }),
-        ...(fornecedor && { fornecedor })
+        nome: document.getElementById('nome').value || undefined,
+        grupo: document.getElementById('grupo').value || undefined,
+        marca: document.getElementById('marca').value || undefined,
+        codigo_produto: document.getElementById('codigo').value || undefined,
+        fornecedor: document.getElementById('fornecedor').value || undefined
     };
 
+    // Remover chaves com valor undefined
+    Object.keys(filtro).forEach(key => filtro[key] === undefined && delete filtro[key]);
+
     if (Object.keys(filtro).length === 0) {
-        alert('Preencha pelo menos um campo para buscar o produto.');
-        return;
+        return alert('Preencha pelo menos um campo para buscar o produto.');
     }
 
     const loadingIndicator = document.getElementById('loading');
-    loadingIndicator.style.display = 'block'; 
+    loadingIndicator.style.display = 'block';
 
     fetch('/api/buscarProdutos', {
         method: 'POST',
@@ -202,19 +204,19 @@ function buscarProdutosNoMongo() {
         },
         body: JSON.stringify(filtro)
     })
-    .then(response => response.json())
-    .then(produtos => {
-        loadingIndicator.style.display = 'none';
-        if (produtos.length > 0) {
-            preencherResultadosProdutos(produtos);
-        } else {
-            alert('Nenhum produto encontrado com os critérios de busca.');
-        }
-    })
-    .catch(error => {
-        loadingIndicator.style.display = 'none';
-        console.error('Erro ao buscar produtos no MongoDB:', error);
-    });
+        .then(response => response.json())
+        .then(produtos => {
+            loadingIndicator.style.display = 'none';
+            if (produtos.length > 0) {
+                preencherResultadosProdutos(produtos);
+            } else {
+                alert('Nenhum produto encontrado com os critérios de busca.');
+            }
+        })
+        .catch(error => {
+            loadingIndicator.style.display = 'none';
+            console.error('Erro ao buscar produtos no MongoDB:', error);
+        });
 }
 
 // Função para exibir os produtos encontrados no painel "Selecione um Produto"
@@ -222,9 +224,9 @@ function preencherResultadosProdutos(produtos) {
     const container = document.getElementById('produtosEncontrados');
     container.innerHTML = '';
 
-     const titulo = document.createElement('h5');
-     titulo.textContent = 'Produtos encontrados 👇';
-     container.appendChild(titulo);
+    const titulo = document.createElement('h5');
+    titulo.textContent = 'Produtos encontrados 👇';
+    container.appendChild(titulo);
 
     const lista = document.createElement('ul');
     lista.classList.add('list-group');
@@ -233,15 +235,76 @@ function preencherResultadosProdutos(produtos) {
         const item = document.createElement('li');
         item.classList.add('list-group-item');
         item.textContent = `${produto.codigo_produto} - ${produto.nome}`;
-        item.addEventListener('click', () => preencherCamposProduto(produto));
+        item.addEventListener('click', () => {
+            preencherCamposProduto(produto);
+            atualizarImagemProduto(produto.fotoProduto);
+            document.getElementById('materiaisSelect').value = produto.codigo_produto;
+            document.getElementById('input-foto').style.display = 'block';
+            document.getElementById('mensagem-aviso').style.display = 'none';
+            localStorage.setItem('codigo_produto', produto.codigo_produto);
+        });
         lista.appendChild(item);
     });
 
     container.appendChild(lista);
 }
-    // só para limpar os imputs
-    function limparCampos() {
-        document.getElementById("productForm").reset();
+
+// Função para verificar se um produto foi selecionado antes de editar a foto
+function verificarProdutoSelecionado() {
+    const codigoSelecionado = document.getElementById('materiaisSelect').value;
+
+    if (!codigoSelecionado) {
+        alert('Por favor, selecione um produto primeiro!');
+        return;
+    }
+
+    document.getElementById('input-foto').click();
+}
+
+// Função para fazer o upload da imagem do produto
+async function uploadImage(file, codigoProduto) {
+    const formData = new FormData();
+    formData.append('imagem', file);
+
+    try {
+        const response = await fetch(`/api/produto/${codigoProduto}/upload`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error('Erro ao fazer upload da imagem');
         }
+
+        const resultado = await response.json();
+        mostrarMensagemSucesso('Imagem enviada com sucesso!');
+        atualizarImagemProduto(resultado.imageUrl); 
+    } catch (error) {
+        console.error('Erro ao enviar a imagem:', error);
+        alert('Erro ao enviar a imagem. Tente novamente.');
+    }
+}
+
+// Função para lidar com a alteração da foto do produto
+document.getElementById('input-foto').addEventListener('change', function (event) {
+    const file = event.target.files[0];
+    const codigoSelecionado = document.getElementById('materiaisSelect').value;
+
+    console.log('Código do produto selecionado:', codigoSelecionado);
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const fotoElemento = document.getElementById('fotoProduto');
+            fotoElemento.src = e.target.result; 
+        };
+        reader.readAsDataURL(file);
+        if (codigoSelecionado) {
+            uploadImage(file, codigoSelecionado);
+        } else {
+            alert('Por favor, selecione um produto primeiro!');
+        }
+    }
+});
 
 carregarProdutosDropdown();

@@ -184,45 +184,7 @@
             }
         }
 
-        async function uploadImage() {
-            console.log("Função uploadImage chamada.");
-            const input = document.getElementById('input-foto');
-            const file = input.files[0];
-
-            if (!file) return;
-
-            const formData = new FormData();
-            formData.append('imagem', file);
-
-            const funcionarioId = localStorage.getItem('funcionarioId');
-            if (!funcionarioId) {
-                alert('ID do funcionário não encontrado.');
-                return;
-            }
-            formData.append('funcionarioId', funcionarioId);
-
-            try {
-                const response = await fetch('/foto/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log("Nova URL da imagem:", data.imageUrl); 
-                    document.getElementById('foto-perfil').src = `${data.imageUrl}?${new Date().getTime()}`; // Previne cache
-                    
-                    // Recarrega as informações do funcionário para atualizar todos os campos
-                    await loadFuncionarioInfo();
-                } else {
-                    const errorData = await response.json();
-                    console.error('Erro ao fazer upload da imagem:', errorData);
-                    alert('Erro ao fazer upload da imagem: ' + errorData.message);
-                }
-            } catch (error) {
-                console.error('Erro:', error);
-            }
-        }
+      
 
         // Função para abrir o modal de edição
         function openEditModal(field) {
