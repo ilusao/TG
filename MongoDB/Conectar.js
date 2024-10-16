@@ -19,25 +19,31 @@ mongoose.connect(mongoURI, options)
     .catch(err => console.error('Erro ao conectar ao MongoDB:', err));
 
 
-app.use(express.json());
-app.use('/foto', fotoRouter);
-app.use(express.static(path.join(__dirname, '..')));
-app.use(express.static('C:/TG/Login'));
-app.use(express.static('C:/TG/Perfil_funcionario'));
-app.use(express.static('C:/TG/Menu'));
-app.use(express.static('C:/TG/Cadastro'));
-app.use(express.static('C:/TG/fornecedor'));
-app.use(express.static('C:/TG/Funcionário'));
-app.use(express.static('C:/TG/localidade'));
-app.use(express.static('C:/TG/produto'));
-app.use('/midia', express.static('C:/TG/Midia'));
+    app.use(express.json());
+    app.use('/foto', fotoRouter);
+    
+    // Serve arquivos estáticos a partir da pasta 'Paginas' e substitui todos os caminhos abaixo
+    app.use(express.static(path.join(__dirname, '..', 'Paginas')));
+    app.use(express.static(path.join(__dirname, '..', 'MongoDB')));
+
+
+    // substituidos...
+    // app.use(express.static('C:/TG/Login'));
+    // app.use(express.static('C:/TG/Perfil_funcionario'));
+    // app.use(express.static('C:/TG/Menu'));
+    // app.use(express.static('C:/TG/Cadastro'));
+    // app.use(express.static('C:/TG/fornecedor'));
+    // app.use(express.static('C:/TG/Funcionário'));
+    // app.use(express.static('C:/TG/localidade'));
+    // app.use(express.static('C:/TG/produto'));
+
 
 // Rota de login
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
     try {
-        // Aqui estamos procurando pelo nome e pela nova senha
+        // Procurando pelo nome e pela senha
         const funcionario = await Funcionario.findOne({ nome: username, senha: password });
         if (funcionario) {
             return res.json({ funcionarioId: funcionario._id });
@@ -194,7 +200,6 @@ app.post('/api/produto', async (req, res) => {
     }
 });
 
-
 app.get('/api/produtos', async (req, res) => {
     try {
         const produtos = await Produto.find(); 
@@ -266,9 +271,8 @@ app.post('/api/buscarProdutos', async (req, res) => {
 
 // Rota principal
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'Login', 'Tela_login.html'));
+    res.sendFile(path.join(__dirname, '..', 'Paginas', 'Login', 'Tela_login.html'));
 });
-
 // Inicializa o servidor
 app.listen(port, () => {
     console.log(`Servidor rodando na porta ${port}`);

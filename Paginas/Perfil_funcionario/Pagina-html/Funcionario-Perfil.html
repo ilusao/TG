@@ -13,7 +13,7 @@
         <div class="row justify-content-center">
             <div class="col-md-4">
                 <div class="position-relative">
-                    <img id="foto-perfil" src="/midia/fotooriginal.png" alt="Foto de Perfil" class="img-fluid rounded-4" style="max-width: 310px; height: 300px;">
+                    <img id="foto-perfil" alt="Foto de Perfil" class="img-fluid rounded-4" style="max-width: 310px; height: 300px;">
                     <button id="editar-foto" class="btn btn-light position-absolute" style="top: 8px; right: 115px;" title="Editar Foto" onclick="document.getElementById('input-foto').click();">
                         <i class="bi bi-camera fs-5"></i>
                     </button>
@@ -110,8 +110,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Modais para Edição -->
     <!-- Modal de Edição -->
     <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -169,12 +167,10 @@
                 img.src = imageUrl; // Tente carregar a imagem
 
                 img.onload = () => {
-                    // Se a imagem carregar corretamente, atualize a src
-                    document.getElementById('foto-perfil').src = `${imageUrl}?${new Date().getTime()}`; // Previne cache
+                    document.getElementById('foto-perfil').src = `${imageUrl}?${new Date().getTime()}`;
                 };
 
                 img.onerror = () => {
-                    // Se houver erro ao carregar a imagem, use a imagem padrão
                     document.getElementById('foto-perfil').src = '/midia/fotooriginal.png';
                 };
 
@@ -184,7 +180,45 @@
             }
         }
 
-      
+        async function uploadImage() {
+            console.log("Função uploadImage chamada.");
+            const input = document.getElementById('input-foto');
+            const file = input.files[0];
+
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('imagem', file);
+
+            const funcionarioId = localStorage.getItem('funcionarioId');
+            if (!funcionarioId) {
+                alert('ID do funcionário não encontrado.');
+                return;
+            }
+            formData.append('funcionarioId', funcionarioId);
+
+            try {
+                const response = await fetch('/foto/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log("Nova URL da imagem:", data.imageUrl); 
+                    document.getElementById('foto-perfil').src = `${data.imageUrl}?${new Date().getTime()}`; // Previne cache
+                    
+                    // Recarrega as informações do funcionário para atualizar todos os campos
+                    await loadFuncionarioInfo();
+                } else {
+                    const errorData = await response.json();
+                    console.error('Erro ao fazer upload da imagem:', errorData);
+                    alert('Erro ao fazer upload da imagem: ' + errorData.message);
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        }
 
         // Função para abrir o modal de edição
         function openEditModal(field) {

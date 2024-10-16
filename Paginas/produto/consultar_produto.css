@@ -32,10 +32,10 @@ h2 {
 
 .btn-primary {
     background-color: #7d6da9;
-    border-color: #f7f7f7;
+    border-color: #7d6da9;
 }
 
 .btn-primary:hover {
     background-color: #6c5c9b;
-    border-color: #f7f7f7;
+    border-color: #6c5c9b;
 }
