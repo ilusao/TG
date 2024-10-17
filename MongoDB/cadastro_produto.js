@@ -26,7 +26,7 @@ const submitForm = async (formData) => {
 
         if (response.ok) {
             alert('Produto cadastrado com sucesso!');
-            form.reset(); // Limpa o formulário após o cadastro bem-sucedido
+            form.reset();
         } else {
             const errorData = await response.json();
             alert(`Erro ao cadastrar o produto: ${errorData.error}`);
@@ -59,7 +59,6 @@ const submitForm = async (formData) => {
             sub_grupo: document.getElementById('subgroupSelect').value,
             fornecedor: document.getElementById('fornecedor').value,
             marca: document.getElementById('marca').value,
-            codigo_produto: document.getElementById('codigoProduto').value,
             localizacao: document.getElementById('localizacao').value,
             destino: document.getElementById('destino').value,
             almoxerifado: document.getElementById('almoxerifado').value,
@@ -205,5 +204,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Adiciona evento para atualizar a lista de subgrupos quando o grupo selecionado mudar
 document.getElementById('groupSelect').addEventListener('change', () => {
-    updateSubgroupOptions(); // Atualiza os subgrupos ao mudar o grupo
+    updateSubgroupOptions();
 });
+s

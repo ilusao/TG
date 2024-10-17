@@ -189,17 +189,7 @@ app.put('/funcionario/:id', async (req, res) => {
     }
 });
 
-// Rota para cadastro de produto
-app.post('/api/produto', async (req, res) => {
-    try {
-        const novoProduto = new Produto(req.body);
-        await novoProduto.save();
-        res.status(201).send({ message: 'Produto cadastrado com sucesso!' });
-    } catch (error) {
-        res.status(500).send({ error: 'Erro ao cadastrar o produto' });
-    }
-});
-
+// grupo de produtos
 app.get('/api/produtos', async (req, res) => {
     try {
         const produtos = await Produto.find(); 
@@ -210,12 +200,35 @@ app.get('/api/produtos', async (req, res) => {
     }
 });
 
-// Rota para pegar um produto específico pelo código
-app.get('/api/produto/:codigo_produto', async (req, res) => {
-    const { codigo_produto } = req.params;
+// Rota para cadastro de produto
+app.post('/api/produto', async (req, res) => {
+    const { codigo_produto } = req.body;
 
     try {
-        const produto = await Produto.findOne({ codigo_produto });
+        // Verifica se o código do produto já está em uso
+        const produtoExistente = await Produto.findOne({ codigo_produto });
+        if (produtoExistente) {
+            return res.status(400).json({ message: 'Código do produto já está em uso.' });
+        }
+
+        // Cria um novo produto
+        const novoProduto = new Produto(req.body);
+        await novoProduto.save();
+
+        res.status(201).json({ message: 'Produto cadastrado com sucesso!' });
+    } catch (error) {
+        console.error('Erro ao cadastrar o produto:', error);
+        res.status(500).json({ error: 'Erro ao cadastrar o produto' });
+    }
+});
+
+// Rota para pegar um produto específico pelo ID (_id)
+app.get('/api/produto/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // Busca o produto pelo _id
+        const produto = await Produto.findById(id);
         if (produto) {
             res.json(produto);
         } else {
@@ -227,19 +240,25 @@ app.get('/api/produto/:codigo_produto', async (req, res) => {
     }
 });
 
-// Rota para atualizar informações de um produto pelo código
-app.put('/api/produto/:codigo_produto', async (req, res) => {
-    const { codigo_produto } = req.params;
+// Rota para atualizar informações de um produto pelo ID (_id)
+app.put('/api/produto/:id', async (req, res) => {
+    const { id } = req.params;
     const updates = req.body;
 
     try {
-        const produto = await Produto.findOneAndUpdate({ codigo_produto }, updates, { new: true });
+        if (updates.codigo_produto) {
+            const codigoExistente = await Produto.findOne({ codigo_produto: updates.codigo_produto });
+            if (codigoExistente && codigoExistente._id.toString() !== id) {
+                return res.status(400).json({ message: 'Código do produto já está em uso.' });
+            }
+        }
+        const produtoAtualizado = await Produto.findByIdAndUpdate(id, updates, { new: true });
 
-        if (!produto) {
+        if (!produtoAtualizado) {
             return res.status(404).json({ message: 'Produto não encontrado' });
         }
 
-        res.json(produto); // Retorna o produto atualizado
+        res.json(produtoAtualizado);
     } catch (error) {
         console.error('Erro ao atualizar o produto:', error);
         res.status(500).json({ message: 'Erro interno do servidor' });

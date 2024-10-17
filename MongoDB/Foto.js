@@ -1,6 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const Funcionario = require('./Funcionarios');
+const Produto = require('./Produto');
 const router = express.Router();
 const path = require('path');
 const fs = require('fs');
@@ -26,10 +27,8 @@ router.post('/upload', upload.single('imagem'), async (req, res) => {
     const funcionarioId = req.body.funcionarioId;
 
     try {
-        // Busca o funcionário pelo ID para obter a foto anterior
         const funcionario = await Funcionario.findById(funcionarioId);
         
-        // Verifica se o funcionário existe
         if (!funcionario) {
             return res.status(404).send('Funcionário não encontrado.');
         }
@@ -37,12 +36,10 @@ router.post('/upload', upload.single('imagem'), async (req, res) => {
         // Caminho da foto anterior
         const fotoAnterior = funcionario.fotoPerfil;
 
-        // Apaga a foto anterior se existir
         if (fotoAnterior) {
             const fotoAnteriorPath = path.join(__dirname, '..', 'Paginas', 'Midia', fotoAnterior);
             fs.access(fotoAnteriorPath, fs.constants.F_OK, (err) => {
                 if (!err) {
-                    // O arquivo existe, pode tentar apagar
                     fs.unlink(fotoAnteriorPath, (err) => {
                         if (err) {
                             console.error('Erro ao apagar a foto anterior:', err);
@@ -51,7 +48,6 @@ router.post('/upload', upload.single('imagem'), async (req, res) => {
                         }
                     });
                 } else {
-                    // Arquivo não existe
                     console.log('A foto anterior não existe, não há necessidade de apagar.');
                 }
             });
@@ -80,5 +76,67 @@ router.get('/midia/:filename', (req, res) => {
         res.sendFile(filePath);
     });
 });
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// foto do produto
+
+// Rota para upload de imagens do produto
+router.post('/produto/:id/mudar-foto', upload.single('foto'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).send('Nenhuma imagem foi enviada.');
+    }
+
+    const produtoId = req.params.id;
+
+    try {
+        const produto = await Produto.findById(produtoId);
+
+        if (!produto) {
+            return res.status(404).send('Produto não encontrado.');
+        }
+
+        // Caminho da foto anterior
+        const fotoAnterior = produto.fotoUrl;
+
+        if (fotoAnterior) {
+            const fotoAnteriorPath = path.join(__dirname, '..', 'Paginas', 'Midia', fotoAnterior);
+            fs.access(fotoAnteriorPath, fs.constants.F_OK, (err) => {
+                if (!err) {
+                    fs.unlink(fotoAnteriorPath, (err) => {
+                        if (err) {
+                            console.error('Erro ao apagar a foto anterior:', err);
+                        } else {
+                            console.log('Foto anterior apagada com sucesso.');
+                        }
+                    });
+                } else {
+                    console.log('A foto anterior não existe, não há necessidade de apagar.');
+                }
+            });
+        }
+        const imageUrl = `/midia/${req.file.filename}`;
+        await Produto.findByIdAndUpdate(produtoId, { fotoProduto: imageUrl });
+
+        res.json({ success: true, novaFotoUrl: imageUrl });
+    } catch (error) {
+        console.error('Erro ao atualizar a foto do produto:', error);
+        return res.status(500).send('Erro ao atualizar a foto do produto.');
+    }
+});
+
+// Middleware para servir imagens do produto
+router.get('/midia/:filename', (req, res) => {
+    const { filename } = req.params;
+    const filePath = path.join(__dirname, '..', 'Paginas', 'Midia', filename);
+
+    fs.access(filePath, fs.constants.F_OK, (err) => {
+        if (err) {
+            const defaultImagePath = path.join(__dirname, '..', 'Paginas', 'Midia', 'Originalproduto.png');
+            return res.sendFile(defaultImagePath);
+        }
+        res.sendFile(filePath);
+    });
+});
+
 
 module.exports = router;

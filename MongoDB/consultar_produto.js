@@ -1,3 +1,6 @@
+// serve para não bugar os codigos dos produtos.
+let idProdutoOriginal = null;
+
 // Função para carregar produtos no dropdown
 function carregarProdutosDropdown() {
     fetch('/api/produtos')
@@ -21,22 +24,24 @@ function carregarProdutosDropdown() {
             opcaoPadrao.value = '';
             dropdown.add(opcaoPadrao);
 
-          
             produtos.forEach(produto => {
                 const option = document.createElement('option');
                 option.text = produto.nome;
-                option.value = produto.codigo_produto;
+                option.value = produto._id;
                 dropdown.add(option);
             });
 
             dropdown.addEventListener('change', function() {
-                const codigoSelecionado = this.value;
+                const idSelecionado = this.value;
 
                 desabilitarCampos();
 
-                if (codigoSelecionado) {
-                    fetch(`/api/produto/${codigoSelecionado}`)
-                        .then(response => response.json())
+                if (idSelecionado) {
+                    fetch(`/api/produto/${idSelecionado}`)
+                        .then(response => {
+                            if (!response.ok) throw new Error('Erro ao buscar detalhes do produto');
+                            return response.json();
+                        })
                         .then(produto => {
                             preencherCamposProduto(produto);
                         })
@@ -51,6 +56,8 @@ function carregarProdutosDropdown() {
 }
 
 function preencherCamposProduto(produto) {
+    idProdutoOriginal = produto._id;
+
     document.getElementById('nome').value = produto.nome || '';
     document.getElementById('descricao').value = produto.descricao_pdv || '';
     document.getElementById('subgrupo').value = produto.sub_grupo || '';
@@ -60,6 +67,12 @@ function preencherCamposProduto(produto) {
     document.getElementById('marca').value = produto.marca || '';
     document.getElementById('codigo').value = produto.codigo_produto || '';
     document.getElementById('preco').value = produto.preco || '';
+
+    if (produto.fotoProduto) {
+        document.getElementById('produtoImagem').src = produto.fotoProduto;
+    } else {
+        document.getElementById('produtoImagem').src = '/Midia/Originalproduto.png'; 
+    }
 }
 
 // Função para habilitar a edição dos campos
@@ -74,6 +87,19 @@ function desabilitarCampos() {
     inputs.forEach(input => {
         input.setAttribute('disabled', 'disabled');
     });
+}
+
+// Cria um elemento de alerta para mostrar a mensagem de sucesso
+function mostrarMensagemSucesso(mensagem) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-success';
+    alertDiv.textContent = mensagem;
+
+    document.body.appendChild(alertDiv);
+
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 3000);
 }
 
 // Função de validação e envio (atualizar ou salvar os dados do produto)
@@ -115,19 +141,22 @@ function validarFormulario() {
         inativo: document.getElementById('inativo').value
     };
 
-    if (codigo) {
-        fetch(`/api/produto/${codigo}`, {
+    // Atualiza o produto com base no ID armazenado
+    if (idProdutoOriginal) {
+        fetch(`/api/produto/${idProdutoOriginal}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(dadosProduto)
+            body: JSON.stringify({...dadosProduto, id: idProdutoOriginal}) 
         })
         .then(response => {
             if (response.ok) {
                 mostrarMensagemSucesso('Produto atualizado com sucesso!');
             } else {
-                alert('Erro ao atualizar o produto. Tente novamente.');
+                return response.json().then(err => {
+                    alert(`Erro ao atualizar o produto: ${err.message || 'Tente novamente.'}`);
+                });
             }
         })
         .catch(error => {
@@ -222,9 +251,9 @@ function preencherResultadosProdutos(produtos) {
     const container = document.getElementById('produtosEncontrados');
     container.innerHTML = '';
 
-     const titulo = document.createElement('h5');
-     titulo.textContent = 'Produtos encontrados 👇';
-     container.appendChild(titulo);
+    const titulo = document.createElement('h5');
+    titulo.textContent = 'Produtos encontrados 👇';
+    container.appendChild(titulo);
 
     const lista = document.createElement('ul');
     lista.classList.add('list-group');
@@ -239,9 +268,61 @@ function preencherResultadosProdutos(produtos) {
 
     container.appendChild(lista);
 }
-    // só para limpar os imputs
-    function limparCampos() {
-        document.getElementById("productForm").reset();
+
+// Função para alterar a foto do produto
+function mudarFoto() {
+    if (!idProdutoOriginal) {
+        alert('Você não escolheu nenhum produto');
+        return;
+    }
+
+    const inputFile = document.createElement('input');
+    inputFile.type = 'file';
+    inputFile.accept = 'image/*';
+    inputFile.style.display = 'none';
+
+    inputFile.addEventListener('change', function() {
+        const file = inputFile.files[0];
+        if (!file) {
+            return;
         }
 
+        const formData = new FormData();
+        formData.append('foto', file);
+
+        fetch(`/foto/produto/${idProdutoOriginal}/mudar-foto`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => { 
+                    throw new Error(text); 
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                document.getElementById('produtoImagem').src = data.novaFotoUrl;
+                alert('Foto do produto alterada com sucesso!');
+            } else {
+                alert('Erro ao alterar a foto do produto. Tente novamente.');
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao enviar a nova foto:', error);
+            alert('Ocorreu um erro ao tentar enviar a nova foto.');
+        });
+    });
+
+    inputFile.click();
+}
+
+// Função para limpar os campos
+function limparCampos() {
+    document.getElementById("productForm").reset();
+}
+
+// Carregar produtos no dropdown ao iniciar
 carregarProdutosDropdown();
