@@ -53,13 +53,14 @@ const submitForm = async (formData) => {
 
         // Coleta os dados do formulário
         const formData = {
+            codigo_produto: document.getElementById('codigoProduto').value,
             nome: document.getElementById('nome').value,
             descricao_pdv: document.getElementById('descricao').value,
             grupo: document.getElementById('groupSelect').value,
             sub_grupo: document.getElementById('subgroupSelect').value,
             fornecedor: document.getElementById('fornecedor').value,
             marca: document.getElementById('marca').value,
-            localizacao: document.getElementById('localizacao').value,
+            localizacao: document.getElementById('localizacao').value || "Dom Amaury Castanho", 
             destino: document.getElementById('destino').value,
             almoxerifado: document.getElementById('almoxerifado').value,
             data_entrada: document.getElementById('dataEntrada').value,
@@ -88,15 +89,20 @@ const submitForm = async (formData) => {
 document.addEventListener('DOMContentLoaded', function() {
     const inputs = form.querySelectorAll('input, select');
 
+    // Desabilitar o botão no início
+    document.getElementById('Consult').disabled = true;
+
     function checkForm() {
         let allFilled = true;
 
         inputs.forEach(function(input) {
-            if (input.hasAttribute('required') && !input.value) {
+            // Ignora a validação do campo de localização
+            if (input.hasAttribute('required') && input.id !== 'localizacao' && !input.value) {
                 allFilled = false;
             }
         });
 
+        // Ativar o botão apenas se todos os campos obrigatórios estiverem preenchidos
         document.getElementById('Consult').disabled = !allFilled;
     }
 
@@ -104,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
         input.addEventListener('input', checkForm);
     });
 
-    checkForm();
+    checkForm(); // Chama a função para verificar os campos ao carregar a página
 });
 
 // Armazena grupos e subgrupos no localStorage
@@ -206,4 +212,3 @@ document.addEventListener('DOMContentLoaded', () => {
 document.getElementById('groupSelect').addEventListener('change', () => {
     updateSubgroupOptions();
 });
-s

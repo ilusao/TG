@@ -290,7 +290,7 @@ function mudarFoto() {
         const formData = new FormData();
         formData.append('foto', file);
 
-        fetch(`/foto/produto/${idProdutoOriginal}/mudar-foto`, {
+        fetch(`/produto/${idProdutoOriginal}/mudar-foto`, {
             method: 'POST',
             body: formData
         })

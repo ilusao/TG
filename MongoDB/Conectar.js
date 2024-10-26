@@ -205,13 +205,10 @@ app.post('/api/produto', async (req, res) => {
     const { codigo_produto } = req.body;
 
     try {
-        // Verifica se o código do produto já está em uso
         const produtoExistente = await Produto.findOne({ codigo_produto });
         if (produtoExistente) {
             return res.status(400).json({ message: 'Código do produto já está em uso.' });
         }
-
-        // Cria um novo produto
         const novoProduto = new Produto(req.body);
         await novoProduto.save();
 
@@ -287,6 +284,38 @@ app.post('/api/buscarProdutos', async (req, res) => {
         res.status(500).json({ error: 'Erro ao buscar produtos' });
     }
 });
+
+// Rota para atualizar o destino de um produto
+app.put('/api/produto/:id/enviar', async (req, res) => {
+    const { destino, localizacao } = req.body;
+    try {
+        const produtoAtualizado = await Produto.findByIdAndUpdate(
+            req.params.id,
+            { destino, status: 'Em trânsito', localizacao },
+            { new: true }
+        );
+        if (!produtoAtualizado) {
+            return res.status(404).json({ message: 'Produto não encontrado' });
+        }
+        res.json(produtoAtualizado);
+    } catch (error) {
+        console.error('Erro ao atualizar o produto:', error);
+        res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+});
+
+// Rota para buscar todos os produtos e suas localizações
+app.get('/api/produtos', async (req, res) => {
+    try {
+        const produtos = await Produto.find();
+        res.json(produtos);
+    } catch (error) {
+        console.error('Erro ao buscar os produtos:', error);
+        res.status(500).json({ message: 'Erro ao buscar os produtos' });
+    }
+});
+
+
 
 // Rota principal
 app.get('/', (req, res) => {

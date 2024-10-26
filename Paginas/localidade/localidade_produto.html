@@ -5,152 +5,230 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Localidade do Produto</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #EAE6EF;
-        }
-        .header {
-            background-color: #8E81A2;
-            color: white;
-            padding: 10px;
-            text-align: center;
-        }
-        .map-container {
-            position: relative;
-            height: 400px;
-            margin-bottom: 20px;
-        }
-        .map-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 10px;
-        }
-        .form-overlay {
-            position: absolute;
-            top: 10%;
-            left: 10%;
-            background: rgba(255, 255, 255, 0.8);
-            padding: 15px;
-            border-radius: 8px;
-            width: 300px;
-        }
-        .destination-section {
-            display: flex;
-            justify-content: space-between;
-            margin: 20px 0;
-        }
-        .destination-box {
-            background-color: white;
-            padding: 15px;
-            width: 48%;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: bold;
-        }
-        .menu {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: #8E81A2;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .menu ul {
-            list-style: none;
-            padding: 0;
-        }
-        .menu ul li {
-            margin: 5px 0;
-        }
-        .menu ul li a {
-            color: white;
-            text-decoration: none;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <link href="localidade_produto.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
 </head>
 <body>
-    <div class="header">
+    <div class="header text-center">
         <h1>LOCALIDADE DO PRODUTO</h1>
     </div>
 
-
-
-    <div class="menu">
-
+    <div class="menu text-center mb-3">
         <a class="btn btn-secondary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">    
-            Menu
+            <i class="bi bi-list"></i> Menu
         </a>
-
-        <ul class="dropdown-menu" style="background-color: #8E81A2;">
-
+        <ul class="dropdown-menu text-center">
             <h4 style="font-style: italic;">
-                <li><a href="#">Início</a></li>
-                <li><a href="#">Estoque</a></li>
-                <li><a href="#">Centro Fornecedor</a></li>
-                <li><a href="#">Detalhe</a></li>
-                <li><a href="#">Cadastrar Produto</a></li>
-                <li><a href="#">Cadastrar Fornecedor</a></li>
-                <li><a href="#">Gerar Balança</a></li>
-                <li><a href="#">Cadastrar Funcionário</a></li>
-                <li><a href="#">Localizar Produto</a></li>
+                <li><a class="dropdown-item" href="#">Estoque</a></li>
+                <li><a class="dropdown-item" href="#">Fornecedor</a></li>
+                <li><a class="dropdown-item" href="#">Cadastrar Produto</a></li>
+                <li><a class="dropdown-item" href="#">Cadastrar Fornecedor</a></li>
+                <li><a class="dropdown-item" href="#">Cadastrar Funcionário</a></li>
             </h4>
-           
         </ul>
     </div>
 
     <div class="map-container">
-        <img src="https://www.cnnbrasil.com.br/wp-content/uploads/sites/12/2024/02/google-maps-e1707316052388.png?w=1200&h=900&crop=1" alt="Mapa">
+        <div id="map" style="height: 600px;"></div>
+        <div class="error-message" id="error-message" style="display: none;"></div>
+        
         <div class="form-overlay">
+            <h3>Localizar Produto</h3>
             <div class="mb-2">
                 <label for="codigoProduto" class="form-label">Código do Produto</label>
-                <input type="text" class="form-control" id="codigoProduto">
-            </div>
-            <div class="mb-2">
-                <label for="descricao" class="form-label">Descrição</label>
-                <input type="text" class="form-control" id="descricao">
-            </div>
-            <div class="row">
-                <div class="col">
-                    <label for="inflamavel" class="form-label">Inflamável</label>
-                    <select id="inflamavel" class="form-select">
-                        <option value="nao">Não</option>
-                        <option value="sim">Sim</option>
-                    </select>
-                </div>
-                <div class="col">
-                    <label for="fragil" class="form-label">Frágil</label>
-                    <select id="fragil" class="form-select">
-                        <option value="nao">Não</option>
-                        <option value="sim">Sim</option>
-                    </select>
-                </div>
+                <input type="text" class="form-control" id="codigoProduto" placeholder="Insira o código do produto">
             </div>
             <div class="mb-2">
                 <label for="localizacao" class="form-label">Localização</label>
-                <input type="text" class="form-control" id="localizacao">
+                <input type="text" class="form-control" id="localizacao" placeholder="Digite uma localização para pesquisar">
             </div>
-            <div class="mb-2">
-                <label for="destino" class="form-label">Destino</label>
-                <input type="text" class="form-control" id="destino">
+            <br>
+            <div class="d-flex justify-content-center mb-2">
+                <button id="buscarLocal" class="btn btn-primary">Buscar Localização</button>
             </div>
         </div>
     </div>
 
-    <br><br>
-
-    <div class="destination-section">
-        <div class="destination-box">
-            DESTINO SAÍDA
-            <input type="text" class="form-control mt-2" placeholder="">
-        </div>
-        <div class="destination-box">
-            DESTINO FINAL
-            <input type="text" class="form-control mt-2" placeholder="">
-        </div>
-    </div>
-
-    <!-- Bootstrap JS and dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Inicializar o mapa em Itu
+        var map = L.map('map').setView([-23.2644, -47.2992], 13);
+        var errorMessage = document.getElementById('error-message');
+
+        // Função para lidar com a inicialização do mapa
+        function initMap() {
+            try {
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+            } catch (error) {
+                showErrorMessage("Infelizmente, o OpenStreetMap está fora do ar.");
+            }
+        }
+
+        // Função para exibir mensagens de erro
+        function showErrorMessage(message) {
+            errorMessage.innerText = message;
+            errorMessage.style.display = 'block'; // Torna a mensagem visível
+        }
+
+        // Carregar todos os produtos no mapa ao carregar a página
+        async function carregarProdutos() {
+            try {
+                const response = await fetch('/api/buscarProdutos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+
+                const produtos = await response.json();
+
+                if (response.ok && produtos.length > 0) {
+                    produtos.forEach(async (produto) => {
+                        if (produto.localizacao) {
+                            try {
+                                const responseLoc = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${produto.localizacao}`);
+                                if (!responseLoc.ok) {
+                                    throw new Error("Falha ao buscar localização");
+                                }
+
+                                const dataLoc = await responseLoc.json();
+
+                                if (dataLoc.length > 0) {
+                                    const { lat, lon } = dataLoc[0];
+                                    L.marker([lat, lon]).addTo(map).bindPopup(`
+                                        <b>Produto:</b> ${produto.nome} <br>
+                                        <b>Localização:</b> ${produto.localizacao} <br>
+                                        <b>Código:</b> ${produto.codigo_produto}
+                                    `);
+                                } else {
+                                    console.warn(`Localização "${produto.localizacao}" não encontrada.`);
+                                }
+                            } catch (error) {
+                                console.error('Erro ao buscar localização:', error);
+                                showErrorMessage("Infelizmente, não conseguimos se conectar ao OpenStreetMap para buscar a localização.");
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+            }
+        }
+
+        let tempLocationMarker = null; // Variável para armazenar o marcador temporário
+
+        document.getElementById('codigoProduto').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                buscarProdutoPorCodigo();
+            }
+        });
+
+        document.getElementById('localizacao').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                buscarLocalizacao();
+            }
+        });
+
+        async function buscarProdutoPorCodigo() {
+            const codigoProduto = document.getElementById('codigoProduto').value;
+
+            if (!codigoProduto) {
+                alert("Digite um código de produto para pesquisar.");
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/buscarProdutos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ codigo_produto: codigoProduto })
+                });
+
+                const produtos = await response.json();
+
+                if (response.ok && produtos.length > 0) {
+                    produtos.forEach(async (produto) => {
+                        if (produto.localizacao) {
+                            try {
+                                const responseLoc = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${produto.localizacao}`);
+                                if (!responseLoc.ok) {
+                                    throw new Error("Falha ao buscar localização");
+                                }
+                                const dataLoc = await responseLoc.json();
+
+                                if (dataLoc.length > 0) {
+                                    const { lat, lon } = dataLoc[0];
+
+                                    // Adiciona o marcador do produto e centraliza o mapa
+                                    const productMarker = L.marker([lat, lon]).addTo(map).bindPopup(`
+                                        <b>Produto:</b> ${produto.nome} <br>
+                                        <b>Localização:</b> ${produto.localizacao} <br>
+                                        <b>Código:</b> ${produto.codigo_produto}
+                                    `);
+                                    
+                                    map.setView([lat, lon], 13);
+                                    productMarker.openPopup();
+                                } else {
+                                    console.warn(`Localização "${produto.localizacao}" não encontrada.`);
+                                }
+                            } catch (error) {
+                                console.error('Erro ao buscar localização:', error);
+                                showErrorMessage("Infelizmente, não conseguimos se conectar ao OpenStreetMap para buscar a localização.");
+                            }
+                        }
+                    });
+                } else {
+                    alert('Produto não encontrado.');
+                }
+            } catch (error) {
+                console.error('Erro ao buscar produto por código:', error);
+            }
+        }
+
+        // Função para buscar uma localização específica quando não se usa Enter no código do produto
+        async function buscarLocalizacao() {
+            const localizacaoInput = document.getElementById('localizacao').value;
+
+            if (!localizacaoInput) {
+                alert("Digite uma localização para pesquisar.");
+                return;
+            }
+
+            try {
+                const responseLoc = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${localizacaoInput}`);
+                if (!responseLoc.ok) {
+                    throw new Error("Falha ao buscar localização");
+                }
+                const dataLoc = await responseLoc.json();
+
+                if (dataLoc.length > 0) {
+                    const { lat, lon } = dataLoc[0];
+                    
+                    if (tempLocationMarker) {
+                        map.removeLayer(tempLocationMarker);
+                    }
+                    tempLocationMarker = L.marker([lat, lon]).addTo(map).bindPopup(`Localização: ${localizacaoInput}`);
+                    map.setView([lat, lon], 13);
+                } else {
+                    alert('Localização não encontrada.');
+                }
+            } catch (error) {
+                console.error('Erro ao buscar localização:', error);
+                showErrorMessage("Infelizmente, não conseguimos se conectar ao OpenStreetMap para buscar a localização.");
+            }
+        }
+
+        document.getElementById('buscarLocal').addEventListener('click', buscarLocalizacao);
+
+        window.onload = function() {
+            initMap();
+            carregarProdutos();
+        }
+    </script>
 </body>
 </html>
