@@ -157,6 +157,7 @@ app.get('/funcionario/search/:searchTerm', async (req, res) => {
 
 // Rota para atualizar informações de um funcionário pelo ID
 app.put('/funcionario/:id', async (req, res) => {
+    console.log('Recebendo uma requisição para mudar foto do produto:', req.params.id);
     try {
         const funcionarioId = req.params.id;
         const updates = req.body;
@@ -304,17 +305,32 @@ app.put('/api/produto/:id/enviar', async (req, res) => {
     }
 });
 
-// Rota para buscar todos os produtos e suas localizações
-app.get('/api/produtos', async (req, res) => {
+// Rota para enviar um produto para uma nova localização e atualizar destino
+app.post('/api/enviarProduto', async (req, res) => {
+    const { codigo_produto, localizacao, destino } = req.body;
+
+    if (!codigo_produto || !localizacao) {
+        return res.status(400).json({ message: 'Dados incompletos. Forneça código_produto e localizacao.' });
+    }
+
     try {
-        const produtos = await Produto.find();
-        res.json(produtos);
+        const produto = await Produto.findOne({ codigo_produto });
+
+        if (!produto) {
+            return res.status(404).json({ message: 'Produto não encontrado' });
+        }
+
+        produto.localizacao = localizacao;
+        produto.destino = destino === "" ? null : destino; // Define destino como null se for string vazia
+
+        await produto.save();
+
+        res.json({ message: 'Produto enviado para nova localização com sucesso!', produto });
     } catch (error) {
-        console.error('Erro ao buscar os produtos:', error);
-        res.status(500).json({ message: 'Erro ao buscar os produtos' });
+        console.error('Erro ao enviar produto:', error);
+        res.status(500).json({ message: 'Erro interno do servidor' });
     }
 });
-
 
 
 // Rota principal

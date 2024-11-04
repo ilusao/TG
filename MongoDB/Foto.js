@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Rota para upload de imagens
+// Rota para upload de imagens do funcionário
 router.post('/upload', upload.single('imagem'), async (req, res) => {
     if (!req.file) {
         return res.status(400).send('Nenhuma imagem foi enviada.');
@@ -33,11 +33,15 @@ router.post('/upload', upload.single('imagem'), async (req, res) => {
             return res.status(404).send('Funcionário não encontrado.');
         }
 
-        // Caminho da foto anterior
+        // Verificando a foto anterior
         const fotoAnterior = funcionario.fotoPerfil;
+        console.log('Foto anterior:', fotoAnterior);
 
         if (fotoAnterior) {
-            const fotoAnteriorPath = path.join(__dirname, '..', 'Paginas', 'Midia', fotoAnterior);
+            // Remove o prefixo /midia/ para obter o caminho correto
+            const fotoAnteriorPath = path.join(__dirname, '..', 'Paginas', 'Midia', fotoAnterior.replace('/midia/', ''));
+            console.log('Tentando apagar:', fotoAnteriorPath);
+
             fs.access(fotoAnteriorPath, fs.constants.F_OK, (err) => {
                 if (!err) {
                     fs.unlink(fotoAnteriorPath, (err) => {
@@ -63,22 +67,27 @@ router.post('/upload', upload.single('imagem'), async (req, res) => {
     }
 });
 
-// Middleware para lidar com imagens não encontradas
-router.get('/midia/:filename', (req, res) => {
+// Middleware para lidar com imagens de funcionários não encontradas
+router.get('/midia/funcionario/:filename', (req, res) => {
     const { filename } = req.params;
     const filePath = path.join(__dirname, '..', 'Paginas', 'Midia', filename);
 
     fs.access(filePath, fs.constants.F_OK, (err) => {
         if (err) {
             const defaultImagePath = path.join(__dirname, '..', 'Paginas', 'Midia', 'fotooriginal.png');
-            return res.sendFile(defaultImagePath);
+            fs.access(defaultImagePath, fs.constants.F_OK, (defaultErr) => {
+                if (defaultErr) {
+                    return res.status(404).send('Imagem padrão não encontrada.');
+                } else {
+                    return res.sendFile(defaultImagePath);
+                }
+            });
+        } else {
+            res.sendFile(filePath);
         }
-        res.sendFile(filePath);
     });
 });
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// foto do produto
 
 // Rota para upload de imagens do produto
 router.post('/produto/:id/mudar-foto', upload.single('foto'), async (req, res) => {
@@ -96,24 +105,30 @@ router.post('/produto/:id/mudar-foto', upload.single('foto'), async (req, res) =
         }
 
         // Caminho da foto anterior
-        const fotoAnterior = produto.fotoUrl;
+        const fotoAnterior = produto.fotoProduto;
 
         if (fotoAnterior) {
-            const fotoAnteriorPath = path.join(__dirname, '..', 'Paginas', 'Midia', fotoAnterior);
-            fs.access(fotoAnteriorPath, fs.constants.F_OK, (err) => {
-                if (!err) {
+            const fotoAnteriorPath = path.join(__dirname, '..', 'Paginas', 'Midia', fotoAnterior.replace('/midia/', ''));
+
+            await new Promise((resolve, reject) => {
+                fs.access(fotoAnteriorPath, fs.constants.F_OK, (err) => {
+                    if (err) {
+                        console.log('A foto anterior do produto não existe, não há necessidade de apagar.');
+                        return resolve();
+                    }
+
                     fs.unlink(fotoAnteriorPath, (err) => {
                         if (err) {
-                            console.error('Erro ao apagar a foto anterior:', err);
-                        } else {
-                            console.log('Foto anterior apagada com sucesso.');
+                            console.error('Erro ao apagar a foto anterior do produto:', err);
+                            return reject(err);
                         }
+                        console.log('Foto anterior do produto apagada com sucesso.');
+                        resolve();
                     });
-                } else {
-                    console.log('A foto anterior não existe, não há necessidade de apagar.');
-                }
+                });
             });
         }
+
         const imageUrl = `/midia/${req.file.filename}`;
         await Produto.findByIdAndUpdate(produtoId, { fotoProduto: imageUrl });
 
@@ -123,20 +138,5 @@ router.post('/produto/:id/mudar-foto', upload.single('foto'), async (req, res) =
         return res.status(500).send('Erro ao atualizar a foto do produto.');
     }
 });
-
-// Middleware para servir imagens do produto
-router.get('/midia/:filename', (req, res) => {
-    const { filename } = req.params;
-    const filePath = path.join(__dirname, '..', 'Paginas', 'Midia', filename);
-
-    fs.access(filePath, fs.constants.F_OK, (err) => {
-        if (err) {
-            const defaultImagePath = path.join(__dirname, '..', 'Paginas', 'Midia', 'Originalproduto.png');
-            return res.sendFile(defaultImagePath);
-        }
-        res.sendFile(filePath);
-    });
-});
-
 
 module.exports = router;

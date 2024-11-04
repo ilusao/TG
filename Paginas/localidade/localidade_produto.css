@@ -59,3 +59,28 @@ body {
     margin: 15px;
     border-radius: 5px;
 }
+
+.loading {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5em;
+}
+.info-panel {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 15px;
+    border-radius: 8px;
+    position: absolute;
+    top: 10px;
+    right: 10px; /* Mover o painel para o lado direito */
+    z-index: 1000;
+    max-width: 250px; /* Definindo uma largura máxima para o painel */
+}
+.info-panel h5 {
+    margin-bottom: 10px;
+}
+.info-panel .icon {
+    margin-right: 8px;
+}

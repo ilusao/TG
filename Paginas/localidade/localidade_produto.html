@@ -6,9 +6,12 @@
     <title>Localidade do Produto</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
-    <link href="localidade_produto.css" rel="stylesheet">
+    <link href="localidade_produto.css" rel="stylesheet"> 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+   
 </head>
 <body>
     <div class="header text-center">
@@ -33,6 +36,7 @@
     <div class="map-container">
         <div id="map" style="height: 600px;"></div>
         <div class="error-message" id="error-message" style="display: none;"></div>
+        <div class="loading" id="loading">Carregando...</div>
         
         <div class="form-overlay">
             <h3>Localizar Produto</h3>
@@ -48,187 +52,44 @@
             <div class="d-flex justify-content-center mb-2">
                 <button id="buscarLocal" class="btn btn-primary">Buscar Localização</button>
             </div>
+
+            <h3 class="mt-4">Enviar Produto</h3>
+            <div class="mb-2">
+                <label for="codigoProdutoEnviar" class="form-label">Código do Produto</label>
+                <input type="text" class="form-control" id="codigoProdutoEnviar" placeholder="Insira o código do produto para enviar">
+            </div>
+            <div class="mb-2">
+                <label for="localizacaoEnviar" class="form-label">Lugar de Envio</label>
+                <input type="text" class="form-control" id="localizacaoEnviar" placeholder="Digite a localização de envio">
+            </div>
+            <br>
+            <div class="d-flex justify-content-center mb-2">
+                <button id="enviarProduto" class="btn btn-primary">Enviar</button>
+            </div>
         </div>
+
+        <!-- Painel de informações sobre os marcadores -->
+        <div class="info-panel">
+            <h5>Marcadores no Mapa:</h5>
+            <div>
+                <i class="bi bi-geo-alt-fill" style="color: blue; font-size: 1.5em;"></i> Produtos disponíveis
+                <br>
+            </div>
+            <div>
+                <i class="bi bi-geo-alt-fill" style="color: gray; font-size: 1.5em;"></i> Produtos que serão enviados
+                <br>
+            </div>
+            <div>
+                <i class="bi bi-geo-alt-fill" style="color: red; font-size: 1.5em;"></i> Produtos que estão sendo enviados
+                <br>
+            </div>
+        </div>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Inicializar o mapa em Itu
-        var map = L.map('map').setView([-23.2644, -47.2992], 13);
-        var errorMessage = document.getElementById('error-message');
+    <!-- Este caminho só funciona corretamente quando o servidor está em execução -->
+    <script src="/Localidade.js"></script>
 
-        // Função para lidar com a inicialização do mapa
-        function initMap() {
-            try {
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                }).addTo(map);
-            } catch (error) {
-                showErrorMessage("Infelizmente, o OpenStreetMap está fora do ar.");
-            }
-        }
-
-        // Função para exibir mensagens de erro
-        function showErrorMessage(message) {
-            errorMessage.innerText = message;
-            errorMessage.style.display = 'block'; // Torna a mensagem visível
-        }
-
-        // Carregar todos os produtos no mapa ao carregar a página
-        async function carregarProdutos() {
-            try {
-                const response = await fetch('/api/buscarProdutos', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({})
-                });
-
-                const produtos = await response.json();
-
-                if (response.ok && produtos.length > 0) {
-                    produtos.forEach(async (produto) => {
-                        if (produto.localizacao) {
-                            try {
-                                const responseLoc = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${produto.localizacao}`);
-                                if (!responseLoc.ok) {
-                                    throw new Error("Falha ao buscar localização");
-                                }
-
-                                const dataLoc = await responseLoc.json();
-
-                                if (dataLoc.length > 0) {
-                                    const { lat, lon } = dataLoc[0];
-                                    L.marker([lat, lon]).addTo(map).bindPopup(`
-                                        <b>Produto:</b> ${produto.nome} <br>
-                                        <b>Localização:</b> ${produto.localizacao} <br>
-                                        <b>Código:</b> ${produto.codigo_produto}
-                                    `);
-                                } else {
-                                    console.warn(`Localização "${produto.localizacao}" não encontrada.`);
-                                }
-                            } catch (error) {
-                                console.error('Erro ao buscar localização:', error);
-                                showErrorMessage("Infelizmente, não conseguimos se conectar ao OpenStreetMap para buscar a localização.");
-                            }
-                        }
-                    });
-                }
-            } catch (error) {
-                console.error('Erro ao carregar produtos:', error);
-            }
-        }
-
-        let tempLocationMarker = null; // Variável para armazenar o marcador temporário
-
-        document.getElementById('codigoProduto').addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                buscarProdutoPorCodigo();
-            }
-        });
-
-        document.getElementById('localizacao').addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                buscarLocalizacao();
-            }
-        });
-
-        async function buscarProdutoPorCodigo() {
-            const codigoProduto = document.getElementById('codigoProduto').value;
-
-            if (!codigoProduto) {
-                alert("Digite um código de produto para pesquisar.");
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/buscarProdutos', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ codigo_produto: codigoProduto })
-                });
-
-                const produtos = await response.json();
-
-                if (response.ok && produtos.length > 0) {
-                    produtos.forEach(async (produto) => {
-                        if (produto.localizacao) {
-                            try {
-                                const responseLoc = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${produto.localizacao}`);
-                                if (!responseLoc.ok) {
-                                    throw new Error("Falha ao buscar localização");
-                                }
-                                const dataLoc = await responseLoc.json();
-
-                                if (dataLoc.length > 0) {
-                                    const { lat, lon } = dataLoc[0];
-
-                                    // Adiciona o marcador do produto e centraliza o mapa
-                                    const productMarker = L.marker([lat, lon]).addTo(map).bindPopup(`
-                                        <b>Produto:</b> ${produto.nome} <br>
-                                        <b>Localização:</b> ${produto.localizacao} <br>
-                                        <b>Código:</b> ${produto.codigo_produto}
-                                    `);
-                                    
-                                    map.setView([lat, lon], 13);
-                                    productMarker.openPopup();
-                                } else {
-                                    console.warn(`Localização "${produto.localizacao}" não encontrada.`);
-                                }
-                            } catch (error) {
-                                console.error('Erro ao buscar localização:', error);
-                                showErrorMessage("Infelizmente, não conseguimos se conectar ao OpenStreetMap para buscar a localização.");
-                            }
-                        }
-                    });
-                } else {
-                    alert('Produto não encontrado.');
-                }
-            } catch (error) {
-                console.error('Erro ao buscar produto por código:', error);
-            }
-        }
-
-        // Função para buscar uma localização específica quando não se usa Enter no código do produto
-        async function buscarLocalizacao() {
-            const localizacaoInput = document.getElementById('localizacao').value;
-
-            if (!localizacaoInput) {
-                alert("Digite uma localização para pesquisar.");
-                return;
-            }
-
-            try {
-                const responseLoc = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${localizacaoInput}`);
-                if (!responseLoc.ok) {
-                    throw new Error("Falha ao buscar localização");
-                }
-                const dataLoc = await responseLoc.json();
-
-                if (dataLoc.length > 0) {
-                    const { lat, lon } = dataLoc[0];
-                    
-                    if (tempLocationMarker) {
-                        map.removeLayer(tempLocationMarker);
-                    }
-                    tempLocationMarker = L.marker([lat, lon]).addTo(map).bindPopup(`Localização: ${localizacaoInput}`);
-                    map.setView([lat, lon], 13);
-                } else {
-                    alert('Localização não encontrada.');
-                }
-            } catch (error) {
-                console.error('Erro ao buscar localização:', error);
-                showErrorMessage("Infelizmente, não conseguimos se conectar ao OpenStreetMap para buscar a localização.");
-            }
-        }
-
-        document.getElementById('buscarLocal').addEventListener('click', buscarLocalizacao);
-
-        window.onload = function() {
-            initMap();
-            carregarProdutos();
-        }
-    </script>
 </body>
 </html>

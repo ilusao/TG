@@ -68,11 +68,16 @@ function preencherCamposProduto(produto) {
     document.getElementById('codigo').value = produto.codigo_produto || '';
     document.getElementById('preco').value = produto.preco || '';
 
-    if (produto.fotoProduto) {
-        document.getElementById('produtoImagem').src = produto.fotoProduto;
-    } else {
-        document.getElementById('produtoImagem').src = '/Midia/Originalproduto.png'; 
-    }
+    const fotoProduto = produto.fotoProduto || '/midia/Originalproduto.png'; 
+    console.log(`Tentando carregar a imagem do produto: ${fotoProduto}`);
+
+    document.getElementById('produtoImagem').src = fotoProduto;
+
+    const imagem = document.getElementById('produtoImagem');
+        imagem.onerror = function() {
+        console.log(`Erro ao carregar a imagem ${fotoProduto}. Carregando a imagem padrão.`);
+        imagem.src = '/midia/Originalproduto.png';
+    };
 }
 
 // Função para habilitar a edição dos campos
@@ -269,8 +274,7 @@ function preencherResultadosProdutos(produtos) {
     container.appendChild(lista);
 }
 
-// Função para alterar a foto do produto
-function mudarFoto() {
+async function mudarFoto() {
     if (!idProdutoOriginal) {
         alert('Você não escolheu nenhum produto');
         return;
@@ -281,8 +285,9 @@ function mudarFoto() {
     inputFile.accept = 'image/*';
     inputFile.style.display = 'none';
 
-    inputFile.addEventListener('change', function() {
+    inputFile.addEventListener('change', async function() {
         const file = inputFile.files[0];
+
         if (!file) {
             return;
         }
@@ -290,34 +295,35 @@ function mudarFoto() {
         const formData = new FormData();
         formData.append('foto', file);
 
-        fetch(`/produto/${idProdutoOriginal}/mudar-foto`, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
+        try {
+            const response = await fetch(`/foto/produto/${idProdutoOriginal}/mudar-foto`, {
+                method: 'POST',
+                body: formData
+            });
+
             if (!response.ok) {
-                return response.text().then(text => { 
-                    throw new Error(text); 
-                });
+                const errorText = await response.text();
+                throw new Error(errorText);
             }
-            return response.json();
-        })
-        .then(data => {
+
+            const data = await response.json();
+
             if (data.success) {
                 document.getElementById('produtoImagem').src = data.novaFotoUrl;
                 alert('Foto do produto alterada com sucesso!');
             } else {
                 alert('Erro ao alterar a foto do produto. Tente novamente.');
             }
-        })
-        .catch(error => {
-            console.error('Erro ao enviar a nova foto:', error);
+        } catch (error) {
             alert('Ocorreu um erro ao tentar enviar a nova foto.');
-        });
+            console.error('Erro:', error); // Registra o erro para depuração
+        }
     });
 
     inputFile.click();
 }
+
+
 
 // Função para limpar os campos
 function limparCampos() {
