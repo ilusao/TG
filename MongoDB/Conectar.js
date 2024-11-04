@@ -321,7 +321,7 @@ app.post('/api/enviarProduto', async (req, res) => {
         }
 
         produto.localizacao = localizacao;
-        produto.destino = destino === "" ? null : destino; // Define destino como null se for string vazia
+        produto.destino = destino === "" ? null : destino;
 
         await produto.save();
 
@@ -329,6 +329,60 @@ app.post('/api/enviarProduto', async (req, res) => {
     } catch (error) {
         console.error('Erro ao enviar produto:', error);
         res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+});
+
+app.get('/fornecedores', async (req, res) => {
+    try {
+        const fornecedores = await Fornecedor.find();
+        res.json(fornecedores);
+    } catch (error) {
+        res.status(500).json({ message: 'Error retrieving fornecedores', error: error.message });
+    }
+});
+
+// PUT update an existing fornecedor by ID
+app.put('/fornecedores/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updatedData = req.body;
+
+        const updatedFornecedor = await Fornecedor.findByIdAndUpdate(id, updatedData, {
+            new: true, // Return the updated document
+            runValidators: true // Validate the update operation against the schema
+        });
+
+        if (!updatedFornecedor) {
+            return res.status(404).json({ message: 'Fornecedor not found' });
+        }
+
+        res.json(updatedFornecedor);
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating fornecedor', error: error.message });
+    }
+});
+
+app.post('/fornecedores', async (req, res) => {
+    try {
+        const { nome, email, descricao, observacoes, pais, cidade, estado, site, cnpj, inativo, preco_proprietario } = req.body;
+        const newFornecedor = new Fornecedor({
+            nome,
+            email,
+            descricao,
+            observacoes,
+            pais,
+            cidade,
+            estado,
+            site,
+            cnpj,
+            inativo,
+            preco_proprietario
+        });
+
+        await newFornecedor.save();
+        res.status(201).json(newFornecedor);
+    } catch (error) {
+        res.status(500).json({ message: 'Error creating fornecedor', error: error.message });
     }
 });
 
