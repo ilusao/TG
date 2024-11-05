@@ -109,5 +109,92 @@
                 }
                 
                 form.classList.add('was-validated');
+            });[]
+
+            //-----------código cadastro---------   
+
+            form.addEventListener('submit', (event) => {
+                event.preventDefault(); // Evita o envio padrão do formulário
+            
+                // Verifica se o formulário é válido
+                if (!form.checkValidity()) {
+                    event.stopPropagation();
+                    form.classList.add('was-validated');
+                    return;
+                }
+            
+                // Coleta os dados do formulário
+                const formData = {
+                    codigo_produto: document.getElementById('codigoProduto').value,
+                    nome: document.getElementById('nome').value,
+                    descricao_pdv: document.getElementById('descricao').value,
+                    grupo: document.getElementById('groupSelect').value,
+                    sub_grupo: document.getElementById('subgroupSelect').value,
+                    fornecedor: document.getElementById('fornecedor').value,
+                    marca: document.getElementById('marca').value,
+                    localizacao: document.getElementById('localizacao').value || "Dom Amaury Castanho", 
+                    destino: document.getElementById('destino').value || null,
+                    almoxerifado: document.getElementById('almoxerifado').value || null,
+                    data_entrada: document.getElementById('dataEntrada').value,
+                    data_saida: document.getElementById('dataSaida').value || null,
+                    preco: parseFloat(document.getElementById('preco').value.replace(/\./g, '').replace(',', '.')),
+                    inflamavel: document.getElementById('inflamavel').value === 'sim',
+                    fragil: document.getElementById('fragil').value === 'sim',
+                };
+            
+                // Verifica se o grupo e subgrupo são válidos
+                if (formData.grupo === '' || formData.grupo === 'Selecione um grupo') {
+                    alert('Por favor, selecione um grupo válido.');
+                    return;
+                }
+            
+                if (formData.sub_grupo === '' || formData.sub_grupo === 'Selecione um subgrupo') {
+                    alert('Por favor, selecione um subgrupo válido.');
+                    return;
+                }
+            
+                submitForm(formData);
             });
+
+            // Desabilitar o botão no início
+            document.getElementById('Consult').disabled = true;
+
+            function checkForm() {
+                let allFilled = true;
+
+                inputs.forEach(function (input) {
+                    // Ignora a validação do campo de localização
+                    if (input.hasAttribute('required') && input.id !== 'localizacao' && !input.value) {
+                        allFilled = false;
+                    }
+                });
+
+                // Ativar o botão apenas se todos os campos obrigatórios estiverem preenchidos
+                document.getElementById('Consult').disabled = !allFilled;
+            }
+
+            inputs.forEach(function (input) {
+                input.addEventListener('input', checkForm);
+            });
+
+            checkForm(); // Chama a função para verificar os campos ao carregar a página              
+
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Selecione um subgrupo';
+            subgroupSelect.appendChild(defaultOption);
+
+            const selectedGroup = document.getElementById('groupSelect').value;
+
+            if (subgrupos[selectedGroup]) {
+                subgrupos[selectedGroup].forEach(subgrupo => {
+                    const option = document.createElement('option');
+                    option.value = subgrupo;
+                    option.textContent = subgrupo;
+                    subgroupSelect.appendChild(option);
+                });
+            }
+            
+            
+
         })();
