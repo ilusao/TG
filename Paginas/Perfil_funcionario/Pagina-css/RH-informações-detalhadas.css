@@ -1,0 +1,110 @@
+body {
+    background-color: #f4f4f9;
+    font-family: 'Arial', sans-serif;
+}
+
+.bg-purple {
+    background-color: #4B0082 !important; /* roxo forte */
+}
+
+.bg-light-purple {
+    background-color: rgba(98, 52, 184, 0.6) !important; /* roxo claro translúcido */
+}
+
+.section-title {
+    color: #4B0082;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.info-box {
+    background-color: #ffffff;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.btn-back {
+    background-color: #6a0dad;
+    color: white;
+    border-radius: 2px;
+    padding: 10px 20px;
+    font-weight: bold;
+}
+
+.btn-back:hover {
+    background-color: #4B0082;
+}
+
+/* Animação suave */
+.info-box {
+    transition: all 0.3s ease-in-out;
+}
+
+.info-box:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Gráfico (apenas estrutura) */
+.chart-box {
+    background-color: #ffffff;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.chart-title {
+    text-align: center;
+    color: #4B0082;
+    font-weight: bold;
+}
+
+.black-line {
+    border: 1px solid black;
+    margin: 10px 0;
+}
+
+/* Estilo da tabela de desempenho */
+.table-performance {
+    width: 100%;
+    margin-top: 20px;
+    border-radius: 10px;
+}
+
+.table-performance th, .table-performance td {
+    text-align: center;
+    padding: 10px;
+}
+
+.badge-promotion {
+    background-color: #4B0082;
+    color: white;
+}
+
+/* Estilo extra para os cards de produtos */
+.produto-item {
+    margin-bottom: 20px;
+}
+
+.card {
+    border: 1px solid #ddd;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-img-top {
+    height: 150px;
+    object-fit: cover;
+}
+
+/* Mensagem de "Sem cadastro de produto" */
+#produtos-empty {
+    font-size: 1.2rem;
+    font-weight: bold;
+}

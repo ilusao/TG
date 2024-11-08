@@ -63,11 +63,12 @@ const submitForm = async (formData) => {
             localizacao: document.getElementById('localizacao').value || "Dom Amaury Castanho", 
             destino: document.getElementById('destino').value || null,
             almoxerifado: document.getElementById('almoxerifado').value || null,
-            data_entrada: document.getElementById('dataEntrada').value,
-            data_saida: document.getElementById('dataSaida').value || null,
+            data_entrada: document.getElementById('dataEntrada').value.split('T')[0],
+            data_saida: document.getElementById('dataSaida').value.split('T')[0] || null, 
             preco: parseFloat(document.getElementById('preco').value.replace(/\./g, '').replace(',', '.')),
             inflamavel: document.getElementById('inflamavel').value === 'sim',
             fragil: document.getElementById('fragil').value === 'sim',
+            idFuncionario: localStorage.getItem('funcionarioId')
         };
 
         // Verifica se o grupo e subgrupo são válidos

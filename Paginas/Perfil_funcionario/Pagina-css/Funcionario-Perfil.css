@@ -19,10 +19,6 @@ body {
     font-weight: bold;
 }
 
-.btn-custom:hover {
-    background-color: #4B0082;
-}
-
 .btn-light{
     background-color: #6a0dad;
     color: white;

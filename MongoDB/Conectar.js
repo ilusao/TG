@@ -1,7 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
-const Funcionario = require('./Funcionarios');
+const cron = require('node-cron');
+const { Funcionario, calcularTempoNaEmpresa } = require('./Funcionarios');
 const fotoRouter = require('./Foto');
 const Produto = require('./Produto');
 const app = express();
@@ -157,13 +158,19 @@ app.get('/funcionario/search/:searchTerm', async (req, res) => {
 
 // Rota para atualizar informações de um funcionário pelo ID
 app.put('/funcionario/:id', async (req, res) => {
-    console.log('Recebendo uma requisição para mudar foto do produto:', req.params.id);
+    console.log('Recebendo uma requisição para atualizar as informações do funcionário:', req.params.id);
     try {
         const funcionarioId = req.params.id;
         const updates = req.body;
 
-        const allowedUpdates = ['nome', 'contato', 'turno', 'codigoFuncionario', 'departamento', 'servico', 'cargo', 'inativo', 'fotoPerfil'];
+        // Define os campos permitidos para atualização
+        const allowedUpdates = [
+            'nome', 'contato', 'turno', 'codigoFuncionario', 'departamento', 
+            'servico', 'cargo', 'inativo', 'fotoPerfil', 'comportamento'
+        ];
         const actualUpdates = Object.keys(updates);
+        
+        // Verifica se todos os campos de atualização são válidos
         const isValidOperation = actualUpdates.every(update => allowedUpdates.includes(update));
 
         if (!isValidOperation) {
@@ -176,11 +183,17 @@ app.put('/funcionario/:id', async (req, res) => {
             return res.status(404).json({ message: 'Funcionário não encontrado' });
         }
 
-        // Atualiza os campos
+        // Verifica o tamanho do comportamento antes de atualizar
+        if (updates.comportamento && updates.comportamento.length > 1000) {
+            return res.status(400).json({ message: 'O comportamento não pode exceder 1000 caracteres' });
+        }
+
+        // Atualiza os campos permitidos
         actualUpdates.forEach(update => {
             funcionario[update] = updates[update];
         });
 
+        // Salva as alterações no banco de dados
         await funcionario.save();
 
         res.json(funcionario);
@@ -201,24 +214,54 @@ app.get('/api/produtos', async (req, res) => {
     }
 });
 
-// Rota para cadastro de produto
+// Rota para cadastro
 app.post('/api/produto', async (req, res) => {
-    const { codigo_produto } = req.body;
+    
+   
+    const { codigo_produto, idFuncionario } = req.body;
+    
+        try {
+            // Verifica se o produto já existe
+            const produtoExistente = await Produto.findOne({ codigo_produto });
+            if (produtoExistente) {
+                return res.status(400).json({ message: 'Código do produto já está em uso.' });
+            }
+    
+            const funcionario = await Funcionario.findById(idFuncionario);
+            if (!funcionario) {
+                return res.status(404).json({ message: 'Funcionário não encontrado.' });
+            }
 
-    try {
-        const produtoExistente = await Produto.findOne({ codigo_produto });
-        if (produtoExistente) {
-            return res.status(400).json({ message: 'Código do produto já está em uso.' });
+            const novoProduto = new Produto({
+                ...req.body,  
+                idFuncionario 
+            });
+            await novoProduto.save();
+            funcionario.produtosCadastrados.push(novoProduto._id);
+            await funcionario.save();
+    
+            res.status(201).json({ message: 'Produto cadastrado com sucesso!' });
+        } catch (error) {
+            console.error('Erro ao cadastrar o produto:', error);
+            res.status(500).json({ error: 'Erro ao cadastrar o produto' });
         }
-        const novoProduto = new Produto(req.body);
-        await novoProduto.save();
+    });
 
-        res.status(201).json({ message: 'Produto cadastrado com sucesso!' });
+// Rota para listar todos os produtos cadastrados por um funcionário
+app.get('/funcionario/:id/produtos', async (req, res) => {
+    try {
+        const funcionario = await Funcionario.findById(req.params.id).populate('produtosCadastrados');
+        if (!funcionario) {
+            return res.status(404).json({ message: 'Funcionário não encontrado' });
+        }
+
+        res.json(funcionario.produtosCadastrados);
     } catch (error) {
-        console.error('Erro ao cadastrar o produto:', error);
-        res.status(500).json({ error: 'Erro ao cadastrar o produto' });
+        console.error(error);
+        res.status(500).json({ message: 'Erro ao buscar produtos do funcionário' });
     }
 });
+
 
 // Rota para pegar um produto específico pelo ID (_id)
 app.get('/api/produto/:id', async (req, res) => {
@@ -385,6 +428,28 @@ app.post('/fornecedores', async (req, res) => {
         res.status(500).json({ message: 'Error creating fornecedor', error: error.message });
     }
 });
+
+// Função para atualizar o tempo de serviço de todos os funcionários
+async function atualizarTempoNaEmpresa() {
+    try {
+        const funcionarios = await Funcionario.find({});
+
+        funcionarios.forEach(async (funcionario) => {
+            const tempo = calcularTempoNaEmpresa(funcionario.dataContratacao);
+            funcionario.tempoNaEmpresa = tempo;
+
+            await funcionario.save();
+        });
+
+        console.log("Tempo de serviço atualizado para todos os funcionários");
+    } catch (err) {
+        console.error("Erro ao atualizar o tempo de serviço:", err);
+    }
+}
+
+// Tarefa cron para rodar todo dia à meia-noite
+cron.schedule('0 0 * * *', atualizarTempoNaEmpresa);
+
 
 
 // Rota principal

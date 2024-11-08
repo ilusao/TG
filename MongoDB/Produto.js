@@ -17,6 +17,7 @@ const produtoSchema = new mongoose.Schema({
     inflamavel: { type: Boolean, default: false },
     fragil: { type: Boolean, default: false },
     fotoProduto: { type: String },
+    idFuncionario: { type: mongoose.Schema.Types.ObjectId, ref: 'Funcionario' },
 }, {
     timestamps: true
 });

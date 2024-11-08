@@ -16,7 +16,7 @@
 
     <div class="container mt-4">
         <!-- Botão de Voltar -->
-        <a href="perfil-funcionario.html" class="btn btn-back mb-4">
+        <a href="http://localhost:3000/Perfil_funcionario/Pagina-html/Funcionario-Perfil.html" class="btn btn-back mb-4">
             <i class="bi bi-arrow-left-circle-fill"></i> Voltar ao Perfil
         </a>
 
@@ -27,20 +27,29 @@
         <div class="info-box">
             <h4 class="section-title">Datas Importantes</h4>
             <hr class="black-line">
-            <p><strong>Data de Contratação:</strong> 15/01/2018</p>
-            <p><strong>Data de Promoção:</strong> 20/06/2022</p>
-            <p><strong>Tempo na Empresa:</strong> 6 anos e 3 meses</p>
+            <p><strong>Data de Contratação:</strong> <span id="data-contratacao">-</span></p>
+            <p><strong>Data de Promoção:</strong> <span id="data-promocao">Sem promoção</span></p>
+            <p><strong>Tempo na Empresa:</strong> <span id="tempo-na-empresa">-</span></p>
         </div>
 
         <!-- Seção: Comportamento do Funcionário -->
         <div class="info-box">
             <h4 class="section-title">Comportamento do Funcionário</h4>
             <hr class="black-line">
-            <p>Jessica é uma funcionária dedicada e mantém uma postura profissional exemplar. Ela demonstra habilidades de liderança, especialmente após a promoção para a área de produtos.</p>
+            <p id="comportamento-funcionario">Sem registro de comportamento</p>
         </div>
 
-        <!-- Seção: Registro de Desempenho -->
+        <!-- Seção: Metas Cumpridas -->
         <div class="info-box">
+            <h4 class="section-title">Metas Cumpridas</h4>
+            <hr class="black-line">
+            <ul id="metas-cumpridas">
+                <li>Nenhuma meta registrada</li>
+            </ul>
+        </div>
+
+          <!-- Seção: Registro de Desempenho -->
+          <div class="info-box">
             <h4 class="section-title">Registro de Desempenho (Mês/Ano)</h4>
             <hr class="black-line">
             <table class="table table-striped table-performance">
@@ -71,20 +80,9 @@
                         <td>88%</td>
                         <td>Não</td>
                     </tr>
-                    <!-- Adicione mais meses conforme necessário -->
+
                 </tbody>
             </table>
-        </div>
-
-        <!-- Seção: Metas Cumpridas -->
-        <div class="info-box">
-            <h4 class="section-title">Metas Cumpridas</h4>
-            <hr class="black-line">
-            <ul>
-                <li>Aumento de 20% na produtividade em 2023</li>
-                <li>Implementação de um novo sistema de controle de estoque</li>
-                <li>Redução de erros no envio de produtos em 15% em 2022</li>
-            </ul>
         </div>
 
         <!-- Seção: Gráfico de Desempenho -->
@@ -95,8 +93,6 @@
                 <span class="badge badge-promotion">Recomendação: Merece Promoção</span>
             </div>
         </div>
-
-    </div>
 
     <!-- Scripts Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
@@ -135,6 +131,57 @@
                 }
             }
         });
+
+        async function loadFuncionarioInfo() {
+            const funcionarioId = localStorage.getItem('funcionarioId'); 
+            if (!funcionarioId) {
+                alert("ID do funcionário não encontrado.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`/funcionario/${funcionarioId}`);
+                if (!response.ok) {
+                    throw new Error('Erro ao buscar informações do funcionário: ' + response.status);
+                }
+                const funcionario = await response.json();
+
+                document.getElementById('data-contratacao').textContent = funcionario.dataContratacao || '🤔 erá pra ter data de contratação, acho que aconteceu um erro em cadastro de funcionario... veja lá';
+                document.getElementById('data-promocao').textContent = funcionario.dataPromocao || 'Sem promoção';
+                
+                if (funcionario.tempoNaEmpresa) {
+                    document.getElementById('tempo-na-empresa').textContent = `${funcionario.tempoNaEmpresa.anos} anos, ${funcionario.tempoNaEmpresa.meses} meses e ${funcionario.tempoNaEmpresa.dias} dias`;
+                }
+
+                document.getElementById('comportamento-funcionario').textContent = funcionario.comportamento || 'Sem registro de comportamento';
+
+                // Atualizar lista de Metas Cumpridas
+                const metasList = document.getElementById('metas-cumpridas');
+                metasList.innerHTML = '';
+                if (funcionario.metasCumpridas && funcionario.metasCumpridas.length > 0) {
+                    funcionario.metasCumpridas.forEach(meta => {
+                        const li = document.createElement('li');
+                        li.textContent = meta;
+                        metasList.appendChild(li);
+                    });
+                } else {
+                    const noMetaItem = document.createElement('li');
+                    noMetaItem.textContent = 'Nenhuma meta registrada';
+                    metasList.appendChild(noMetaItem);
+                }
+
+            } catch (error) {
+                console.error(error);
+                alert('Não foi possível carregar as informações do funcionário: ' + error.message);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", loadFuncionarioInfo);
+
+
+
+
+
     </script>
 
 </body>

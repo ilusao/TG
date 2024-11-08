@@ -79,7 +79,7 @@ var map = L.map('map').setView([-23.2644, -47.2992], 13);
                                     Produto: ${produto.nome} <br>
                                     Localização: ${produto.localizacao} <br>
                                     Código: ${produto.codigo_produto} <br>
-                                    Produto será enviado para: ${produto.destino} no dia: ${new Date().toLocaleDateString()} <!-- Mensagem -->
+                                    Produto será enviado para: ${produto.destino} no dia: ${produto.data_entrada} <!-- Mensagem -->
                                 `;
                             } else {
                                 // Produto sem destino - usa ícone normal
