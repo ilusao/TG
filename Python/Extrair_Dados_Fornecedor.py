@@ -1,28 +1,34 @@
 from bs4 import BeautifulSoup
+from flask import Flask, render_template_string, request
 
-# Exemplo de HTML que representa a resposta do servidor (substitua com o conteúdo da resposta)
-html_content = """
-<!-- coloque aqui o conteúdo HTML do formulário, substituindo esse comentário -->
-"""
+@app.route('/')
+def formulario():
+    return render_template_string(formulario_html)
 
-# Carregando o HTML com BeautifulSoup
-soup = BeautifulSoup(html_content, 'html.parser')
+# Rota para processar o envio do formulário
+@app.route('/enviar', methods=['POST'])
+def enviar_formulario():
+    # Captura os dados enviados no formulário
+    dados = {
+        "nome": request.form.get("nome"),
+        "descricao": request.form.get("descricao"),
+        "email": request.form.get("email"),
+        "observacoes": request.form.get("observacoes"),
+        "pais": request.form.get("pais"),
+        "cidade": request.form.get("cidade"),
+        "estado": request.form.get("estado"),
+        "site": request.form.get("site"),
+        "cnpj": request.form.get("cnpj"),
+        "inativo": request.form.get("inativo"),
+        "preco": request.form.get("preco"),
+    }
 
-# Extraindo os campos do formulário
-dados_formulario = {
-    'nome': soup.find('input', {'id': 'nome'})['placeholder'],
-    'descricao': soup.find('input', {'id': 'descricao'})['value'] if soup.find('input', {'id': 'descricao'}) else None,
-    'email': soup.find('input', {'id': 'email'})['placeholder'],
-    'observacoes': soup.find('input', {'id': 'observacoes'})['placeholder'],
-    'pais': soup.find('input', {'id': 'pais'})['value'] if soup.find('input', {'id': 'pais'}) else None,
-    'cidade': soup.find('input', {'id': 'cidade'})['value'] if soup.find('input', {'id': 'cidade'}) else None,
-    'estado': soup.find('input', {'id': 'estado'})['value'] if soup.find('input', {'id': 'estado'}) else None,
-    'site': soup.find('input', {'id': 'site'})['placeholder'],
-    'cnpj': soup.find('input', {'id': 'cnpj'})['placeholder'],
-    'inativo': soup.find('select', {'id': 'inativo'}).find('option', selected=True).text if soup.find('select', {'id': 'inativo'}) else None,
-    'preco': soup.find('input', {'id': 'preco'})['placeholder']
-}
+    # Exibe os dados recebidos no terminal ou os processa conforme necessário
+    print("Dados do formulário recebidos:", dados)
 
-# Exibindo os dados extraídos
-for campo, valor in dados_formulario.items():
-    print(f"{campo}: {valor}")
+    # Retorna uma resposta ao usuário com os dados submetidos
+    return f"<h1>Dados Recebidos</h1><pre>{dados}</pre>"
+
+# Executa o aplicativo Flask
+if __name__ == '__main__':
+    app.run(debug=True)
