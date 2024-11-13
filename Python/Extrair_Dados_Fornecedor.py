@@ -26,8 +26,6 @@ def enviar_formulario():
     # Exibe os dados recebidos no terminal ou os processa conforme necessário
     print("Dados do formulário recebidos:", dados)
 
-    # Retorna uma resposta ao usuário com os dados submetidos
-    return f"<h1>Dados Recebidos</h1><pre>{dados}</pre>"
 
 # Executa o aplicativo Flask
 if __name__ == '__main__':
