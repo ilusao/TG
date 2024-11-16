@@ -1,6 +1,6 @@
 const express = require('express');
 const multer = require('multer');
-const Funcionario = require('./Funcionarios');
+const { Funcionario, calcularTempoNaEmpresa } = require('./Funcionarios');
 const Produto = require('./Produto');
 const router = express.Router();
 const path = require('path');
@@ -23,8 +23,14 @@ router.post('/upload', upload.single('imagem'), async (req, res) => {
     if (!req.file) {
         return res.status(400).send('Nenhuma imagem foi enviada.');
     }
-    
-    const funcionarioId = req.body.funcionarioId;
+
+    // Verifica o ID do funcionário na requisição
+    const funcionarioId = req.body.funcionarioId || req.body.viewedFuncionarioId;
+
+    // Se nenhum dos dois IDs estiver presente, retorna erro
+    if (!funcionarioId) {
+        return res.status(400).send('ID do funcionário não encontrado.');
+    }
 
     try {
         const funcionario = await Funcionario.findById(funcionarioId);

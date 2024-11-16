@@ -58,15 +58,15 @@ function carregarProdutosDropdown() {
 function preencherCamposProduto(produto) {
     idProdutoOriginal = produto._id;
 
-    document.getElementById('nome').value = produto.nome || '';
-    document.getElementById('descricao').value = produto.descricao_pdv || '';
-    document.getElementById('subgrupo').value = produto.sub_grupo || '';
-    document.getElementById('almoxerifado').value = produto.almoxerifado || '';
-    document.getElementById('grupo').value = produto.grupo || '';
-    document.getElementById('fornecedor').value = produto.fornecedor || '';
-    document.getElementById('marca').value = produto.marca || '';
-    document.getElementById('codigo').value = produto.codigo_produto || '';
-    document.getElementById('preco').value = produto.preco || '';
+    document.getElementById('nome').value = produto.nome;
+    document.getElementById('descricao').value = produto.descricao_pdv;
+    document.getElementById('subgrupo').value = produto.sub_grupo;
+    document.getElementById('almoxerifado').value = produto.almoxerifado;
+    document.getElementById('grupo').value = produto.grupo;
+    document.getElementById('fornecedor').value = produto.fornecedor;
+    document.getElementById('marca').value = produto.marca;
+    document.getElementById('codigo').value = produto.codigo_produto;
+    document.getElementById('preco').value = produto.preco;
 
     const fotoProduto = produto.fotoProduto || '/midia/Originalproduto.png'; 
     console.log(`Tentando carregar a imagem do produto: ${fotoProduto}`);
@@ -74,10 +74,31 @@ function preencherCamposProduto(produto) {
     document.getElementById('produtoImagem').src = fotoProduto;
 
     const imagem = document.getElementById('produtoImagem');
-        imagem.onerror = function() {
+    imagem.onerror = function() {
         console.log(`Erro ao carregar a imagem ${fotoProduto}. Carregando a imagem padrão.`);
         imagem.src = '/midia/Originalproduto.png';
     };
+
+    const colaboradorElement = document.getElementById('colaboradorCadastrador');
+
+    // Verifica o cargo do funcionário no localStorage
+    const cargoFuncionario = localStorage.getItem('cargo'); // "Gerente" ou outro valor
+
+    // Se o cargo for "Gerente", exibe o nome e ID do colaborador
+    if (cargoFuncionario === 'Gerente') {
+        if (produto.idFuncionario) {
+            if (produto.idFuncionario.nome) {
+                colaboradorElement.innerHTML = `<strong>Colaborador:</strong> ${produto.idFuncionario.nome} (ID: ${produto.idFuncionario._id})`;
+            } else {
+                colaboradorElement.innerHTML = '<strong>Colaborador:</strong> Nome não encontrado';
+            }
+        } else {
+            colaboradorElement.innerHTML = '<strong>Colaborador:</strong> Não informado';
+        }
+    } else {
+        // Caso o cargo não seja "Gerente", não exibe o colaborador
+        colaboradorElement.innerHTML = '';
+    }
 }
 
 // Função para habilitar a edição dos campos

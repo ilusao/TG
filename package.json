@@ -12,8 +12,7 @@
   "description": "Esta é a primeira versão do TG 2, que inclui os passos iniciais do projeto. Nesta versão, foram implementadas as telas de login e de cadastro de funcionários.",
   "main": "Conectar.js",
   "scripts": {
-    "start": "node MongoDB/Conectar.js",
-    "dev": "nodemon MongoDB/Conectar.js"
+    "start": "node MongoDB/Conectar.js"
   },
   "keywords": [],
   "author": "andré e joão",

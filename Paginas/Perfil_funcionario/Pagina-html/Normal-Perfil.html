@@ -50,37 +50,32 @@
 
             <div class="col-md-8">
                 <div class="card" style="border-radius: 40px; padding: 0; height: auto;">
-                    <div class="text-center bg-purple" style="border-radius: 40px 40px 0 0; padding: 20px;">
-                        <h2 class="text-white">PERFIL</h2>
+                    <div class="d-flex justify-content-center  bg-purple text-white" style="border-radius: 40px 40px 0 0; padding: 20px; position: relative;">
+                        <h2 class="m-0">PERFIL</h2>
                     </div>
                     <div class="card-body bg-light-purple text-white" style="border-radius: 0 0 40px 40px;">
                         <div class="text-center" style="margin-bottom: 20px;">
                             <h4 class="text-white perfil-card-subtitle">Informações compartilhadas pelo funcionário</h4>
                             <hr class="black-line">
-
                             <h4>NOME:</h4>
                             <br>
-                            <h4 id="nome-funcionario" class="info-text-data">Carregando...</h4>
+                            <h4 id="nome-funcionario">Carregando...</h4>
                             <hr class="black-line">
-                            
                             <h4>DEPARTAMENTO:</h4>
                             <br>
-                            <h4 id="departamento" class="info-text-data">Carregando...</h4>
+                            <h4 id="departamento">Carregando...</h4>
                             <hr class="black-line">
-                        
                             <h4>SERVIÇO:</h4>
                             <br>
-                            <h4 id="servico" class="info-text-data">Carregando...</h4>
+                            <h4 id="servico">Carregando...</h4>
                             <hr class="black-line">
-                            
                             <h4>CARGO:</h4>
                             <br>
-                            <h4 id="cargo" class="info-text-data">Carregando...</h4>
+                            <h4 id="cargo">Carregando...</h4>
                             <hr class="black-line">
-                            
                             <h4>Inatividade:</h4>
                             <br>
-                            <h4 id="inatividade" class="info-text-data">Carregando...</h4>
+                            <h4 id="inatividade">Carregando...</h4>
                         </div>
                     </div>
                 </div>
@@ -105,7 +100,6 @@
                     })
                     .then(funcionario => {
                         // Atualiza os elementos com os dados do funcionário
-                        document.getElementById('foto-perfil').src = funcionario.fotoPerfil || '/midia/fotooriginal.png';
                         document.getElementById('contato').textContent = funcionario.contato || 'Não informado';
                         document.getElementById('horario-trabalho').textContent = funcionario.turno || 'Não informado';
                         document.getElementById('codigo-funcionario').textContent = funcionario.codigoFuncionario || 'Não informado';
@@ -114,14 +108,19 @@
                         document.getElementById('servico').textContent = funcionario.servico || 'Não informado';
                         document.getElementById('cargo').textContent = funcionario.cargo || 'Não informado';
                         document.getElementById('inatividade').textContent = funcionario.inativo ? 'Sim' : 'Não';
+                        
+                        const imageUrl = funcionario.fotoPerfil;
+                        const img = new Image();
+                        img.src = imageUrl;
+
+                        img.onload = () => {
+                                    document.getElementById('foto-perfil').src = `${imageUrl}?${new Date().getTime()}`;
+                                };
                     })
-                    .catch(error => {
-                        alert(error.message);
-                        window.location.href = 'Entrar-perfil.html'; // Redireciona de volta em caso de erro
-                    });
+                    
             } else {
                 alert('Nenhum funcionário selecionado.');
-                window.location.href = 'Entrar-perfil.html'; // Redireciona de volta se nenhum funcionário foi selecionado
+                window.location.href = 'Entrar-perfil.html';
             }
         };
     </script>

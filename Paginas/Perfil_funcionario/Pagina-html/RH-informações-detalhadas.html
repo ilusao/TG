@@ -146,11 +146,11 @@
 
     <script>
         // Tooltip do Bootstrap
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip]'));
         const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
-
+    
         // Gráfico de Desempenho com Chart.js
         const ctx = document.getElementById('performanceChart').getContext('2d');
         const performanceChart = new Chart(ctx, {
@@ -182,30 +182,30 @@
                 }
             }
         });
-
+    
         async function loadFuncionarioInfo() {
-            const funcionarioId = localStorage.getItem('funcionarioId'); 
-            if (!funcionarioId) {
-                alert("ID do funcionário não encontrado.");
+            const viewedFuncionarioId = localStorage.getItem('viewedFuncionarioId'); 
+            if (!viewedFuncionarioId) {
+                alert("ID do funcionário pesquisado não encontrado.");
                 return;
             }
-
+    
             try {
-                const response = await fetch(`/funcionario/${funcionarioId}`);
+                const response = await fetch(`/funcionario/${viewedFuncionarioId}`);
                 if (!response.ok) {
                     throw new Error('Erro ao buscar informações do funcionário: ' + response.status);
                 }
                 const funcionario = await response.json();
-
+    
                 document.getElementById('data-contratacao').textContent = funcionario.dataContratacao || '🤔 erá pra ter data de contratação, acho que aconteceu um erro em cadastro de funcionario... veja lá';
                 document.getElementById('data-promocao').textContent = funcionario.dataPromocao || 'Sem promoção';
                 
                 if (funcionario.tempoNaEmpresa) {
                     document.getElementById('tempo-na-empresa').textContent = `${funcionario.tempoNaEmpresa.anos} anos, ${funcionario.tempoNaEmpresa.meses} meses e ${funcionario.tempoNaEmpresa.dias} dias`;
                 }
-
+    
                 document.getElementById('comportamento-funcionario').textContent = funcionario.comportamento || 'Sem registro de comportamento';
-
+    
                 // Atualizar lista de Metas Cumpridas
                 const metasList = document.getElementById('metas-cumpridas');
                 metasList.innerHTML = '';
@@ -220,112 +220,113 @@
                     noMetaItem.textContent = 'Nenhuma meta registrada';
                     metasList.appendChild(noMetaItem);
                 }
-
+    
             } catch (error) {
                 console.error(error);
                 alert('Não foi possível carregar as informações do funcionário: ' + error.message);
             }
         }
-
-        // Função para abrir o modal e carregar o comportamento atual
-document.getElementById('edit-comportamento').addEventListener('click', () => {
-    const comportamentoAtual = document.getElementById('comportamento-funcionario').textContent;
-    document.getElementById('comportamento-input').value = comportamentoAtual;
-    const modal = new bootstrap.Modal(document.getElementById('editComportamentoModal'));
-    modal.show();
-});
-
-// Função para salvar o comportamento no banco de dados
-document.getElementById('save-comportamento').addEventListener('click', async () => {
-    const novoComportamento = document.getElementById('comportamento-input').value;
-    const funcionarioId = localStorage.getItem('funcionarioId');
     
-    if (!novoComportamento) {
-        alert("Comportamento não pode ser vazio!");
-        return;
-    }
-
-    try {
-        const response = await fetch(`/funcionario/${funcionarioId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ comportamento: novoComportamento })
+        // Função para abrir o modal e carregar o comportamento atual
+        document.getElementById('edit-comportamento').addEventListener('click', () => {
+            const comportamentoAtual = document.getElementById('comportamento-funcionario').textContent;
+            document.getElementById('comportamento-input').value = comportamentoAtual;
+            const modal = new bootstrap.Modal(document.getElementById('editComportamentoModal'));
+            modal.show();
         });
-
-        if (response.ok) {
-            alert("Comportamento atualizado com sucesso!");
-            document.getElementById('comportamento-funcionario').textContent = novoComportamento;
-
-            const modal = bootstrap.Modal.getInstance(document.getElementById('editComportamentoModal'));
-            modal.hide();
-        } else {
-            throw new Error("Falha ao atualizar comportamento.");
-        }
-    } catch (error) {
-        alert(error.message);
-    }
-});
-
-/// Função para buscar e exibir os produtos do funcionário
-async function loadProdutosFuncionario(funcionarioId) {
-    const produtosContainer = document.getElementById('produtos-container');
-    const produtosEmpty = document.getElementById('produtos-empty');
-    const loading = document.getElementById('loading');
-
-    loading.style.display = 'block';
-    produtosContainer.style.display = 'none';
-    produtosEmpty.style.display = 'none';
-
-    try {
-        const response = await fetch(`/funcionario/${funcionarioId}/produtos`);
-        const produtos = await response.json();
-
-        // Esconde o loader e mostra a lista de produtos
-        loading.style.display = 'none';
-        produtosContainer.style.display = 'block';
-
-        // Verifica se o funcionário tem produtos cadastrados
-        if (produtos.length === 0) {
-            produtosEmpty.style.display = 'block';
-            return;
-        }
-
-        // Limpa o container antes de adicionar os produtos
-        produtosContainer.innerHTML = '';
-
-        // Adiciona cada produto ao container
-        produtos.forEach(produto => {
-            const produtoElement = document.createElement('div');
-            produtoElement.classList.add('col', 'produto-item');
-            produtoElement.innerHTML = `
-                <div class="card shadow-sm">
-                    <img src="${produto.fotoProduto || 'https://via.placeholder.com/150'}" class="card-img-top" alt="${produto.nome}">
-                    <div class="card-body">
-                        <h5 class="card-title">${produto.nome}</h5>
-                        <p class="card-text">Código: ${produto.codigo_produto}</p>
-                        <p class="card-text">Preço: R$ ${produto.preco}</p>
-                        <p class="card-text"><small class="text-muted">Data de Cadastro: ${new Date(produto.createdAt).toLocaleString()}</small></p>
-                    </div>
-                </div>
-            `;
-            produtosContainer.appendChild(produtoElement);
+    
+        // Função para salvar o comportamento no banco de dados
+        document.getElementById('save-comportamento').addEventListener('click', async () => {
+            const novoComportamento = document.getElementById('comportamento-input').value;
+            const viewedFuncionarioId = localStorage.getItem('viewedFuncionarioId');
+            
+            if (!novoComportamento) {
+                alert("Comportamento não pode ser vazio!");
+                return;
+            }
+    
+            try {
+                const response = await fetch(`/funcionario/${viewedFuncionarioId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ comportamento: novoComportamento })
+                });
+    
+                if (response.ok) {
+                    alert("Comportamento atualizado com sucesso!");
+                    document.getElementById('comportamento-funcionario').textContent = novoComportamento;
+    
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editComportamentoModal'));
+                    modal.hide();
+                } else {
+                    throw new Error("Falha ao atualizar comportamento.");
+                }
+            } catch (error) {
+                alert(error.message);
+            }
         });
-    } catch (error) {
-        console.error('Erro ao carregar produtos:', error);
-        alert('Erro ao carregar produtos do funcionário.');
-    }
-}
-
-// Chamada para carregar os produtos
-const funcionarioId = localStorage.getItem('funcionarioId');
-if (funcionarioId) {
-    loadProdutosFuncionario(funcionarioId);
-}
-
+    
+        /// Função para buscar e exibir os produtos do funcionário
+        async function loadProdutosFuncionario(viewedFuncionarioId) {
+            const produtosContainer = document.getElementById('produtos-container');
+            const produtosEmpty = document.getElementById('produtos-empty');
+            const loading = document.getElementById('loading');
+    
+            loading.style.display = 'block';
+            produtosContainer.style.display = 'none';
+            produtosEmpty.style.display = 'none';
+    
+            try {
+                const response = await fetch(`/funcionario/${viewedFuncionarioId}/produtos`);
+                const produtos = await response.json();
+    
+                // Esconde o loader e mostra a lista de produtos
+                loading.style.display = 'none';
+                produtosContainer.style.display = 'block';
+    
+                // Verifica se o funcionário tem produtos cadastrados
+                if (produtos.length === 0) {
+                    produtosEmpty.style.display = 'block';
+                    return;
+                }
+    
+                // Limpa o container antes de adicionar os produtos
+                produtosContainer.innerHTML = '';
+    
+                // Adiciona cada produto ao container
+                produtos.forEach(produto => {
+                    const produtoElement = document.createElement('div');
+                    produtoElement.classList.add('col', 'produto-item');
+                    produtoElement.innerHTML = `
+                        <div class="card shadow-sm">
+                            <img src="${produto.fotoProduto || 'https://via.placeholder.com/150'}" class="card-img-top" alt="${produto.nome}">
+                            <div class="card-body">
+                                <h5 class="card-title">${produto.nome}</h5>
+                                <p class="card-text">Código: ${produto.codigo_produto}</p>
+                                <p class="card-text">Preço: R$ ${produto.preco}</p>
+                                <p class="card-text"><small class="text-muted">Data de Cadastro: ${new Date(produto.createdAt).toLocaleString()}</small></p>
+                            </div>
+                        </div>
+                    `;
+                    produtosContainer.appendChild(produtoElement);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+                alert('Erro ao carregar produtos do funcionário.');
+            }
+        }
+    
+        // Chamada para carregar os produtos
+        const viewedFuncionarioId = localStorage.getItem('viewedFuncionarioId');
+        if (viewedFuncionarioId) {
+            loadProdutosFuncionario(viewedFuncionarioId);
+        }
+    
         document.addEventListener("DOMContentLoaded", loadFuncionarioInfo);
     </script>
+    
 
 </body>
 </html>
