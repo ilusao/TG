@@ -54,6 +54,11 @@
                         <div class="invalid-feedback">Por favor, insira o nome do fornecedor.</div>
                     </div>
                     <div class="col-md-6 mb-3">
+                        <label for="nome" class="form-label">Código</label>
+                        <input type="text" class="form-control" id="nome" placeholder="Nome do Fornecedor" required>
+                        <div class="invalid-feedback">Por favor, insira o Código do fornecedor.</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
                         <label for="descricao" class="form-label">Descrição</label>
                         <input type="text" class="form-control" id="descricao" required>
                         <div class="invalid-feedback">Por favor, insira a descrição.</div>
@@ -106,18 +111,11 @@
                             <option value="sim">Sim</option>
                         </select>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="preco" class="form-label">Preço Proprietário</label>
-                        <input type="number" class="form-control" id="preco" placeholder="Vendas" required>
-                        <div class="invalid-feedback">Por favor, insira o preço.</div>
-                    </div>
                 </div>
                 <p class="text-muted">Cadastro referente apenas a parte de fornecedores</p>
                 <button type="submit" class="btn btn-register w-100" style="border-radius: 2px;">Registrar</button>
                 <button type="submit" class="btn btn-register w-100" style="border-radius: 2px;">
-                    <a href="../fornecedor/consultar_Fornecedor.html">
-                        <h4>Consultar</h4>
-                    </a>
+                    <a href="../fornecedor/consultar_Fornecedor.html">Consultar</a>
                 </button>
             </form>
         </div>
