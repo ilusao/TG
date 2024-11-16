@@ -1,11 +1,10 @@
-
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login de Funcionários</title>
+    <title>Menu de Funcionários</title>
     <!-- Link para ícones do Bootstrap -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
@@ -43,8 +42,7 @@
 
     <div class="position-absolute top-0 end-0">
         <div class="triangle z-2 rounded-5 bg-purple-800 text-white d-flex justify-content-center align-items-center"
-             style="width: 350px; height: 350px; transform: rotate(45deg); opacity: 0.9; margin-left: -60%; margin-top: 30%;">
-        </div>
+             style="width: 350px; height: 350px; transform: rotate(45deg); opacity: 0.9; margin-left: -60%; margin-top: 30%;"></div>
     </div>
 
     <div class="z-3 position-absolute top-0 end-0">
@@ -60,36 +58,37 @@
         <form>
             <div class="row">
                 <div class="col-md-6 d-flex flex-column gap-2 align-items-center">
+                    <!-- Botões que podem ser acessados dependendo do cargo -->
                     <button type="button" class="btn btn-primary btn-custom left bg-purple-800" 
-                            onclick="window.location.href='/Perfil_funcionario/Pagina-html/Entrar-perfil.html';">
+                            id="perfil-button" onclick="window.location.href='/Perfil_funcionario/Pagina-html/Entrar-perfil.html';">
                         <i class="bi bi-arrow-left"></i> Acessar perfis
                     </button>
                     <br>
                     <button  type="button" class="btn btn-primary btn-custom left bg-purple-800" 
-                            onclick="window.location.href='/fornecedor/cadastro_fornecedor.html';">
+                            id="fornecedor-button" onclick="window.location.href='/fornecedor/cadastro_fornecedor.html';">
                         <i class="bi bi-arrow-left"></i> Registrar Fornecedor
                     </button>
                     
                     <br>
                     <button type="button" class="btn btn-primary btn-custom left bg-purple-800" 
-                            onclick="window.location.href='/Cadastro/Tela_cadastro.html';" >
-                        <i class="bi bi-arrow-left"></i> Cadastro Funcionários
+                            id="cadastro-button" onclick="window.location.href='/Cadastro/Tela_cadastro.html';" >
+                        <i class="bi bi-arrow-left"></i> Registrar Colaborador
                     </button>
                     <br>
                 </div>
                 <div class="col-md-6 d-flex flex-column gap-2 align-items-center">
                     <button type="button" class="btn btn-primary btn-custom right bg-purple-800" 
-                            onclick="window.location.href='/localidade/localidade_produto.html';">
+                            id="localidade-button" onclick="window.location.href='/localidade/localidade_produto.html';">
                         Localidade de Produto <i class="bi bi-arrow-right" ></i>
                     </button>
                     <br>
                     <button type="button" class="btn btn-primary btn-custom right bg-purple-800" 
-                            onclick="window.location.href='/produto/cadastro_produto.html';">
+                            id="produto-button" onclick="window.location.href='/produto/cadastro_produto.html';">
                         Registrar Produto <i class="bi bi-arrow-right"></i>
                     </button>
                     <br>
                     <button type="button" class="btn btn-primary btn-custom right bg-purple-800"
-                        onclick="window.location.href='/produto/consultar_produto.html';">
+                        id="consultar-button" onclick="window.location.href='/produto/consultar_produto.html';">
                         Consultar Produto <i class="bi bi-arrow-right"></i>
                     </button>
                     <br>
@@ -101,6 +100,45 @@
     <footer class="bg-light text-center text-muted py-3 mt-auto">
         <p class="mb-0">&copy; 2024 Seu Site. Primeira Versão</p>
     </footer>
+
+    <script>
+        const funcionarioId = localStorage.getItem('funcionarioId');
+        const cargo = localStorage.getItem('cargo');
+
+        // Verificar qual é o cargo e ajustar os botões de acordo
+        window.onload = function() {
+            if (cargo === "Funcionário de Estoque") {
+                document.getElementById('fornecedor-button').classList.add('disabled');
+                document.getElementById('cadastro-button').classList.add('disabled');
+
+                /* caso seja melhor azer os botões desaparecerem, só colocar esse codigo.
+                document.getElementById('fornecedor-button').style.display = 'none';
+                document.getElementById('cadastro-button').style.display = 'none';
+                */
+
+
+            } else if (cargo === "Funcionário do RH") {
+
+                document.getElementById('localidade-button').classList.add('disabled');
+                document.getElementById('produto-button').classList.add('disabled');
+                document.getElementById('consultar-button').classList.add('disabled');
+
+
+                /*
+                document.getElementById('localidade-button').style.display = 'none';
+                document.getElementById('produto-button').style.display = 'none';
+                document.getElementById('consultar-produto-button').style.display = 'none';
+                */
+
+
+            } else if (cargo === "Gerente") {
+                // a ideia de não ter nada em gerente é porque ele pode acessar tudo... eu acho.
+                return;  
+            } else {
+                alert('Cargo não reconhecido.');
+            }
+        };
+    </script>
     
 </body>
 

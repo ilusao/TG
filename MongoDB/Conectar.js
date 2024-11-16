@@ -44,12 +44,22 @@ app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
     try {
-        // Procurando pelo nome e pela senha
         const funcionario = await Funcionario.findOne({ nome: username, senha: password });
-        if (funcionario) {
-            return res.json({ funcionarioId: funcionario._id });
+        // Verificar se o funcionário existe
+        if (!funcionario) {
+            return res.status(401).send('Usuário ou senha incorretos');
         }
-        return res.status(401).send('Usuário ou senha incorretos');
+
+        if (funcionario.inativo) {
+            return res.status(403).send('Funcionário inativo, acesso negado');
+        }
+
+        // Se as credenciais estiverem corretas e o funcionário estiver ativo, enviar a resposta
+        return res.json({
+            funcionarioId: funcionario._id,
+            cargo: funcionario.cargo,
+            mensagem: 'Login bem-sucedido',
+        });
     } catch (error) {
         console.error('Erro ao autenticar:', error);
         return res.status(500).json('Erro interno do servidor');
@@ -158,7 +168,6 @@ app.get('/funcionario/search/:searchTerm', async (req, res) => {
 
 // Rota para atualizar informações de um funcionário pelo ID
 app.put('/funcionario/:id', async (req, res) => {
-    console.log('Recebendo uma requisição para atualizar as informações do funcionário:', req.params.id);
     try {
         const funcionarioId = req.params.id;
         const updates = req.body;
@@ -183,9 +192,8 @@ app.put('/funcionario/:id', async (req, res) => {
             return res.status(404).json({ message: 'Funcionário não encontrado' });
         }
 
-        // Verifica o tamanho do comportamento antes de atualizar
         if (updates.comportamento && updates.comportamento.length > 1000) {
-            return res.status(400).json({ message: 'O comportamento não pode exceder 1000 caracteres' });
+            return res.status(400).json({ message: 'O Comportamento do Funcionário não pode exceder 1000 caracteres' });
         }
 
         // Atualiza os campos permitidos
@@ -205,11 +213,14 @@ app.put('/funcionario/:id', async (req, res) => {
 
 // grupo de produtos
 app.get('/api/produtos', async (req, res) => {
-    try {
-        const produtos = await Produto.find(); 
-        res.json(produtos); 
+    try {  
+        const produtos = await Produto.find()
+            .populate('idFuncionario', 'nome');
+        
+
+        res.json(produtos);
     } catch (error) {
-        console.error('Erro ao buscar os produtos:', error);
+        console.error('Erro ao buscar produtos:', error);
         res.status(500).json({ message: 'Erro ao buscar os produtos' });
     }
 });
@@ -219,6 +230,7 @@ app.post('/api/produto', async (req, res) => {
     
    
     const { codigo_produto, idFuncionario } = req.body;
+    
     
         try {
             // Verifica se o produto já existe
@@ -268,8 +280,8 @@ app.get('/api/produto/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        // Busca o produto pelo _id
-        const produto = await Produto.findById(id);
+        const produto = await Produto.findById(id).populate('idFuncionario', 'nome');
+
         if (produto) {
             res.json(produto);
         } else {

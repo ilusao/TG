@@ -35,19 +35,24 @@
                 <form id="productForm" novalidate>
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <label for="nome" class="form-label">Nome</label>
+                            <label for="nome" class="form-label">Nome
+                                <i class="bi bi-question-circle" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" title="Nome do Produto" data-bs-content="Informe o nome completo do produto para identificação."></i>
+                            </label>
                             <input type="text" class="form-control" id="nome" placeholder="Nome do Produto" required>
-                            <div class="invalid-feedback">Por favor, insira o nome do produto.</div>
                         </div>
                         <div class="col-md-6">
-                            <label for="descricao" class="form-label">Descrição PDV</label>
+                            <label for="descricao" class="form-label">Descrição PDV
+                                <i class="bi bi-question-circle" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" title="Descrição PDV" data-bs-content="Insira uma breve descrição do produto para o ponto de venda."></i>
+                            </label>
                             <input type="text" class="form-control" id="descricao" placeholder="Descrição PDV" required>
-                            <div class="invalid-feedback">Por favor, insira a descrição do PDV.</div>
+                    
                         </div>
                     </div>
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <label for="groupSelect" class="form-label">Grupo</label>
+                            <label for="groupSelect" class="form-label">Grupo
+                                <i class="bi bi-question-circle" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" title="Grupo do Produto" data-bs-content="Selecione ou crie o grupo ao qual o produto pertence."></i>
+                            </label>
                             <div class="input-group">
                                 <select id="groupSelect" class="form-select custom-select"></select>
                                 <button type="button" id="addGroup" class="btn btn-outline-secondary">
@@ -56,7 +61,9 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <label for="subgroupSelect" class="form-label">Sub-Grupo</label>
+                            <label for="subgroupSelect" class="form-label">Sub-Grupo
+                                <i class="bi bi-question-circle" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" title="Sub-Grupo do Produto" data-bs-content="Selecione ou crie o sub-grupo ao qual o produto pertence. Nota: só será possível selecionar o sub-grupo após a definição do grupo."></i>
+                            </label>
                             <div class="input-group">
                                 <select id="subgroupSelect" class="form-select custom-select"></select>
                                 <button type="button" id="addSubgroup" class="btn btn-outline-secondary">
@@ -68,62 +75,82 @@
 
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <label for="fornecedor" class="form-label">Fornecedor</label>
+                            <label for="fornecedor" class="form-label">Código do Fornecedor
+                                <i class="bi bi-question-circle" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" title="Código do Fornecedor" data-bs-content="Informe o código do fornecedor. Caso o fornecedor ainda não esteja cadastrado, será necessário registrá-lo posteriormente."></i>
+                            </label>
                             <input type="text" class="form-control" id="fornecedor" required>
-                            <div class="invalid-feedback">Por favor, insira o fornecedor.</div>
+                          
                         </div>
                         <div class="col-md-6">
-                            <label for="marca" class="form-label">Marca</label>
+                            <label for="marca" class="form-label">Marca
+                                <i class="bi bi-question-circle" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" title="Marca do Produto" data-bs-content="Informe a marca do produto. Se preferir, pode usar o nome da empresa responsável pela fabricação."></i>
+                            </label>
                             <input type="text" class="form-control" id="marca" required>
-                            <div class="invalid-feedback">Por favor, insira a marca.</div>
+                          
                         </div>
                     </div>
 
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <label for="codigoProduto" class="form-label">Código do Produto</label>
+                            <label for="codigoProduto" class="form-label">Código do Produto
+                            <i class="bi bi-question-circle" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" title="Código do Produto" data-bs-content="Informe o código do produto, geralmente encontrado na embalagem. Se não houver, consulte o fornecedor ou seu superior."></i>
+                            </label>
                             <input type="text" class="form-control" id="codigoProduto" required>
-                            <div class="invalid-feedback">Por favor, insira o código do produto.</div>
+                       
                         </div>
                         <div class="col-md-6">
-                            <label for="localizacao" class="form-label">Localização</label>
-                            <input type="text" class="form-control" id="localizacao" placeholder="Se o produto já esta na empresa, não coloque nada" required>
+                            <label for="localizacao" class="form-label">Localização
+                            <i class="bi bi-question-circle" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" title="Localização do Produto" data-bs-content="Informe a localização do produto, caso ele não esteja na empresa. Caso contrário, deixe em branco."></i>
+                            </label>
+                            <input type="text" class="form-control" id="localizacao" placeholder="Se o produto já esta na empresa, não coloque nada">
                         </div>
                     </div>
 
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <label for="destino" class="form-label">Destino</label>
-                            <input type="text" class="form-control" id="destino" required>
-                            <div class="invalid-feedback">Por favor, insira o destino.</div>
+                            <label for="destino" class="form-label">Destino
+                            <i class="bi bi-question-circle" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" title="Destino do Produto" data-bs-content="Informe o destino do produto, se ele ainda será enviado. Caso o produto já esteja no destino, deixe em branco."></i>
+                            </label>
+                            <input type="text" class="form-control" id="destino">
+                     
                         </div>
                         <div class="col-md-6">
-                            <label for="almoxerifado" class="form-label">Almoxerifado</label>
+                            <label for="almoxerifado" class="form-label">Almoxerifado
+                            <i class="bi bi-question-circle" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" title="Almoxarifado" data-bs-content="Indique o almoxarifado e a prateleira onde o produto está ou será armazenado. Caso o produto não esteja na empresa, deixe em branco."></i>
+                            </label>
                             <input type="text" class="form-control" id="almoxerifado" required>
-                            <div class="invalid-feedback">Por favor, insira o almoxerifado.</div>
+                   
                         </div>
                     </div>
 
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <label for="dataEntrada" class="form-label">Data que o produto entrou ou vai entrar</label>
+                            <label for="dataEntrada" class="form-label">Data que o produto entrou ou vai entrar
+                                <i class="bi bi-question-circle" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" title="Data de Entrada" data-bs-content="Informe a data em que o produto entrou ou entrará na empresa. Não insira a data de cadastro."></i>
+                            </label>
                             <input type="date" class="form-control" id="dataEntrada" required>
-                            <div class="invalid-feedback">Por favor, insira a data de entrada.</div>
+                        
                         </div>
                         <div class="col-md-6">
-                            <label for="dataSaida" class="form-label">Data Saída</label>
+                            <label for="dataSaida" class="form-label">Data Saída
+                                <i class="bi bi-question-circle" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" title="Data de Saída" data-bs-content="Informe a data em que o produto sairá do almoxarifado. Se não souber a data exata, consulte o responsável ou deixe em branco."></i>
+                            </label>
                             <input type="date" class="form-control" id="dataSaida">
                         </div>
                     </div>
 
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <label for="preco" class="form-label">Preço Proprietário</label>
+                            <label for="preco" class="form-label">Preço
+                                <i class="bi bi-question-circle" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" title="Data de Saída" data-bs-content="Preço do produto"></i>
+                            </label>
                             <input type="text" class="form-control" id="preco" required pattern="^\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})$">
                             <div class="invalid-feedback">Por favor, insira o preço no formato correto (0.50 ou 1,000.50).</div>
                         </div>
                         <div class="col-md-6">
-                            <label for="inflamavel" class="form-label">Inflamável</label><br>
+                            <label for="inflamavel" class="form-label">Inflamável
+                                <i class="bi bi-question-circle" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" title="Data de Saída" data-bs-content="Se o produto entra em combustão facil, isso vai facilita a entraga do produto"></i>
+                            </label><br>
                             <select id="inflamavel" class="form-select">
                                 <option value="nao">Não</option>
                                 <option value="sim">Sim</option>
@@ -133,7 +160,9 @@
 
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <label for="fragil" class="form-label">Frágil</label><br>
+                            <label for="fragil" class="form-label">Frágil
+                                <i class="bi bi-question-circle" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" title="Data de Saída" data-bs-content="Se o produto quebra facil, isso vai facilitar a entrega do produto"></i>
+                            </label><br>
                             <select id="fragil" class="form-select">
                                 <option value="nao">Não</option>
                                 <option value="sim">Sim</option>
@@ -156,5 +185,13 @@
     <!-- Este caminho só funciona corretamente quando o servidor está em execução -->
      <!--Motivo: ele esta em outra pasta e o VS tenta pegar nessa pasta que da erro, mas o servidor (express) já tem as pasta o que no site não da erro...-->
     <script src="/cadastro_produto.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+            const popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+                return new bootstrap.Popover(popoverTriggerEl);
+            });
+        });
+    </script>
 </body>
 </html>

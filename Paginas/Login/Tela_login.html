@@ -127,38 +127,43 @@
 
     <script>
         // Lidar com o envio do formulário de login
-        document.getElementById('loginForm').addEventListener('submit', function(event) {
-            event.preventDefault();
+document.getElementById('loginForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    fetch('/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, password })
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            return response.text(); 
+        }
+    })
+    .then(data => {
+        if (data.funcionarioId && data.cargo) {
+            
+            localStorage.setItem('funcionarioId', data.funcionarioId);
+            localStorage.setItem('cargo', data.cargo);
+            window.location.href = 'Menu/Tela_menu.html'; 
+        } else {
+           
+            
     
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-    
-            fetch('/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username, password })
-            })
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    return response.text();
-                }
-            })
-            .then(data => {
-                if (data.funcionarioId) {
-                    localStorage.setItem('funcionarioId', data.funcionarioId);
-                    window.location.href = 'Menu/Tela_menu.html'; 
-                } else {
-                    alert(data);
-                }
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-            });
-        });
+alert(data); 
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+    });
+});
     
         // Exibir o modal de recuperação de senha
         document.getElementById('forgot-password').addEventListener('click', function() {

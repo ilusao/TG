@@ -59,7 +59,7 @@
 
                 <!-- Botão de informações detalhadas -->
                 <div class="mt-2" style="max-width: 310px;">
-                    <a href="http://localhost:3000/Perfil_funcionario/Pagina-html/informa%C3%A7%C3%B5es-detalhadas.html" class="btn btn-custom d-block">
+                    <a href="Informações-detalhadas.html" class="btn btn-custom d-block">
                         <i class="bi bi-info-circle-fill" style="position: absolute; left: 150px;"></i> Informações Detalhadas
                     </a>
                 </div>
@@ -103,6 +103,25 @@
         </div>
     </div>
 
+    <!-- Modal para edição de informações -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Editar Informação</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="editInput" class="form-control" placeholder="Novo valor">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-light" id="editSaveBtn">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
     <script>
         async function loadFuncionarioInfo() {
             const funcionarioId = localStorage.getItem('funcionarioId'); 
@@ -144,39 +163,46 @@
         }
 
         async function uploadImage() {
-            const input = document.getElementById('input-foto');
-            const file = input.files[0];
-            if (!file) return;
+    const input = document.getElementById('input-foto');
+    const file = input.files[0];
+    if (!file) return;
 
-            const formData = new FormData();
-            formData.append('imagem', file);
+    const formData = new FormData();
+    formData.append('imagem', file);
 
-            const funcionarioId = localStorage.getItem('funcionarioId');
-            if (!funcionarioId) {
-                alert('ID do funcionário não encontrado.');
-                return;
-            }
-            formData.append('funcionarioId', funcionarioId);
+    const funcionarioId = localStorage.getItem('funcionarioId');
+    if (!funcionarioId) {
+        alert('ID do funcionário não encontrado.');
+        return;
+    }
+    formData.append('funcionarioId', funcionarioId);
 
+    try {
+        const response = await fetch('/foto/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            document.getElementById('foto-perfil').src = `${data.imageUrl}?${new Date().getTime()}`;
+            await loadFuncionarioInfo();
+        } else {
+            // Tente ler a resposta como JSON, mas verifique se realmente é JSON
+            let errorData;
             try {
-                const response = await fetch('/foto/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    document.getElementById('foto-perfil').src = `${data.imageUrl}?${new Date().getTime()}`;
-                    await loadFuncionarioInfo();
-                } else {
-                    const errorData = await response.json();
-                    console.error('Erro ao fazer upload da imagem:', errorData);
-                    alert('Erro ao fazer upload da imagem: ' + errorData.message);
-                }
-            } catch (error) {
-                console.error('Erro:', error);
+                errorData = await response.json();
+            } catch (err) {
+                errorData = { message: 'Erro desconhecido ao fazer upload da imagem.' };
             }
+            console.error('Erro ao fazer upload da imagem:', errorData);
+            alert('Erro ao fazer upload da imagem: ' + errorData.message);
         }
+    } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro na conexão com o servidor.');
+    }
+}
 
         function openEditModal(field) {
             const modal = new bootstrap.Modal(document.getElementById('editModal'));
@@ -187,31 +213,31 @@
         }
 
         async function updateField(field) {
-            const funcionarioId = localStorage.getItem('funcionarioId');
-            if (!funcionarioId) {
-                alert('ID do funcionário não encontrado.');
-                return;
-            }
+    const funcionarioId = localStorage.getItem('funcionarioId');
+    if (!funcionarioId) {
+        alert('ID do funcionário não encontrado.');
+        return;
+    }
 
-            const newValue = document.getElementById('editInput').value;
-            try {
-                const response = await fetch(`/funcionario/${funcionarioId}/update`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ field, value: newValue })
-                });
+    const newValue = document.getElementById('editInput').value;
+    try {
+        const response = await fetch(`/funcionario/${funcionarioId}`, {
+            method: 'PUT', 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ [field]: newValue })
+        });
 
-                if (response.ok) {
-                    const updatedData = await response.json();
-                    document.getElementById(field).textContent = updatedData[field];
-                    bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
-                } else {
-                    console.error('Erro na atualização:', await response.json());
-                }
-            } catch (error) {
-                console.error('Erro:', error);
-            }
+        if (response.ok) {
+            const updatedData = await response.json();
+            document.getElementById(field).textContent = updatedData[field];
+            bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+        } else {
+            console.error('Erro na atualização:', await response.json());
         }
+    } catch (error) {
+        console.error('Erro:', error);
+    }
+}
 
         function capitalizeFirstLetter(string) {
             return string.charAt(0).toUpperCase() + string.slice(1);
@@ -219,5 +245,6 @@
 
         document.addEventListener("DOMContentLoaded", loadFuncionarioInfo);
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

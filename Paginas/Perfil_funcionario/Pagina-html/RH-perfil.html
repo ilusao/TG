@@ -13,7 +13,7 @@
         <div class="row justify-content-center">
             <div class="col-md-4">
                 <div class="position-relative">
-                    <img id="foto-perfil" alt="Foto de Perfil" class="img-fluid rounded-4" style="max-width: 310px; height: 300px;">
+                    <img id="foto-perfil" src="/midia/fotooriginal.png" alt="Foto de Perfil" class="img-fluid rounded-4" style="max-width: 310px; height: 300px;">
                     <button id="editar-foto" class="btn btn-light position-absolute" style="top: 8px; right: 115px;" title="Editar Foto" onclick="document.getElementById('input-foto').click();">
                         <i class="bi bi-camera fs-5"></i>
                     </button>
@@ -25,13 +25,13 @@
                 <!-- Contato -->
                 <div class="card mt-2 bg-light-purple" style="border-radius: 40px; max-width: 310px; height: 120px;">
                     <div class="card-header text-white text-center bg-purple fs-5" style="border-radius: 40px 40px 0 0;">
-                        <i class="bi bi-telephone fs-4" style="position: absolute; left: 15px;"></i>
+                        <i class="bi bi-telephone fs-4 position-absolute" style="left: 15px;"></i>
                         <span>Contato</span>
-                        <button class="btn btn-light float-end" title="Editar Contato" onclick="openEditModal('contato')">
+                        <button class="btn btn-light position-absolute" style="right: 15px;" title="Editar Contato" onclick="openEditModal('contato')">
                             <i class="bi bi-pencil"></i>
                         </button>
                     </div>
-                    <div class="card-body text-center text-white">
+                    <div class="card-body text-center text-dark">
                         <p id="contato">Carregando...</p>
                     </div>
                 </div>
@@ -39,13 +39,13 @@
                 <!-- Horário de trabalho -->
                 <div class="card mt-2 bg-light-purple" style="border-radius: 40px; max-width: 310px; height: 120px;">
                     <div class="card-header text-white text-center bg-purple fs-5" style="border-radius: 40px 40px 0 0;">
-                        <i class="bi bi-clock fs-4" style="position: absolute; left: 15px;"></i> Horário de Trabalho
-                        <button class="btn btn-light float-end" title="Editar Horário" onclick="openEditModal('horario-trabalho')">
+                        <i class="bi bi-clock fs-4 position-absolute" style="position: absolute; left: 15px;"></i> Horário de Trabalho
+                        <button class="btn btn-light position-absolute" style="right: 15px;"  title="Editar Horário" onclick="openEditModal('turno')">
                             <i class="bi bi-pencil"></i>
                         </button>
                     </div>
-                    <div class="card-body text-center text-white">
-                        <p id="horario-trabalho">Carregando...</p>
+                    <div class="card-body text-center text-dark">
+                        <p id="turno">Carregando...</p>
                     </div>
                 </div>
 
@@ -53,51 +53,49 @@
                 <div class="card mt-2 bg-danger" style="border-radius: 40px; max-width: 310px; height: 120px;"> 
                     <div class="card-header text-white text-center bg-purple fs-5" style="border-radius: 40px 40px 0 0;">
                         <i class="bi bi-person-badge-fill fs-4" style="position: absolute; left: 15px;"></i>
-                        <span>Código do Funcionário</span>
-                        <button class="btn btn-light float-end" title="Editar Código" onclick="openEditModal('codigo-funcionario')">
+                        Código
+                        <button class="btn btn-light position-absolute" style="right: 15px;" title="Editar Código" onclick="openEditModal('codigoFuncionario')">
                             <i class="bi bi-pencil"></i>
                         </button>
                     </div>
-                    <div class="card-body text-center text-white bor">
-                        <p id="codigo-funcionario">Carregando...</p>
+                    <div class="card-body text-center text-dark">
+                        <p id="codigoFuncionario">Carregando...</p>
                     </div>
                 </div>
 
                 <!-- Botão de informações detalhadas -->
                 <div class="mt-2" style="max-width: 310px;">
-                    <a href="#" class="btn btn-custom d-block">
-                        <i class="bi bi-info-circle-fill" style="position: absolute; left: 150px;"></i> Informações Detalhadas
+                    <a href="RH-informações-detalhadas.html" class="btn btn-custom d-block">
+                        <i class="bi bi-info-circle-fill position-absolute" style="left: 150px;"></i> Informações Detalhadas
                     </a>
                 </div>
             </div>
 
             <div class="col-md-8">
                 <div class="card" style="border-radius: 40px; padding: 0; height: auto;">
-                    <div class="text-center bg-purple" style="border-radius: 40px 40px 0 0; padding: 20px;">
-                        <h2 class="text-white">
-                            PERFIL
-                            <button class="btn btn-light float-end fs-4" title="Editar Perfil" onclick="openEditModal('nome-funcionario')">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                        </h2>
+                    <div class="d-flex justify-content-center  bg-purple text-white" style="border-radius: 40px 40px 0 0; padding: 20px; position: relative;">
+                        <h2 class="m-0">PERFIL</h2>
+                        <button class="btn btn-light position-absolute" style="right: 15px; top: 50%; transform: translateY(-50%);" title="Editar Perfil" onclick="openEditModal()">
+                            <i class="bi bi-pencil"></i>
+                        </button>
                     </div>
-                    <div class="card-body bg-light-purple text-white" style="border-radius: 0 0 40px 40px;">
+                    <div class="card-body bg-light-purple text-dark" style="border-radius: 0 0 40px 40px;">
                         <div class="text-center" style="margin-bottom: 20px;">
-                            <h4 class="text-white perfil-card-subtitle">Informações compartilhadas pelo funcionário</h4>
+                            <h4 class="text-dart perfil-card-subtitle">Informações do colaborador</h4>
                             <hr class="black-line">
-                            <h4>NOME:</h4>
+                            <h4>Nome:</h4>
                             <br>
-                            <h4 id="nome-funcionario" class="info-text-data">Carregando...</h4>
+                            <h4 id="nome-funcionario">Carregando...</h4>
                             <hr class="black-line">
-                            <h4>DEPARTAMENTO:</h4>
+                            <h4>Departamento:</h4>
                             <br>
                             <h4 id="departamento">Carregando...</h4>
                             <hr class="black-line">
-                            <h4>SERVIÇO:</h4>
+                            <h4>Serviço:</h4>
                             <br>
                             <h4 id="servico">Carregando...</h4>
                             <hr class="black-line">
-                            <h4>CARGO:</h4>
+                            <h4>Cargo:</h4>
                             <br>
                             <h4 id="cargo">Carregando...</h4>
                             <hr class="black-line">
@@ -110,6 +108,7 @@
             </div>
         </div>
     </div>
+
     <!-- Modal de Edição -->
     <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -133,162 +132,230 @@
         </div>
     </div>
 
+    <!-- Modal para Edição Completa do Perfil -->
+    <div class="modal fade" id="completeEditModal" tabindex="-1" aria-labelledby="completeEditModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="completeEditForm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="completeEditModalLabel">Editar Perfil Completo</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Campos para edição de todas as informações do perfil -->
+                        <div class="mb-3">
+                            <label for="editNome" class="form-label">Nome:</label>
+                            <input type="text" id="editNome" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDepartamento" class="form-label">Departamento:</label>
+                            <input type="text" id="editDepartamento" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editServico" class="form-label">Serviço:</label>
+                            <input type="text" id="editServico" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCargo" class="form-label">Cargo:</label>
+                            <input type="text" id="editCargo" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editInatividade" class="form-label">Inatividade:</label>
+                            <select id="editInatividade" class="form-select" required>
+                                <option value="Sim">Sim</option>
+                                <option value="Não">Não</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-light">Salvar Alterações</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         async function loadFuncionarioInfo() {
-            const funcionarioId = localStorage.getItem('funcionarioId'); 
-            console.log("ID do Funcionário:", funcionarioId);
-
-            if (!funcionarioId) {
+            const viewedFuncionarioId = localStorage.getItem('viewedFuncionarioId'); 
+    
+            if (!viewedFuncionarioId) {
                 alert("ID do funcionário não encontrado.");
                 return;
             }
-
+    
             try {
-                const response = await fetch(`/funcionario/${funcionarioId}`);
+                const response = await fetch(`/funcionario/${viewedFuncionarioId}`);
+        
                 if (!response.ok) {
                     throw new Error('Erro ao buscar informações do funcionário: ' + response.status);
                 }
+    
                 const funcionario = await response.json();
-
+        
                 // Preencher os campos com os dados do funcionário
                 document.getElementById('nome-funcionario').textContent = funcionario.nome;
                 document.getElementById('contato').textContent = funcionario.contato;
-                document.getElementById('codigo-funcionario').textContent = funcionario.codigoFuncionario;
-                document.getElementById('horario-trabalho').textContent = funcionario.turno;
+                document.getElementById('codigoFuncionario').textContent = funcionario.codigoFuncionario;
+                document.getElementById('turno').textContent = funcionario.turno;
                 document.getElementById('departamento').textContent = funcionario.departamento;
                 document.getElementById('servico').textContent = funcionario.servico;
                 document.getElementById('cargo').textContent = funcionario.cargo;
                 document.getElementById('inatividade').textContent = funcionario.inativo ? 'Sim' : 'Não';
-
-                // Atualize a imagem do perfil
-                const imageUrl = funcionario.fotoPerfil || '/midia/fotooriginal.png';
+        
+                const imageUrl = funcionario.fotoPerfil;
                 const img = new Image();
-
-                img.src = imageUrl; // Tente carregar a imagem
-
+                img.src = imageUrl;
                 img.onload = () => {
                     document.getElementById('foto-perfil').src = `${imageUrl}?${new Date().getTime()}`;
                 };
-
-                img.onerror = () => {
-                    document.getElementById('foto-perfil').src = '/midia/fotooriginal.png';
-                };
-
+    
             } catch (error) {
-                console.error(error);
-                alert('Não foi possível carregar as informações do funcionário: ' + error.message);
+                alert('Erro ao carregar as informações do funcionário.');
             }
         }
-
+    
+        // Função para abrir o modal de edição
+        function openEditModal(field = null) {
+            if (field) {
+                // Editando um único campo
+                const fieldValue = document.getElementById(field).textContent;
+                document.getElementById('editInput').value = fieldValue;
+                document.getElementById('fieldToEdit').value = field;
+    
+                const modal = new bootstrap.Modal(document.getElementById('editModal'));
+                modal.show();
+            } else {
+                // Editando o perfil completo
+                document.getElementById('editNome').value = document.getElementById('nome-funcionario').textContent;
+                document.getElementById('editDepartamento').value = document.getElementById('departamento').textContent;
+                document.getElementById('editServico').value = document.getElementById('servico').textContent;
+                document.getElementById('editCargo').value = document.getElementById('cargo').textContent;
+                document.getElementById('editInatividade').value = document.getElementById('inatividade').textContent === 'Sim' ? 'Sim' : 'Não';
+    
+                const modal = new bootstrap.Modal(document.getElementById('completeEditModal'));
+                modal.show();
+            }
+        }
+    
+        // Função de envio do formulário de edição para um único campo
+        document.getElementById('editForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            await submitEditForm();
+        });
+    
+        // Função de envio do formulário de edição completa
+        document.getElementById('completeEditForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            await submitEditForm(true);
+        });
+    
+        // Função que lida com a atualização das informações
+        async function submitEditForm(isCompleteEdit = false) {
+            const viewedFuncionarioId = localStorage.getItem('viewedFuncionarioId');
+            if (!viewedFuncionarioId) {
+                alert("ID do funcionário não encontrado.");
+                return;
+            }
+    
+            let updatedInfo;
+            if (isCompleteEdit) {
+                // Edição completa
+                updatedInfo = {
+                    nome: document.getElementById('editNome').value,
+                    departamento: document.getElementById('editDepartamento').value,
+                    servico: document.getElementById('editServico').value,
+                    cargo: document.getElementById('editCargo').value,
+                    inativo: document.getElementById('editInatividade').value === 'Sim'
+                };
+            } else {
+                // Edição de campo individual
+                const fieldToEdit = document.getElementById('fieldToEdit').value;
+                const newValue = document.getElementById('editInput').value;
+                updatedInfo = { [fieldToEdit]: newValue };
+            }
+    
+            try {
+                const response = await fetch(`/funcionario/${viewedFuncionarioId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedInfo)
+                });
+    
+                if (!response.ok) {
+                    const errorDetails = await response.json();
+                    throw new Error('Erro ao atualizar o perfil.');
+                }
+    
+                // Atualizar a interface com os novos dados
+                if (isCompleteEdit) {
+                    document.getElementById('nome-funcionario').textContent = updatedInfo.nome;
+                    document.getElementById('departamento').textContent = updatedInfo.departamento;
+                    document.getElementById('servico').textContent = updatedInfo.servico;
+                    document.getElementById('cargo').textContent = updatedInfo.cargo;
+                    document.getElementById('inatividade').textContent = updatedInfo.inativo ? 'Sim' : 'Não';
+                } else {
+                    const fieldToEdit = document.getElementById('fieldToEdit').value;
+                    const newValue = document.getElementById('editInput').value;
+                    document.getElementById(fieldToEdit).textContent = newValue;
+                }
+    
+                // Fechar o modal
+                const modalId = isCompleteEdit ? 'completeEditModal' : 'editModal';
+                const modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
+                modal.hide();
+    
+            } catch (error) {
+                alert('Erro ao atualizar o perfil.');
+            }
+        }
+    
+        // Função para upload de imagem de perfil
         async function uploadImage() {
-            console.log("Função uploadImage chamada.");
             const input = document.getElementById('input-foto');
             const file = input.files[0];
-
             if (!file) return;
-
+    
             const formData = new FormData();
             formData.append('imagem', file);
-
-            const funcionarioId = localStorage.getItem('funcionarioId');
-            if (!funcionarioId) {
+    
+            const viewedFuncionarioId = localStorage.getItem('viewedFuncionarioId');
+            if (!viewedFuncionarioId) {
                 alert('ID do funcionário não encontrado.');
                 return;
             }
-            formData.append('funcionarioId', funcionarioId);
-
+            formData.append('viewedFuncionarioId', viewedFuncionarioId);
+    
             try {
                 const response = await fetch('/foto/upload', {
                     method: 'POST',
                     body: formData
                 });
-
+    
                 if (response.ok) {
                     const data = await response.json();
-                    console.log("Nova URL da imagem:", data.imageUrl); 
-                    document.getElementById('foto-perfil').src = `${data.imageUrl}?${new Date().getTime()}`; // Previne cache
-                    
-                    // Recarrega as informações do funcionário para atualizar todos os campos
+                    document.getElementById('foto-perfil').src = `${data.imageUrl}?${new Date().getTime()}`;
                     await loadFuncionarioInfo();
                 } else {
-                    const errorData = await response.json();
-                    console.error('Erro ao fazer upload da imagem:', errorData);
+                    let errorData;
+                    try {
+                        errorData = await response.json();
+                    } catch (err) {
+                        errorData = { message: 'Erro desconhecido ao fazer upload da imagem.' };
+                    }
                     alert('Erro ao fazer upload da imagem: ' + errorData.message);
                 }
             } catch (error) {
-                console.error('Erro:', error);
+                alert('Erro na conexão com o servidor.');
             }
         }
-
-        // Função para abrir o modal de edição
-        function openEditModal(field) {
-            const modal = new bootstrap.Modal(document.getElementById('editModal'));
-            document.getElementById('editModalLabel').textContent = `Editar ${capitalizeFirstLetter(field.replace('-', ' '))}`;
-            document.getElementById('editInput').value = document.getElementById(field).textContent;
-            document.getElementById('fieldToEdit').value = field;
-            modal.show();
-        }
-
-        // Função para tratar a submissão do formulário de edição
-        document.getElementById('editForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const newValue = document.getElementById('editInput').value.trim();
-            const field = document.getElementById('fieldToEdit').value;
-            const funcionarioId = localStorage.getItem('funcionarioId');
-
-            if (!newValue) {
-                alert('O campo não pode estar vazio.');
-                return;
-            }
-
-            try {
-                const response = await fetch(`/funcionario/${funcionarioId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ [mapFieldToDb(field)]: newValue })
-                });
-
-                if (response.ok) {
-                    const updatedFuncionario = await response.json();
-                    // Atualiza o campo na página
-                    document.getElementById(field).textContent = updatedFuncionario[mapFieldToDb(field)] || 'Não informado';
-                    // Fecha o modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
-                    modal.hide();
-                } else {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Erro ao atualizar informação.');
-                }
-            } catch (error) {
-                console.error(error);
-                alert('Não foi possível atualizar a informação: ' + error.message);
-            }
-        });
-
-        // Função para mapear os campos do HTML para os campos do banco de dados
-        function mapFieldToDb(field) {
-            const mapping = {
-                'contato': 'contato',
-                'horario-trabalho': 'turno',
-                'codigo-funcionario': 'codigoFuncionario',
-                'nome-funcionario': 'nome'
-                // Adicione mais mapeamentos conforme necessário
-            };
-            return mapping[field] || field;
-        }
-
-        // Função para capitalizar a primeira letra
-        function capitalizeFirstLetter(string) {
-            return string.charAt(0).toUpperCase() + string.slice(1);
-        }
-
-        // Carrega as informações do funcionário quando a página é carregada
-        window.onload = loadFuncionarioInfo;
+    
+        // Carregar informações do funcionário assim que a página carregar
+        loadFuncionarioInfo();
     </script>
-
-    <!-- Scripts Bootstrap -->
+    
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -86,7 +86,6 @@ const submitForm = async (formData) => {
     });
 })();
 
-// Função para verificar se todos os campos obrigatórios estão preenchidos
 document.addEventListener('DOMContentLoaded', function() {
     const inputs = form.querySelectorAll('input, select');
 
@@ -97,13 +96,11 @@ document.addEventListener('DOMContentLoaded', function() {
         let allFilled = true;
 
         inputs.forEach(function(input) {
-            // Ignora a validação do campo de localização
-            if (input.hasAttribute('required') && input.id !== 'localizacao' && !input.value) {
+            if (input.hasAttribute('required') && input.id !== 'localizacao' && input.id !== 'destino' && !input.value.trim()) {
                 allFilled = false;
             }
         });
 
-        // Ativar o botão apenas se todos os campos obrigatórios estiverem preenchidos
         document.getElementById('Consult').disabled = !allFilled;
     }
 
@@ -111,7 +108,8 @@ document.addEventListener('DOMContentLoaded', function() {
         input.addEventListener('input', checkForm);
     });
 
-    checkForm(); // Chama a função para verificar os campos ao carregar a página
+    // Verifica os campos ao carregar a página
+    checkForm();
 });
 
 // Armazena grupos e subgrupos no localStorage

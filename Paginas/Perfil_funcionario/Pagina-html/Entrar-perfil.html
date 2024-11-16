@@ -93,34 +93,42 @@
             if (profile === 'seu') {
                 window.location.href = 'Funcionario-Perfil.html';
             } else {
-                openModal(); // Chama a função para abrir o modal
+                openModal();
             }
         }
 
         function redirectToNormalProfile() {
-            const searchInput = document.getElementById('searchInput').value.trim();
-            if (searchInput) {
-                // Enviar uma requisição para buscar o funcionário pelo nome ou código
-                fetch(`/funcionario/search/${searchInput}`)
-                    .then(response => {
-                        if (response.ok) {
-                            return response.json(); 
-                        } else {
-                            throw new Error('Funcionário não encontrado');
-                        }
-                    })
-                    .then(funcionario => {
-                        // Armazena o ID do funcionário visualizado no localStorage
-                        localStorage.setItem('viewedFuncionarioId', funcionario._id);
+        const searchInput = document.getElementById('searchInput').value.trim();
+        if (searchInput) {
+           
+            fetch(`/funcionario/search/${searchInput}`)
+                .then(response => {
+                    if (response.ok) {
+                        return response.json(); 
+                    } else {
+                        throw new Error('Funcionário não encontrado');
+                    }
+                })
+                .then(funcionario => {
+                    localStorage.setItem('viewedFuncionarioId', funcionario._id);
+
+                    const cargo = localStorage.getItem('cargo');
+                   // aqui eu fiz a separação dos cargos ao acessar o perfil, funcionario vai acessar o perfil normal ou seja não vão consegui mudar nada, e RH e gerente para a tela de RH.
+                    if (cargo === 'Funcionário de Estoque') {
                         window.location.href = 'Normal-Perfil.html';
-                    })
-                    .catch(error => {
-                        alert(error.message);
-                    });
-            } else {
-                alert('Por favor, insira um código ou nome válido.');
-            }
+                    } else if (cargo === 'Funcionário do RH' || cargo === 'Gerente') {
+                        window.location.href = 'RH-Perfil.html';
+                    } else {
+                        alert('Cargo não reconhecido para visualização do perfil.');
+                    }
+                })
+                .catch(error => {
+                    alert(error.message);
+                });
+        } else {
+            alert('Por favor, insira um código ou nome válido.');
         }
+    }
     </script>
 
     <!-- Scripts Bootstrap -->
