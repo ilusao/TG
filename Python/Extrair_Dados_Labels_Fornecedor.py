@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 from pathlib import Path
 
 # Caminho do arquivo HTML
-caminho_html = Path("C:/Users/joaob/OneDrive/Documentos/GitHub/TG-3/Paginas/produto/teste.html")
+caminho_html = Path("C:/Users/JoaoGabriel_UserTemp/Documents/GitHub/TG/Paginas/fornecedor/cadastro_fornecedor.html")
 
 # Abre e lê o conteúdo do arquivo HTML
 with open(caminho_html, "r", encoding="utf-8") as arquivo:
