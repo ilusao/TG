@@ -1,0 +1,49 @@
+body {
+    background-color: #E0E0E0;
+}
+
+header h2 {
+    font-weight: bold;
+}
+
+.form-section {
+    background-color: #C3BEDA;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px auto;
+    width: 80%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.bg-custom {
+    background-color: #C3BEDA;
+}
+
+.form-control, .form-select {
+    border-radius: 0;
+    border: none;
+    border-bottom: 2px solid #CCC;
+    background-color: transparent;
+    color: #000;
+    padding-left: 10px;
+}
+
+.btn-dark {
+    background-color: #000;
+    border: none;
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem;
+}
+
+.col-md-6 {
+    flex: 0 0 auto;
+    width: 50%;
+}
+
+@media (max-width: 768px) {
+    .col-md-6 {
+        width: 100%;
+    }
+}

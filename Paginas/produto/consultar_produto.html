@@ -72,7 +72,7 @@
                             <input type="text" class="form-control" id="grupo" name="grupo" disabled>
                         </div>
                         <div class="col-md-6">
-                            <label for="fornecedor" class="form-label">Fornecedor</label>
+                            <label for="fornecedor" class="form-label">Código do Fornecedor</label>
                             <input type="text" class="form-control" id="fornecedor" name="fornecedor" disabled>
                         </div>
                     </div>
@@ -122,10 +122,10 @@
                         </div>
                     </div>
                     
-                    <div class="d-flex justify-content-center mb-4">
-                        <button type="button" class="btn btn-primary me-2" onclick="habilitarBusca()">Buscar</button>
-                        <button type="button" class="btn btn-secondary me-2" onclick="habilitarEdicao()">Editar</button>
-                        <button type="button" class="btn btn-success" onclick="validarFormulario()">Salvar</button>
+                    <div class="d-flex justify-content-center mb-4" id="buttonContainer">
+                        <button type="button" class="btn btn-primary me-2" id="buscarBtn" onclick="habilitarBusca()">Buscar</button>
+                        <button type="button" class="btn btn-secondary me-2" id="editarBtn" onclick="habilitarEdicao()">Editar</button>
+                        <button type="button" class="btn btn-success" id="salvarBtn" onclick="validarFormulario()" disabled>Salvar</button>
                         <button type="button" class="btn btn-danger ms-2" onclick="limparCampos()">Limpar</button> 
                     </div>
                 </form>

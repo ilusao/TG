@@ -1,4 +1,8 @@
 // serve para não bugar os codigos dos produtos.
+let codigoProdutoOriginal = null;
+let codigoFornecedorOriginal = null; 
+
+let alteracoes = {};
 let idProdutoOriginal = null;
 
 // Função para carregar produtos no dropdown
@@ -31,7 +35,7 @@ function carregarProdutosDropdown() {
                 dropdown.add(option);
             });
 
-            dropdown.addEventListener('change', function() {
+            dropdown.addEventListener('change', function () {
                 const idSelecionado = this.value;
 
                 desabilitarCampos();
@@ -82,7 +86,7 @@ function preencherCamposProduto(produto) {
     const colaboradorElement = document.getElementById('colaboradorCadastrador');
 
     // Verifica o cargo do funcionário no localStorage
-    const cargoFuncionario = localStorage.getItem('cargo'); // "Gerente" ou outro valor
+    const cargoFuncionario = localStorage.getItem('cargo');
 
     // Se o cargo for "Gerente", exibe o nome e ID do colaborador
     if (cargoFuncionario === 'Gerente') {
@@ -101,11 +105,42 @@ function preencherCamposProduto(produto) {
     }
 }
 
-// Função para habilitar a edição dos campos
+
+// Função para habilitar edição
 function habilitarEdicao() {
+    const dropdown = document.getElementById('materiaisSelect');
+    const produtoSelecionado = dropdown.value;
+
+    if (!produtoSelecionado) {
+        alert('Selecione um produto antes de editar.');
+        return;
+    }
+
     const inputs = document.querySelectorAll('#productForm input, #productForm select');
-    inputs.forEach(input => input.removeAttribute('disabled'));
+    inputs.forEach(input => {
+        if (input.id !== 'materiaisSelect') {
+            input.removeAttribute('disabled');
+            input.addEventListener('input', monitorarAlteracoes);
+        }
+    });
+
+    // Armazenar o código do fornecedor original para comparações
+    codigoProdutoOriginal = document.getElementById('codigo').value;
+    codigoFornecedorOriginal = document.getElementById('fornecedor').value; 
+
+    document.getElementById('nome').focus();
 }
+
+// Monitorar alterações nos inputs para habilitar o botão Salvar
+function monitorarAlteracoes(event) {
+    const input = event.target;
+    const campo = input.id;
+    const valorAtual = input.value;
+
+    alteracoes[campo] = valorAtual;
+    document.getElementById('salvarBtn').removeAttribute('disabled');
+}
+
 
 // Função para desabilitar os campos
 function desabilitarCampos() {
@@ -128,18 +163,77 @@ function mostrarMensagemSucesso(mensagem) {
     }, 3000);
 }
 
-// Função de validação e envio (atualizar ou salvar os dados do produto)
-function validarFormulario() {
+// Função para validar o código do produto
+function validarCodigoProduto(codigoProdutoAtual) {
+    if (codigoProdutoAtual !== codigoProdutoOriginal) {
+        const confirmacaoProduto = confirm('Tem certeza que deseja alterar o código do produto?');
+        if (!confirmacaoProduto) {
+            document.getElementById('codigo').value = codigoProdutoOriginal;
+            return false;
+        }
+        return fetch('/api/buscarProdutos', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ codigo_produto: codigoProdutoAtual })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.length > 0) {
+                alert('Este código já está em uso por outro produto.');
+                document.getElementById('codigo').value = codigoProdutoOriginal;
+                return false;
+            }
+            return true;
+        });
+    }
+    return true;
+}
+
+// Função para validar o código do fornecedor
+function validarCodigoFornecedor(codigoFornecedorAtual) {
+    if (codigoFornecedorAtual !== codigoFornecedorOriginal) {
+        const confirmacaoFornecedor = confirm('Tem certeza que deseja alterar o código do fornecedor?');
+
+        if (!confirmacaoFornecedor) {
+            document.getElementById('fornecedor').value = alteracoes['fornecedor'] || '';
+            return false;
+        }
+
+        return fetch('/api/buscarFornecedores', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ codigo_fornecedor: codigoFornecedorAtual })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.length === 0) {
+                alert('Nenhum fornecedor encontrado com esse código. Por favor, cadastre o fornecedor primeiro.');
+                document.getElementById('fornecedor').value = '';
+                return false;
+            }
+            return true;
+        });
+    }
+    return true;
+}
+
+// Função para validar o formulário, incluindo o código do produto e fornecedor
+async function validarFormulario() {
     const nome = document.getElementById('nome').value;
-    const codigo = document.getElementById('codigo').value;
+    const codigoAtual = document.getElementById('codigo').value;
     const preco = document.getElementById('preco').value;
+    const fornecedorCodigo = document.getElementById('fornecedor').value;
 
     if (!nome) {
         alert('O campo Nome é obrigatório.');
         return false;
     }
 
-    if (!codigo) {
+    if (!codigoAtual) {
         alert('O campo Código do Produto é obrigatório.');
         return false;
     }
@@ -149,66 +243,51 @@ function validarFormulario() {
         return false;
     }
 
-    alert('Formulário validado com sucesso! Enviando...');
+    // Validar código do produto
+    const produtoValido = await validarCodigoProduto(codigoAtual);
+    if (!produtoValido) return false;
 
+    // Validar código do fornecedor
+    const fornecedorValido = await validarCodigoFornecedor(fornecedorCodigo);
+    if (!fornecedorValido) return false;
+
+    // Se tudo estiver ok, enviar o formulário
+    enviarFormulario();
+}
+
+function enviarFormulario() {
     const dadosProduto = {
-        nome: nome,
-        codigo_produto: codigo,
-        preco: parseFloat(preco),
+        nome: document.getElementById('nome').value,
         descricao_pdv: document.getElementById('descricao').value,
         sub_grupo: document.getElementById('subgrupo').value,
         almoxerifado: document.getElementById('almoxerifado').value,
         grupo: document.getElementById('grupo').value,
         fornecedor: document.getElementById('fornecedor').value,
         marca: document.getElementById('marca').value,
-        gtin: document.getElementById('gtin').value,
-        servico: document.getElementById('servico').value,
-        tipo: document.getElementById('tipo').value,
-        inativo: document.getElementById('inativo').value
+        codigo_produto: document.getElementById('codigo').value,
+        preco: document.getElementById('preco').value,
     };
 
-    // Atualiza o produto com base no ID armazenado
-    if (idProdutoOriginal) {
-        fetch(`/api/produto/${idProdutoOriginal}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({...dadosProduto, id: idProdutoOriginal}) 
-        })
-        .then(response => {
-            if (response.ok) {
-                mostrarMensagemSucesso('Produto atualizado com sucesso!');
-            } else {
-                return response.json().then(err => {
-                    alert(`Erro ao atualizar o produto: ${err.message || 'Tente novamente.'}`);
-                });
-            }
-        })
-        .catch(error => {
-            console.error('Erro ao enviar o formulário:', error);
-            alert('Ocorreu um erro ao tentar atualizar o produto.');
-        });
-    } else {
-        fetch('/api/produto', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(dadosProduto)
-        })
-        .then(response => {
-            if (response.ok) {
-                mostrarMensagemSucesso('Produto salvo com sucesso!');
-            } else {
-                alert('Erro ao salvar o produto. Tente novamente.');
-            }
-        })
-        .catch(error => {
-            console.error('Erro ao enviar o formulário:', error);
-            alert('Ocorreu um erro ao tentar salvar o produto.');
-        });
-    }
+    fetch(`/api/produto/${idProdutoOriginal}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dadosProduto),
+    })
+    .then(response => {
+        if (response.ok) {
+            alert('Produto atualizado com sucesso!');
+            codigoProdutoOriginal = dadosProduto.codigo_produto;
+            mostrarMensagemSucesso('Produto salvo com sucesso!');
+        } else {
+            alert('Erro ao atualizar o produto. Tente novamente.');
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao salvar o produto:', error);
+        alert('Erro ao salvar o produto. Tente novamente.');
+    });
 }
 
 // Função para habilitar a busca (primeiro clique no botão "Buscar")
@@ -346,9 +425,27 @@ async function mudarFoto() {
 
 
 
-// Função para limpar os campos
+// Botão Limpar Campos
 function limparCampos() {
-    document.getElementById("productForm").reset();
+    const form = document.getElementById("productForm");
+    if (form) {
+        form.reset();
+        desabilitarCampos();
+        document.getElementById('produtoImagem').src = '/midia/Originalproduto.png';
+        document.getElementById('produtosEncontrados').innerHTML = '';
+        document.getElementById('colaboradorCadastrador').innerHTML = '';
+    }
+    carregarProdutosDropdown();
+    buscaAtivada = false;
+}
+
+
+// Função para desabilitar todos os campos
+function desabilitarCampos() {
+    const inputs = document.querySelectorAll('#productForm input, #productForm select');
+    inputs.forEach(input => {
+        input.setAttribute('disabled', 'disabled');
+    });
 }
 
 // Carregar produtos no dropdown ao iniciar

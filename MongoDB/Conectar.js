@@ -5,10 +5,11 @@ const cron = require('node-cron');
 const { Funcionario, calcularTempoNaEmpresa } = require('./Funcionarios');
 const fotoRouter = require('./Foto');
 const Produto = require('./Produto');
+const Fornecedor = require('./Fornecedor');
 const app = express();
 const port = 3000;
 
-// Configurações do MongoDB
+// Configurações do MongoDBs
 const mongoURI = 'mongodb+srv://TG:ilusao.com@funcionarios.avocc.mongodb.net/';
 const options = {
     maxPoolSize: 20,
@@ -26,6 +27,7 @@ mongoose.connect(mongoURI, options)
     // Serve arquivos estáticos a partir da pasta 'Paginas' e substitui todos os caminhos abaixo
     app.use(express.static(path.join(__dirname, '..', 'Paginas')));
     app.use(express.static(path.join(__dirname, '..', 'MongoDB')));
+    app.use(express.static(path.join(__dirname, '..', 'Python')));
 
 
     // substituidos...
@@ -387,59 +389,97 @@ app.post('/api/enviarProduto', async (req, res) => {
     }
 });
 
+// Rota para os fornecedores
 app.get('/fornecedores', async (req, res) => {
     try {
-        const fornecedores = await Fornecedor.find();
-        res.json(fornecedores);
+        const fornecedores = await Fornecedor.find().populate('idFuncionario', 'nome _id');
+
+        res.status(200).json(fornecedores);
     } catch (error) {
-        res.status(500).json({ message: 'Error retrieving fornecedores', error: error.message });
+        console.error('Erro ao buscar fornecedores:', error);
+        res.status(500).json({ mensagem: 'Erro ao buscar fornecedores.', erro: error.message });
     }
 });
 
-// PUT update an existing fornecedor by ID
-app.put('/fornecedores/:id', async (req, res) => {
+// Rota para buscar fornecedor pelo id
+app.get('/fornecedores/:id', async (req, res) => {
     try {
-        const { id } = req.params;
-        const updatedData = req.body;
+        const fornecedor = await Fornecedor.findById(req.params.id).populate('idFuncionario', 'nome _id');
+        if (!fornecedor) {
+            return res.status(404).json({ mensagem: 'Fornecedor não encontrado.' });
+        }
+        res.status(200).json(fornecedor);
+    } catch (error) {
+        console.error('Erro ao buscar fornecedor:', error);
+        res.status(500).json({ mensagem: 'Erro ao buscar fornecedor.', erro: error.message });
+    }
+});
 
-        const updatedFornecedor = await Fornecedor.findByIdAndUpdate(id, updatedData, {
-            new: true, // Return the updated document
-            runValidators: true // Validate the update operation against the schema
+// Rota para registrar fornecedor
+app.post('/fornecedores', async (req, res) => {
+    const { nome, email, cnpj, codigo_fornecedor, idFuncionario } = req.body;
+
+    // Validação de campos obrigatórios
+    if (!nome || !email || !cnpj || !codigo_fornecedor || !idFuncionario) {
+        return res.status(400).json({ 
+            mensagem: 'Campos obrigatórios estão faltando.', 
+            dados: req.body 
+        });
+    }
+
+    try {
+        const novoFornecedor = new Fornecedor({
+            ...req.body,
+            idFuncionario,
+            dataCadastro: Date.now()  
         });
 
-        if (!updatedFornecedor) {
-            return res.status(404).json({ message: 'Fornecedor not found' });
+        const fornecedorSalvo = await novoFornecedor.save();
+        res.status(201).json({ mensagem: 'Fornecedor cadastrado com sucesso!', fornecedor: fornecedorSalvo });
+    } catch (error) {
+        console.error('Erro ao cadastrar fornecedor:', error);
+        res.status(400).json({ 
+            mensagem: 'Erro ao cadastrar fornecedor.',
+            erro: error.message,
+            dados: req.body 
+         });
+    }
+});
+// Rota para buscar o fornecedor
+app.post('/api/buscarFornecedores', async (req, res) => {
+    const filtro = req.body;
+
+    try {
+        const fornecedores = await Fornecedor.find(filtro);
+        res.json(fornecedores);
+    } catch (err) {
+        console.error('Erro ao buscar fornecedores:', err);
+        res.status(500).send({ message: 'Erro ao buscar fornecedores' });
+    }
+});
+
+// Rota para atualizar fornecedor
+app.put('/fornecedores/:id', async (req, res) => {
+    const { nome, email, cnpj, codigo_fornecedor, idFuncionario } = req.body;
+
+    if (!nome || !email || !cnpj || !codigo_fornecedor || !idFuncionario) {
+        return res.status(400).json({ mensagem: 'Campos obrigatórios estão faltando.' });
+    }
+
+    try {
+        const fornecedorAtualizado = await Fornecedor.findByIdAndUpdate(req.params.id, req.body, { new: true });
+
+        if (!fornecedorAtualizado) {
+            return res.status(404).json({ mensagem: 'Fornecedor não encontrado.' });
         }
 
-        res.json(updatedFornecedor);
+        res.status(200).json({ mensagem: 'Fornecedor atualizado com sucesso!', fornecedor: fornecedorAtualizado });
     } catch (error) {
-        res.status(500).json({ message: 'Error updating fornecedor', error: error.message });
+        console.error('Erro ao atualizar fornecedor:', error);
+        res.status(400).json({ mensagem: 'Erro ao atualizar fornecedor.', erro: error.message });
     }
 });
 
-app.post('/fornecedores', async (req, res) => {
-    try {
-        const { nome, email, descricao, observacoes, pais, cidade, estado, site, cnpj, inativo, preco_proprietario } = req.body;
-        const newFornecedor = new Fornecedor({
-            nome,
-            email,
-            descricao,
-            observacoes,
-            pais,
-            cidade,
-            estado,
-            site,
-            cnpj,
-            inativo,
-            preco_proprietario
-        });
-
-        await newFornecedor.save();
-        res.status(201).json(newFornecedor);
-    } catch (error) {
-        res.status(500).json({ message: 'Error creating fornecedor', error: error.message });
-    }
-});
 
 // Função para atualizar o tempo de serviço de todos os funcionários
 async function atualizarTempoNaEmpresa() {

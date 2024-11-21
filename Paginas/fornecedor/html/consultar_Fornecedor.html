@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultar Fornecedor</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/consultar_Fornecedor.css" rel="stylesheet">
+</head>
+
+<body>
+    <header class="text-center mb-4">
+        <h2 class="mb-0">CONSULTAR FORNECEDOR</h2>
+    </header>
+
+    <div class="container">
+        <div class="row">
+            <!-- Painel esquerdo -->
+            <div class="col-md-4 left-panel">
+                <h4>Selecione um Fornecedor</h4>
+                <select id="fornecedor-select" class="form-select mb-3">
+                    <option value="" disabled selected>Selecione um Fornecedor</option>
+                </select>
+
+                <!-- Carregamento -->
+                <div id="loading" style="display: none;">
+                    <div class="spinner-border text-primary text-center" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                </div>
+
+                <div id="Buscarfornecedor" class="mt-4"></div>
+
+                <div id="colaboradorCadastrador" class="mt-4"></div>
+
+                <div id="fotoFornecedor" class="mt-4 d-flex flex-column align-items-center justify-content-center text-center">
+                    <img id="fornecedorImagem" src="/Midia/FornecedorOriginal.png" alt="Foto do fornecedor" class="img-thumbnail mb-3" style="max-width: 200px; height: auto;">
+                    <input type="file" id="fotoFornecedorInput" accept="image/*" style="display: none;" onchange="exibirImagemSelecionada(event)" disabled>
+                    <button type="button" class="btn btn-secondary" id="mudarFotoBtn" disabled>Mudar foto do fornecedor</button>
+                </div>
+                
+                
+            </div>
+
+            <!-- Painel direito - Formulário -->
+            <div class="col-md-8 right-panel">
+                <form id="fornecedorForm">
+                    <!-- Informações Pessoais (Código, Nome, CNPJ) -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="codigo" class="form-label">Código</label>
+                            <input type="text" class="form-control" id="codigo_fornecedor" name="codigo_fornecedor" required disabled>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="nome" class="form-label">Nome</label>
+                            <input type="text" class="form-control" id="nome" name="nome" disabled>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="cnpj" class="form-label">CNPJ</label>
+                            <input type="text" class="form-control" id="cnpj" name="cnpj" required disabled>
+                        </div>
+                    </div>
+
+                    <!-- Contato (Email, Telefone, Site) -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="text" class="form-control" id="email" name="email" disabled>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="telefone" class="form-label">Telefone</label>
+                            <input type="text" class="form-control" id="telefone" name="telefone" disabled>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="site" class="form-label">Site</label>
+                            <input type="text" class="form-control" id="site" name="site" disabled>
+                        </div>
+                    </div>
+
+                    <!-- Endereço (País, Estado, Cidade, CEP, Número) -->
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label for="pais" class="form-label">País</label>
+                            <input type="text" class="form-control" id="pais" name="pais" disabled>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="estado" class="form-label">Estado</label>
+                            <input type="text" class="form-control" id="estado" name="estado" disabled>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="cidade" class="form-label">Cidade</label>
+                            <input type="text" class="form-control" id="cidade" name="cidade" disabled>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="cep" class="form-label">CEP</label>
+                            <input type="text" class="form-control" id="cep" name="cep" disabled>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="numero" class="form-label">Número</label>
+                            <input type="text" class="form-control" id="numero" name="numero" disabled>
+                        </div>
+                    </div>
+
+                    <!-- Outras Informações (Descrição, Produtos, Data de Cadastro) -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="descricao" class="form-label">Descrição</label>
+                            <input type="text" class="form-control" id="descricao" name="descricao" disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="produtos" class="form-label">Produtos</label>
+                            <input type="text" class="form-control" id="produtos" name="produtos" disabled>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="dataCadastro" class="form-label">Data de Cadastro</label>
+                            <input type="text" class="form-control" id="dataCadastro" name="dataCadastro" disabled>
+                        </div>
+                    </div>
+
+                    <!-- Status: Inativo -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="inativo" class="form-label">Inativo</label>
+                            <select class="form-select" id="inativo" name="inativo" disabled>
+                                <option value="false">Não</option>
+                                <option value="true">Sim</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Botões -->
+                    <div class="d-flex justify-content-center mb-4">
+                        <button type="button" class="btn btn-primary me-2" onclick="habilitarBusca()">Buscar</button>
+                        <button type="button" class="btn btn-secondary me-2" onclick="habilitarEdicao()">Editar</button>
+                        <button type="button" id="btnSalvar" class="btn btn-success" onclick="validarFormulario()" disabled>Salvar</button>
+                        <button type="button" class="btn btn-danger ms-2" onclick="limparCampos()">Limpar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/consultar_fornecedor.js"></script>
+</body>
+</html>

@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const { Funcionario, calcularTempoNaEmpresa } = require('./Funcionarios');
 const Produto = require('./Produto');
+const Fornecedor = require('./Fornecedor');
 const router = express.Router();
 const path = require('path');
 const fs = require('fs');
@@ -143,6 +144,81 @@ router.post('/produto/:id/mudar-foto', upload.single('foto'), async (req, res) =
         console.error('Erro ao atualizar a foto do produto:', error);
         return res.status(500).send('Erro ao atualizar a foto do produto.');
     }
+});
+// Rota para upload da foto do fornecedor
+router.post('/fornecedor/:id/mudar-foto', upload.single('foto'), async (req, res) => {
+    console.log('Requisição de upload recebida para o fornecedor ID:', req.params.id);
+    console.log('Arquivo enviado:', req.file);
+
+    if (!req.file) {
+        console.log('Nenhuma imagem foi enviada.');
+        return res.status(400).send('Nenhuma imagem foi enviada.');
+    }
+
+    const fornecedorId = req.params.id;
+
+    try {
+        const fornecedor = await Fornecedor.findById(fornecedorId);
+
+        if (!fornecedor) {
+            console.log('Fornecedor não encontrado.');
+            return res.status(404).send('Fornecedor não encontrado.');
+        }
+        const fotoAnterior = fornecedor.fotoFornecedor;
+
+        if (fotoAnterior) {
+            const fotoAnteriorPath = path.join(__dirname, '..', 'Paginas', 'Midia', fotoAnterior.replace('/midia/', ''));
+            await new Promise((resolve, reject) => {
+                fs.access(fotoAnteriorPath, fs.constants.F_OK, (err) => {
+                    if (err) {
+                        console.log('A foto anterior do fornecedor não existe, não há necessidade de apagar.');
+                        return resolve();
+                    }
+
+                    fs.unlink(fotoAnteriorPath, (err) => {
+                        if (err) {
+                            console.error('Erro ao apagar a foto anterior do fornecedor:', err);
+                            return reject(err);
+                        }
+                        console.log('Foto anterior do fornecedor apagada com sucesso.');
+                        resolve();
+                    });
+                });
+            });
+        }
+
+        const imageUrl = `/midia/${req.file.filename}`;
+        fornecedor.fotoFornecedor = imageUrl;
+        console.log('Nova foto salva no fornecedor:', imageUrl);
+        await fornecedor.save();
+
+        res.json({ success: true, novaFotoUrl: imageUrl });
+    } catch (error) {
+        console.error('Erro ao atualizar a foto do fornecedor:', error);
+        return res.status(500).send('Erro ao atualizar a foto do fornecedor.');
+    }
+});
+
+
+// Middleware para lidar com imagens de fornecedores não encontradas
+router.get('/midia/fornecedor/:filename', (req, res) => {
+    const { filename } = req.params;
+    const filePath = path.join(__dirname, '..', 'Paginas', 'Midia', filename);
+
+    fs.access(filePath, fs.constants.F_OK, (err) => {
+        if (err) {
+            const defaultImagePath = path.join(__dirname, '..', 'Paginas', 'Midia', 'FornecedorOriginal.png');
+            fs.access(defaultImagePath, fs.constants.F_OK, (defaultErr) => {
+                if (defaultErr) {
+                    return res.status(404).send('Imagem padrão não encontrada.');
+                } else {
+                    return res.sendFile(defaultImagePath);
+                }
+            });
+        } else {
+            res.sendFile(filePath);
+        }
+    });
 });
 
 module.exports = router;
