@@ -193,5 +193,49 @@
             });
         });
     </script>
+    <script>
+        document.getElementById('Consult').addEventListener('click', async (event) => {
+            event.preventDefault(); // Evita o comportamento padrão do formulário
+    
+            // Capturar dados do formulário
+            const dados = {
+                nome: document.getElementById('nome').value,
+                descricao: document.getElementById('descricao').value,
+                grupo: document.getElementById('groupSelect').value,
+                subgrupo: document.getElementById('subgroupSelect').value,
+                fornecedor: document.getElementById('fornecedor').value,
+                marca: document.getElementById('marca').value,
+                codigoProduto: document.getElementById('codigoProduto').value,
+                localizacao: document.getElementById('localizacao').value,
+                destino: document.getElementById('destino').value,
+                almoxerifado: document.getElementById('almoxerifado').value,
+                dataEntrada: document.getElementById('dataEntrada').value,
+                dataSaida: document.getElementById('dataSaida').value,
+                preco: document.getElementById('preco').value,
+                inflamavel: document.getElementById('inflamavel').value,
+                fragil: document.getElementById('fragil').value
+            };
+    
+            // Enviar dados ao backend
+            try {
+                const resposta = await fetch('http://127.0.0.1:5000/registrar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(dados)
+                });
+    
+                const resultado = await resposta.json();
+    
+                // Exibir mensagem de sucesso ou erro
+                alert(resultado.mensagem);
+            } catch (erro) {
+                console.error('Erro ao registrar produto:', erro);
+                alert('Ocorreu um erro ao registrar o produto.');
+            }
+        });
+    </script>    
+
 </body>
 </html>
