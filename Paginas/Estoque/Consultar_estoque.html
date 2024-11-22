@@ -88,5 +88,47 @@
             document.getElementById("capacidadeResultado").classList.remove("d-none");
         }
     </script>
+    
+    <script>
+        function calcularCapacidade() {
+            const numAlmoxarifados = document.getElementById('numAlmoxarifados').value;
+            const numPrateleiras = document.getElementById('numPrateleiras').value;
+
+            if (numAlmoxarifados && numPrateleiras) {
+                const capacidade = numAlmoxarifados * numPrateleiras;
+                alert(`Capacidade total: ${capacidade} prateleiras.`);
+            } else {
+                alert('Por favor, preencha todos os campos antes de calcular.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector('#configForm').addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                const dados = {
+                    numAlmoxarifados: document.getElementById('numAlmoxarifados').value,
+                    numPrateleiras: document.getElementById('numPrateleiras').value
+                };
+
+                try {
+                    const resposta = await fetch('http://127.0.0.1:5000/salvar-configuracao', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(dados)
+                    });
+
+                    const resultado = await resposta.json();
+                    alert(resultado.mensagem);
+                } catch (erro) {
+                    console.error('Erro ao salvar configuração:', erro);
+                    alert('Erro ao salvar a configuração.');
+                }
+            });
+        });
+    </script>
+
 </body>
 </html>
