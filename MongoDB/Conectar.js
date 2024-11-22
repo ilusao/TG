@@ -6,6 +6,7 @@ const { Funcionario, calcularTempoNaEmpresa } = require('./Funcionarios');
 const fotoRouter = require('./Foto');
 const Produto = require('./Produto');
 const Fornecedor = require('./Fornecedor');
+const Estoque = require('./estoque');
 const app = express();
 const port = 3000;
 
@@ -477,6 +478,33 @@ app.put('/fornecedores/:id', async (req, res) => {
     } catch (error) {
         console.error('Erro ao atualizar fornecedor:', error);
         res.status(400).json({ mensagem: 'Erro ao atualizar fornecedor.', erro: error.message });
+    }
+});
+
+// Rota para salvar os estoques
+app.post('/estoques', async (req, res) => {
+    const { estoques } = req.body;
+
+    try {
+        for (const estoqueData of estoques) {
+            const { tipoEstante, tipoProduto, capacidadeTotal, numPrateleiras, statusProduto, produtos } = estoqueData;
+
+            const novoEstoque = new Estoque({
+                tipoEstante,
+                tipoProduto,
+                capacidadeTotal,
+                numPrateleiras,
+                statusProduto,
+                produtos: produtos.map(idProduto => mongoose.Types.ObjectId(idProduto))
+            });
+
+            await novoEstoque.save();
+        }
+
+        res.status(200).json({ message: 'Estoques salvos com sucesso!' });
+    } catch (error) {
+        console.error('Erro ao salvar estoques:', error);
+        res.status(500).json({ message: 'Erro ao salvar estoques.' });
     }
 });
 

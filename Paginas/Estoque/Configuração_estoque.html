@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuração de Estoque</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1a1a2e; /* Roxo escuro */
+            color: #ffffff; /* Texto branco */
+        }
+        .card {
+            background-color: rgba(255, 255, 255, 0.1); /* Transparência */
+            border: none;
+            border-radius: 10px;
+        }
+        .btn-custom {
+            background-color: #6a0dad; /* Roxo médio */
+            color: white;
+            border: none;
+        }
+        .btn-custom:hover {
+            background-color: #8a2be2; /* Roxo claro */
+        }
+        .section-title {
+            border-bottom: 2px solid #8a2be2;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+        }
+        .estoque-container {
+            margin-bottom: 20px;
+        }
+        .estoque-section {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Configuração de Estoque</h1>
+
+        <!-- Seção 1: Formulário para Múltiplos Estoques -->
+        <div class="card p-4 mb-4">
+            <h3 class="section-title">Adicionar Estoques</h3>
+            <form id="estoqueForm">
+                <div class="estoque-container">
+                    <label for="numEstoques" class="form-label">Número de Estoques</label>
+                    <input type="number" class="form-control" id="numEstoques" min="1" value="1" required>
+                </div>
+                <button type="button" class="btn btn-custom" onclick="gerarFormulariosEstoques()">Gerar Formularios</button>
+            </form>
+        </div>
+
+        <!-- Seção de Estoques -->
+        <div id="estoques" class="estoque-section"></div>
+
+        <!-- Resultado do Cálculo -->
+        <div id="resultadoCalculo" class="card p-4 d-none">
+            <h4>Resultados de Armazenagem</h4>
+            <div id="resultadosTexto"></div>
+        </div>
+
+        <!-- Botão para salvar informações -->
+        <div class="text-center mt-4">
+            <button type="button" class="btn btn-custom" onclick="salvarInformacoes()">Salvar Informações</button>
+        </div>
+
+        <!-- Seção 2: Dicas e Boas Práticas -->
+        <div class="card p-4 mt-4">
+            <h3 class="section-title">Dicas e Boas Práticas</h3>
+            <ul>
+                <li>Utilize o sistema de estantes adequado ao tipo de produto armazenado.</li>
+                <li>Considere a organização e layout do armazém para otimizar o espaço.</li>
+                <li>Avalie os tipos de paletes usados: madeira, plástico, europeu, americano, etc.</li>
+                <li>Priorize processos de preparação de pedidos ao invés de somente maximizar o espaço.</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Função para gerar formulários de estoques
+        function gerarFormulariosEstoques() {
+            const numEstoques = parseInt(document.getElementById("numEstoques").value);
+            const estoquesContainer = document.getElementById("estoques");
+            estoquesContainer.innerHTML = ''; // Limpar conteúdo anterior
+
+            for (let i = 1; i <= numEstoques; i++) {
+                // Criação de formulário para cada estoque
+                const estoqueDiv = document.createElement("div");
+                estoqueDiv.classList.add("card", "p-4", "mb-4");
+                estoqueDiv.innerHTML = `
+                    <h4>Configuração do Estoque ${i}</h4>
+                    <div class="mb-3">
+                        <label for="tipoEstante${i}" class="form-label">Tipo de Estantes ou Sistemas Utilizados</label>
+                        <select id="tipoEstante${i}" class="form-select" required>
+                            <option value="convencional">Convencional</option>
+                            <option value="porta-paletes">Porta-Paletes</option>
+                            <option value="drive-in">Drive-In</option>
+                            <option value="cantilever">Cantilever</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tipoProduto${i}" class="form-label">Tipo de Bens Armazenados</label>
+                        <select id="tipoProduto${i}" class="form-select" required>
+                            <option value="solido">Sólidos</option>
+                            <option value="liquido">Líquidos</option>
+                            <option value="perecivel">Perecíveis</option>
+                            <option value="geral">Outros</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="capacidadeTotal${i}" class="form-label">Capacidade Total do Armazém (m³)</label>
+                        <input type="number" id="capacidadeTotal${i}" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="numPrateleiras${i}" class="form-label">Número de Prateleiras</label>
+                        <input type="number" id="numPrateleiras${i}" class="form-control" min="1" required>
+                    </div>
+                    <button type="button" class="btn btn-custom" onclick="calcularEspaco(${i})">Calcular Estoque ${i}</button>
+                `;
+                estoquesContainer.appendChild(estoqueDiv);
+            }
+        }
+
+        // Função para calcular o espaço de cada estoque
+        function calcularEspaco(estoqueIndex) {
+            const capacidadeTotal = parseFloat(document.getElementById(`capacidadeTotal${estoqueIndex}`).value);
+            
+            if (capacidadeTotal > 0) {
+                // Cálculo das caixas (esse cálculo deve ser feito de acordo com as especificações do seu projeto)
+                const volumeCaixaNormal = 0.1;
+                const numCaixasNormais = Math.floor(capacidadeTotal / volumeCaixaNormal);
+
+                const resultadoTexto = `
+                    <h5>Estoque ${estoqueIndex}:</h5>
+                    <p>O estoque tem uma capacidade total de ${capacidadeTotal} m³.</p>
+                    <p>Com essa capacidade, é possível armazenar:</p>
+                    <ul>
+                        <li>${numCaixasNormais} caixas normais (0,1 m³ cada)</li>
+                    </ul>
+                `;
+                document.getElementById("resultadosTexto").innerHTML += resultadoTexto;
+                document.getElementById("resultadoCalculo").classList.remove("d-none");
+            } else {
+                alert("Por favor, insira valores válidos.");
+            }
+        }
+
+        // Função para salvar as informações no MongoDB
+        function salvarInformacoes() {
+            const numEstoques = parseInt(document.getElementById("numEstoques").value);
+            const estoques = [];
+
+            for (let i = 1; i <= numEstoques; i++) {
+                const tipoEstante = document.getElementById(`tipoEstante${i}`).value;
+                const tipoProduto = document.getElementById(`tipoProduto${i}`).value;
+                const capacidadeTotal = parseFloat(document.getElementById(`capacidadeTotal${i}`).value);
+                const numPrateleiras = parseInt(document.getElementById(`numPrateleiras${i}`).value);
+
+                const estoque = {
+                    tipoEstante,
+                    tipoProduto,
+                    capacidadeTotal,
+                    numPrateleiras,
+                    statusProduto: "Ativo", // Defina o status conforme necessário
+                    produtos: [] // Adicione lógica aqui para capturar os tipos de produtos, se necessário
+                };
+
+                estoques.push(estoque);
+            }
+
+            // Enviar dados para a API backend (supondo que sua rota seja '/api/estoques')
+            fetch('http://localhost:5000/estoques', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ estoques })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Estoques salvos com sucesso!');
+                console.log(data);
+            })
+            .catch(error => {
+                console.error('Erro ao salvar estoques:', error);
+                alert('Erro ao salvar estoques.');
+            });
+        }
+    </script>
+</body>
+</html>
