@@ -1,0 +1,44 @@
+# Configurações do MongoDB
+db_uri=mongodb+srv://TG:ilusao.com@funcionarios.avocc.mongodb.net/
+
+# Configuração do servidor
+server_port=3000
+
+# Credenciais para teste
+# Gerentes
+gerente_1_nome=andre
+gerente_1_senha=3322
+gerente_2_nome=João
+gerente_2_senha=406
+
+# Funcionário Estoque
+estoque_nome=valdeci
+estoque_senha=3322
+
+# Funcionário RH
+rh_nome=Marta
+rh_senha=1122
+
+# Funcionário inativo
+inativo_nome=bruno
+inativo_senha=123456789
+
+# Produtos
+produto_1_nome=Smartphone Ultra 3000
+produto_1_codigo=FZT3223
+
+produto_2_nome=Parafuso de Aço Inoxidável
+produto_2_codigo=PARAFUSO001
+
+# Fornecedor
+fornecedor_nome=Casas Brasil
+fornecedor_codigo=123123
+
+# Passos iniciais
+# 1. Execute 'npm install' após clonar o repositório para instalar todas as dependências.
+# 2. Instale a extensão do MongoDB no Visual Studio Code.
+# 3. Clique no '+' ao lado de Connections e conecte com o link especificado em 'db_uri'.
+# 4. Execute 'npm start' para iniciar o servidor.
+
+# Observação sobre o MongoDB
+# O MongoDB é um serviço em nuvem e pode atingir o limite de armazenamento.
