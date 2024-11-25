@@ -484,6 +484,29 @@ app.put('/fornecedores/:id', async (req, res) => {
     }
 });
 
+// Rota para buscar produtos de um fornecedor
+app.post('/api/FornecedorProduto', async (req, res) => {
+    const { codigo_fornecedor } = req.body;
+
+    try {
+        const fornecedor = await Fornecedor.findOne({ codigo_fornecedor });
+
+        if (!fornecedor) {
+            return res.status(404).json({ message: 'Fornecedor não encontrado' });
+        }
+        const produtos = await Produto.find({ fornecedor: codigo_fornecedor });
+
+        if (produtos.length === 0) {
+            return res.status(404).json({ message: 'Nenhum produto encontrado para esse fornecedor' });
+        }
+
+        res.json(produtos);
+    } catch (error) {
+        console.error('Erro ao buscar produtos:', error);
+        res.status(500).json({ error: 'Erro ao buscar produtos' });
+    }
+});
+
 // Rota para salvar os estoques
 app.post('/estoques', async (req, res) => {
     const { estoques } = req.body;

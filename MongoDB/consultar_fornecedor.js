@@ -1,15 +1,19 @@
 let idFornecedorOriginal = null;
-
 // Função para carregar fornecedores no dropdown
 function carregarFornecedoresDropdown() {
+    console.log("Carregando fornecedores...");
+    
     fetch('/fornecedores')
         .then(response => {
             if (!response.ok) {
+                console.error('Erro ao buscar fornecedores, status:', response.status);
                 throw new Error('Erro ao buscar fornecedores');
             }
             return response.json();
         })
         .then(fornecedores => {
+            console.log('Fornecedores encontrados:', fornecedores);
+            
             const dropdown = document.getElementById('fornecedor-select');
             dropdown.innerHTML = '';
 
@@ -32,26 +36,56 @@ function carregarFornecedoresDropdown() {
 
             dropdown.addEventListener('change', function () {
                 const idSelecionado = this.value;
-            
+                console.log('Fornecedor selecionado, ID:', idSelecionado);
+
                 desabilitarCampos();
-                
+
                 if (idSelecionado) {
                     fetch(`/fornecedores/${idSelecionado}`)
                         .then(response => {
-                            if (!response.ok) throw new Error('Erro ao buscar detalhes do fornecedor');
+                            if (!response.ok) {
+                                console.error('Erro ao buscar detalhes do fornecedor, status:', response.status);
+                                throw new Error('Erro ao buscar detalhes do fornecedor');
+                            }
                             return response.json();
                         })
                         .then(fornecedor => {
+                            console.log('Detalhes do fornecedor:', fornecedor);
                             preencherCamposFornecedor(fornecedor);
-                            const mudarFotoBtn = document.getElementById('mudarFotoBtn');
-                            mudarFotoBtn.disabled = false;
-                            desabilitarSalvar(); 
+
+                            fetch('/api/FornecedorProduto', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    codigo_fornecedor: fornecedor.codigo_fornecedor
+                                })
+                            })
+                                .then(response => {
+                                    if (!response.ok) {
+                                        console.error('Erro ao buscar produtos, status:', response.status);
+                                        throw new Error('Erro ao buscar produtos');
+                                    }
+                                    return response.json();
+                                })
+                                .then(produtos => {
+                                    console.log('Produtos encontrados:', produtos);
+                                    const campoProdutos = document.getElementById('produtos');
+                                    if (produtos.length > 0) {
+                                        campoProdutos.value = produtos.map(produto => produto.nome).join(', ');
+                                    } else {
+                                        campoProdutos.value = 'Nenhum produto encontrado';
+                                    }
+                                })
+                                .catch(error => console.error('Erro ao buscar produtos:', error));
                         })
                         .catch(error => console.error('Erro ao carregar os detalhes do fornecedor:', error));
-                        const mudarFotoBtn = document.getElementById('mudarFotoBtn');
-                        mudarFotoBtn.disabled = true;
+
+                    const mudarFotoBtn = document.getElementById('mudarFotoBtn');
+                    mudarFotoBtn.disabled = true;
                 } else {
-                    idFornecedorOriginal = null; 
+                    idFornecedorOriginal = null;
                     desabilitarSalvar();
                 }
             });
@@ -61,6 +95,8 @@ function carregarFornecedoresDropdown() {
             alert('Erro ao carregar fornecedores. Tente novamente mais tarde.');
         });
 }
+
+
 
 // data sem horario
 function formatarData(data) {
@@ -87,7 +123,7 @@ function preencherCamposFornecedor(fornecedor) {
     document.getElementById('cep').value = fornecedor.cep || '';
     document.getElementById('numero').value = fornecedor.numero || '';
     document.getElementById('descricao').value = fornecedor.descricao || 'sem descrição';
-    document.getElementById('produtos').value = fornecedor.produtos?.join(', ') || 'sem produtos';
+    document.getElementById('produtos').value = fornecedor.produtos?.join(', ') || 'Sem produtos';
     document.getElementById('dataCadastro').value = formatarData(new Date(fornecedor.dataCadastro));
     document.getElementById('inativo').value = fornecedor.inativo ? 'true' : 'false';
 
