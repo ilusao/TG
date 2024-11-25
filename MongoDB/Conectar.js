@@ -10,6 +10,9 @@ const Estoque = require('./estoque');
 const app = express();
 const port = 3000;
 
+const axios = require('axios'); // Para comunicação com o Flask
+const bodyParser = require('body-parser');
+
 // Configurações do MongoDBs
 const mongoURI = 'mongodb+srv://TG:ilusao.com@funcionarios.avocc.mongodb.net/';
 const options = {
@@ -508,6 +511,30 @@ app.post('/estoques', async (req, res) => {
     }
 });
 
+//Rota Aquivos Excell
+app.post('/send-data', async (req, res) => { // Rota que envia dados para o Flask e retorna a resposta ao cliente
+    const { name, age, job } = req.body;
+
+    if (!name || !age || !job) {
+        return res.status(400).send({ error: 'Todos os campos são obrigatórios (name, age, job).' });
+    }
+
+    try {
+        // Envia os dados para o servidor Flask
+        const response = await axios.post('http://127.0.0.1:3000/process', { name, age, job });
+
+        // Retorna a resposta do Flask para o cliente
+        res.json(response.data);
+    } catch (error) {
+        console.error('Erro ao comunicar com o Python:', error.message);
+        res.status(500).send({ error: 'Erro interno ao processar os dados' });
+    }
+});
+
+// Inicia o servidor Node.js na porta 3000
+app.listen(3000, () => {
+    console.log('Servidor Node.js rodando na porta 3000');
+});
 
 // Função para atualizar o tempo de serviço de todos os funcionários
 async function atualizarTempoNaEmpresa() {
