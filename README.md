@@ -24,3 +24,5 @@ npm install dotenv
 npm install multer
 
 npm install boostrap
+
+npm install axios

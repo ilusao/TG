@@ -10,8 +10,6 @@ const Estoque = require('./estoque');
 const app = express();
 const port = 3000;
 
-const axios = require('axios'); // Para comunicação com o Flask
-const bodyParser = require('body-parser');
 
 // Configurações do MongoDBs
 const mongoURI = 'mongodb+srv://TG:ilusao.com@funcionarios.avocc.mongodb.net/';
@@ -43,7 +41,6 @@ mongoose.connect(mongoURI, options)
     // app.use(express.static('C:/TG/Funcionário'));
     // app.use(express.static('C:/TG/localidade'));
     // app.use(express.static('C:/TG/produto'));
-
 
 // Rota de login
 app.post('/login', async (req, res) => {
@@ -421,7 +418,7 @@ app.get('/fornecedores/:id', async (req, res) => {
 
 // Rota para registrar fornecedor
 app.post('/fornecedores', async (req, res) => {
-    const { nome, email, cnpj, codigo_fornecedor, idFuncionario } = req.body;
+    const { nome, email, cnpj, codigo_fornecedor, idFuncionario, exportarParaExcel } = req.body;
 
     // Validação de campos obrigatórios
     if (!nome || !email || !cnpj || !codigo_fornecedor || !idFuncionario) {
@@ -439,7 +436,30 @@ app.post('/fornecedores', async (req, res) => {
         });
 
         const fornecedorSalvo = await novoFornecedor.save();
-        res.status(201).json({ mensagem: 'Fornecedor cadastrado com sucesso!', fornecedor: fornecedorSalvo });
+
+        if (exportarParaExcel) {
+            // Enviar os dados completos para o Flask para gerar o Excel
+            const response = await fetch('http://localhost:5000/fornecedor/gerar-excel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(fornecedorSalvo)
+            });
+
+            if (response.ok) {
+                const arrayBuffer = await response.arrayBuffer();
+                const buffer = Buffer.from(arrayBuffer);
+
+                res.setHeader('Content-Disposition', 'attachment; filename="fornecedor.xlsx"');
+                res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                return res.status(200).send(buffer);
+            } else {
+                console.error('Erro ao gerar Excel no Flask:', response.statusText);
+                return res.status(500).json({ mensagem: 'Erro ao gerar o Excel.' });
+            }
+        } else {
+            res.status(201).json({ mensagem: 'Fornecedor cadastrado com sucesso!', fornecedor: fornecedorSalvo });
+        }
+
     } catch (error) {
         console.error('Erro ao cadastrar fornecedor:', error);
         res.status(400).json({ 
@@ -449,6 +469,9 @@ app.post('/fornecedores', async (req, res) => {
          });
     }
 });
+
+
+
 // Rota para buscar o fornecedor
 app.post('/api/buscarFornecedores', async (req, res) => {
     const filtro = req.body;
@@ -532,31 +555,6 @@ app.post('/estoques', async (req, res) => {
         console.error('Erro ao salvar estoques:', error);
         res.status(500).json({ message: 'Erro ao salvar estoques.' });
     }
-});
-
-//Rota Aquivos Excell
-app.post('/send-data', async (req, res) => { // Rota que envia dados para o Flask e retorna a resposta ao cliente
-    const { name, age, job } = req.body;
-
-    if (!name || !age || !job) {
-        return res.status(400).send({ error: 'Todos os campos são obrigatórios (name, age, job).' });
-    }
-
-    try {
-        // Envia os dados para o servidor Flask
-        const response = await axios.post('http://127.0.0.1:3000/process', { name, age, job });
-
-        // Retorna a resposta do Flask para o cliente
-        res.json(response.data);
-    } catch (error) {
-        console.error('Erro ao comunicar com o Python:', error.message);
-        res.status(500).send({ error: 'Erro interno ao processar os dados' });
-    }
-});
-
-// Inicia o servidor Node.js na porta 3000
-app.listen(3000, () => {
-    console.log('Servidor Node.js rodando na porta 3000');
 });
 
 // Função para atualizar o tempo de serviço de todos os funcionários

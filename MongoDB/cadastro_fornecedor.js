@@ -1,9 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.querySelector('#supplierForm');
+    const exportButton = document.getElementById('exportarExcel');
+    const statusExportarExcel = document.getElementById('statusExportarExcel');
+
+    let exportarParaExcel = false; // Inicializa como 'false'
 
     if (!form) {
         console.error('Formulário não encontrado');
-        return; 
+        return;
     }
 
     // Função para formatar o CNPJ enquanto o usuário digita
@@ -13,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/^(\d{2})(\d)/, '$1.$2')
             .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
             .replace(/\.(\d{3})(\d)/, '.$1/$2')
-            .replace(/(\d{4})(\d)/, '$1-$2') 
+            .replace(/(\d{4})(\d)/, '$1-$2')
             .replace(/(-\d{2})\d+?$/, '$1');
     }
 
@@ -37,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
         if (resultado != digitos.charAt(0)) {
-            return false; 
+            return false;
         }
 
         tamanho = tamanho + 1;
@@ -52,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
         if (resultado != digitos.charAt(1)) {
-            return false; 
+            return false;
         }
 
         return true;
@@ -73,13 +77,19 @@ document.addEventListener('DOMContentLoaded', () => {
         this.value = formatarCNPJ(cnpjValue);
     });
 
+    // Evento para alternar o estado de exportação para Excel
+    exportButton.addEventListener('click', function () {
+        exportarParaExcel = !exportarParaExcel; // Alterna o valor
+        statusExportarExcel.textContent = exportarParaExcel ? 'Sim' : 'Não';
+    });
+
     // Validação do formulário ao submeter
     form.addEventListener('submit', (event) => {
-        event.preventDefault(); 
+        event.preventDefault();
 
         const cnpjValido = validarCNPJ(cnpjInput.value);
         if (!cnpjValido) {
-            cnpjInput.classList.add('is-invalid'); 
+            cnpjInput.classList.add('is-invalid');
             cnpjFeedback.style.display = 'block';
             cnpjInput.focus();
             return;
@@ -97,10 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Validação e ajuste de dados antes de enviar ao backend
         const codigoFornecedor = document.getElementById('codigo_fornecedor').value.trim();
-        if (!codigoFornecedor) {
-            // Se desejar atribuir um valor padrão ou algum valor genérico:
-            // codigoFornecedor = "valor-padrão";
-        }
 
         // Montar os dados para envio
         const data = {
@@ -113,14 +119,16 @@ document.addEventListener('DOMContentLoaded', () => {
             estado: document.getElementById('estado').value,
             cep: document.getElementById('cep').value,
             numero: document.getElementById('numero').value,
+            telefone: document.getElementById('telefone').value, 
             site: document.getElementById('site').value || null,
-            cnpj: cnpjInput.value.replace(/\D/g, ''), // Formatação do CNPJ
-            codigo_fornecedor: codigoFornecedor, // Garantindo que o campo não seja undefined
+            cnpj: cnpjInput.value.replace(/\D/g, ''),
+            codigo_fornecedor: codigoFornecedor,
             inativo: document.getElementById('inativo').value === 'true',
-            idFuncionario: funcionarioId
+            idFuncionario: funcionarioId,
+            exportarParaExcel: exportarParaExcel 
         };
-
-        // Envio da requisição
+        console.log(data); 
+        
         fetch('/fornecedores', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -132,7 +140,41 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return response.json();
         })
-        .then(result => alert('Fornecedor cadastrado com sucesso!'))
+        .then(result => {
+            alert('Fornecedor cadastrado com sucesso!');
+            
+            const fornecedorSalvo = result.fornecedor;
+        
+            // Se precisar gerar Excel, envia os dados para o Flask
+            if (exportarParaExcel) {
+                fetch('/fornecedor/gerar-excel', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(fornecedorSalvo)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        console.error('Erro na resposta do Flask:', response.statusText);
+                        throw new Error('Erro ao gerar Excel');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    console.log('Excel gerado com sucesso!');
+                })
+                .catch(error => {
+                    console.error('Erro ao gerar Excel:', error);
+                    alert('Erro ao gerar Excel: ' + error.message);
+                });
+            }
+        })
         .catch(error => {
             console.error('Erro ao cadastrar fornecedor:', error);
             alert('Erro ao cadastrar fornecedor: ' + error.message);
