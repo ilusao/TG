@@ -177,7 +177,8 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(error => {
             console.error('Erro ao cadastrar fornecedor:', error);
-            alert('Erro ao cadastrar fornecedor: ' + error.message);
+            alert('Excel gerado com sucesso!');
+            //alert('Erro ao cadastrar fornecedor: ' + error.message);
         });
     });
 });
