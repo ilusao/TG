@@ -1,24 +1,91 @@
-from flask import Blueprint, jsonify, request, send_from_directory
-from pymongo import MongoClient
+from flask import Blueprint, jsonify, request, send_file
+import xlsxwriter
 import os
+import re
 
 # Definir o Blueprint
 produto_bp = Blueprint('produto', __name__)
 
-# Configuração do MongoDB
-client = MongoClient('mongodb+srv://TG:ilusao.com@funcionarios.avocc.mongodb.net/')
-db = client['test']
-colecao = db['produtos']
+# Caminho onde os arquivos Excel serão armazenados
+pasta_produtos = os.path.join(os.getcwd(), 'Excel', 'Produtos')
 
-@produto_bp.route('/cadastro-produto')
-def cadastro_produto():
-    # Caminho absoluto para o diretório onde está o HTML
-    caminho_html = os.path.join(os.getcwd(), 'Paginas/produtos')
-    return send_from_directory(caminho_html, 'cadastro_produto.html')
+# Função para limpar o nome do arquivo, substituindo caracteres especiais por underscores
+def limpar_nome_arquivo(nome):
+    # Substitui caracteres especiais por underscores
+    nome_limpo = re.sub(r'[^a-zA-Z0-9_]+', '_', nome)
+    return nome_limpo
 
-# Rota para registrar o produto
-@produto_bp.route('/registrar', methods=['POST'])
-def registrar_produto():
-    dados = request.json
-    resultado = colecao.insert_one(dados)
-    return jsonify({"mensagem": "Produto registrado com sucesso!", "id": str(resultado.inserted_id)})
+# Rota para gerar o Excel com os dados do produto específico
+@produto_bp.route('/gerar-excel', methods=['POST'])
+def gerar_excel():
+    try:
+        # Dados do produto recebidos do frontend
+        produto = request.json
+
+        # Verifica se a pasta 'Produtos' existe, caso contrário, cria
+        if not os.path.exists(pasta_produtos):
+            os.makedirs(pasta_produtos)
+
+        # Nome do arquivo Excel: Usando o nome do produto ou o código dele
+        nome_arquivo = limpar_nome_arquivo(produto['nome']) if produto.get('nome') else f"produto_{produto['codigo_produto']}"
+        caminho_excel = os.path.join(pasta_produtos, f"produto_{nome_arquivo}.xlsx")
+
+        # Criando o arquivo Excel no caminho desejado
+        workbook = xlsxwriter.Workbook(caminho_excel)
+        worksheet = workbook.add_worksheet()
+
+        # Adicionando o cabeçalho (com todos os campos)
+        worksheet.write('A1', 'Código Produto')
+        worksheet.write('B1', 'Nome')
+        worksheet.write('C1', 'Descrição PDV')
+        worksheet.write('D1', 'Grupo')
+        worksheet.write('E1', 'Sub-Grupo')
+        worksheet.write('F1', 'Fornecedor')
+        worksheet.write('G1', 'Marca')
+        worksheet.write('H1', 'Localização')
+        worksheet.write('I1', 'Destino')
+        worksheet.write('J1', 'Almoxarifado')
+        worksheet.write('K1', 'Data Entrada')
+        worksheet.write('L1', 'Data Saída')
+        worksheet.write('M1', 'Preço')
+        worksheet.write('N1', 'Inflamável')
+        worksheet.write('O1', 'Frágil')
+        worksheet.write('P1', 'Foto Produto')
+        worksheet.write('Q1', 'ID Funcionário')
+        worksheet.write('R1', 'Data de Criação')
+        worksheet.write('S1', 'Data de Atualização')
+
+        # Preenchendo os dados do produto
+        worksheet.write(1, 0, produto['codigo_produto'])
+        worksheet.write(1, 1, produto['nome'])
+        worksheet.write(1, 2, produto.get('descricao_pdv', ''))
+        worksheet.write(1, 3, produto.get('grupo', ''))
+        worksheet.write(1, 4, produto.get('sub_grupo', ''))
+        worksheet.write(1, 5, produto.get('fornecedor', ''))
+        worksheet.write(1, 6, produto.get('marca', ''))
+        worksheet.write(1, 7, produto.get('localizacao', ''))
+        worksheet.write(1, 8, produto.get('destino', ''))
+        worksheet.write(1, 9, produto.get('almoxarifado', ''))
+        worksheet.write(1, 10, produto.get('data_entrada', ''))
+        worksheet.write(1, 11, produto.get('data_saida', ''))
+        worksheet.write(1, 12, produto.get('preco', 0))
+        worksheet.write(1, 13, produto.get('inflamavel', False))
+        worksheet.write(1, 14, produto.get('fragil', False))
+        worksheet.write(1, 15, produto.get('fotoProduto', ''))
+        worksheet.write(1, 16, produto.get('idFuncionario', ''))
+        worksheet.write(1, 17, produto.get('createdAt', ''))
+        worksheet.write(1, 18, produto.get('updatedAt', ''))
+
+        # Fechando o arquivo Excel
+        workbook.close()
+
+        # Adicionando o print para verificar o caminho do arquivo
+        print(f"Excel gerado com sucesso: {caminho_excel}")
+
+        # Usando send_file para enviar o arquivo
+        return send_file(caminho_excel, as_attachment=True)
+
+    except Exception as e:
+        # Log de erro detalhado para facilitar depuração
+        print(f"Erro ao gerar Excel para produto {produto.get('nome', produto.get('codigo_produto'))}: {str(e)}")
+        return jsonify({"error": str(e)}), 500
