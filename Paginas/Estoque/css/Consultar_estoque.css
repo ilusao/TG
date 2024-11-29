@@ -1,0 +1,17 @@
+body {
+    background-color: #1a1a2e;
+    color: #ffffff;
+}
+.card {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 10px;
+}
+.btn-custom {
+    background-color: #6a0dad;
+    color: white;
+    border: none;
+}
+.btn-custom:hover {
+    background-color: #8a2be2;
+}

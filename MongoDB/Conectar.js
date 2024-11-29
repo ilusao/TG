@@ -530,21 +530,27 @@ app.post('/api/FornecedorProduto', async (req, res) => {
     }
 });
 
+// Rota dos Estoques
+app.get('/estoques', async (req, res) => {
+    try {
+        const estoques = await Estoque.find();
+        res.status(200).json(estoques);
+    } catch (error) {
+        console.error('Erro ao listar estoques:', error);
+        res.status(500).json({ message: 'Erro ao listar estoques.' });
+    }
+});
+
 // Rota para salvar os estoques
 app.post('/estoques', async (req, res) => {
     const { estoques } = req.body;
 
     try {
         for (const estoqueData of estoques) {
-            const { tipoEstante, tipoProduto, capacidadeTotal, numPrateleiras, statusProduto, produtos } = estoqueData;
+            const { nome, tipoEstante, tipoProduto, capacidadeTotal, numPrateleiras, espacoEntrePrateleiras, pesoMaximo, statusProduto, volumePorPrateleira, totalVolumeOcupado, numCaixas, capacidadeUtilizada } = estoqueData;
 
             const novoEstoque = new Estoque({
-                tipoEstante,
-                tipoProduto,
-                capacidadeTotal,
-                numPrateleiras,
-                statusProduto,
-                produtos: produtos.map(idProduto => mongoose.Types.ObjectId(idProduto))
+                nome, tipoEstante, tipoProduto, capacidadeTotal, numPrateleiras, espacoEntrePrateleiras, pesoMaximo, statusProduto, volumePorPrateleira, totalVolumeOcupado, numCaixas, capacidadeUtilizada
             });
 
             await novoEstoque.save();
@@ -554,6 +560,78 @@ app.post('/estoques', async (req, res) => {
     } catch (error) {
         console.error('Erro ao salvar estoques:', error);
         res.status(500).json({ message: 'Erro ao salvar estoques.' });
+    }
+});
+
+
+// Rota para buscar um estoque pelo ID ou nome
+app.get('/estoques/:id', async (req, res) => {
+    try {
+        let estoque;
+
+        if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+            estoque = await Estoque.findById(req.params.id);
+        }
+        if (!estoque) {
+            estoque = await Estoque.findOne({ nome: req.params.id });
+        }
+        if (!estoque) {
+            return res.status(404).json({ message: 'Estoque não encontrado' });
+        }
+        res.status(200).json(estoque);
+    } catch (error) {
+        console.error('Erro ao buscar estoque:', error);
+        res.status(500).json({ message: 'Erro ao buscar estoque.' });
+    }
+});
+
+// Rota para buscar os produtos de um estoque específico
+app.get('/produtos/por-estoque/:almoxerifado', async (req, res) => {
+    const { almoxerifado } = req.params;
+
+    try {
+        // Buscando os produtos que possuem o almoxerifado correspondente
+        const produtos = await Produto.find({ almoxerifado });
+
+        if (!produtos || produtos.length === 0) {
+            return res.status(404).json({ message: 'Nenhum produto encontrado para este estoque.' });
+        }
+
+        res.status(200).json(produtos);
+    } catch (error) {
+        console.error('Erro ao buscar produtos:', error);
+        res.status(500).json({ message: 'Erro ao buscar produtos.' });
+    }
+});
+
+// Rota para consultar as informações do estoque
+app.get('/estoques/:almoxerifado', async (req, res) => {
+    try {
+        const almoxerifado = req.params.almoxerifado;
+        const estoque = await Estoque.findOne({ nome: almoxerifado }).populate('produtos');
+
+        if (!estoque) {
+            return res.status(404).json({ message: 'Estoque não encontrado' });
+        }
+        let capacidadeUtilizada = 0;
+        let custoTotal = 0;
+
+        estoque.produtos.forEach(produto => {
+            capacidadeUtilizada += produto.volume;
+            custoTotal += produto.preco || 0;
+        });
+        const ocupacaoAtual = ((capacidadeUtilizada / estoque.capacidadeTotal) * 100).toFixed(2);
+
+        res.json({
+            capacidadeTotal: estoque.capacidadeTotal,
+            capacidadeUtilizada: capacidadeUtilizada,
+            ocupacaoAtual: `${ocupacaoAtual}%`,
+            custoTotal: custoTotal.toFixed(2)
+        });
+
+    } catch (error) {
+        console.error('Erro ao consultar estoque:', error);
+        res.status(500).json({ message: 'Erro ao consultar estoque.' });
     }
 });
 

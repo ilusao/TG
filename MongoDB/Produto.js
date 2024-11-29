@@ -9,6 +9,8 @@ const produtoSchema = new mongoose.Schema({
     fornecedor: { type: String },
     marca: { type: String },
     localizacao: { type: String },
+    peso: { type: Number, required: true },
+    volume: { type: Number, required: true },
     destino: { type: String },
     almoxerifado: { type: String },
     data_entrada: { type: Date, default: Date.now },

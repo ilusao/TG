@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuração de Estoque</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/Configuração_estoque.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Configuração de Estoque</h1>
+
+        <!-- Seção 1: Formulário para Múltiplos Estoques -->
+        <div class="card p-4 mb-4">
+            <h3 class="section-title">Adicionar Estoques</h3>
+            <form id="estoqueForm">
+                <div class="estoque-container">
+                    <label for="numEstoques" class="form-label">Número de Estoques</label>
+                    <input type="number" class="form-control" id="numEstoques" min="1" value="1" required>
+                </div>
+                <button type="button" class="btn btn-custom" onclick="gerarFormulariosEstoques()">Gerar Formularios</button>
+                <button type="button" class="btn btn-custom" onclick="listarEstoques()">Editar Estoque</button>
+            </form>
+        </div>
+
+        <!-- Seção de Estoques -->
+        <div id="estoques" class="estoque-section"></div>
+
+        <!-- Resultado do Cálculo -->
+        <div id="resultadoCalculo" class="card p-4 d-none">
+            <h4>Resultados de Armazenagem</h4>
+            <div id="resultadosTexto"></div>
+        </div>
+
+        <!-- Botão para salvar informações -->
+        <div class="text-center mt-4">
+            <button type="button" class="btn btn-custom" onclick="salvarEstoques()">Salvar Informações</button>
+        </div>
+
+        <!-- Seção 2: Dicas e Boas Práticas -->
+        <div class="card p-4 mt-4">
+            <h3 class="section-title">Dicas e Boas Práticas</h3>
+            <ul>
+                <li>Utilize o sistema de estantes adequado ao tipo de produto armazenado.</li>
+                <li>Considere a organização e layout do armazém para otimizar o espaço.</li>
+                <li>Avalie os tipos de paletes usados: madeira, plástico, europeu, americano, etc.</li>
+                <li>Priorize processos de preparação de pedidos ao invés de somente maximizar o espaço.</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="/Configuração_estoque.js"></script>
+</body>
+</html>

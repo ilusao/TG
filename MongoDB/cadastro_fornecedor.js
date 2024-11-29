@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
             cnpj: cnpjInput.value.replace(/\D/g, ''),
             codigo_fornecedor: codigoFornecedor,
             inativo: document.getElementById('inativo').value === 'true',
-            idFuncionario: funcionarioId,
+            iFuncidonario: funcionarioId,
             exportarParaExcel: exportarParaExcel 
         };
         console.log(data); 

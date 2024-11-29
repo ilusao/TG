@@ -37,6 +37,36 @@ const submitForm = async (formData) => {
     }
 };
 
+const Estoques = async () => {
+    try {
+        const response = await fetch('/estoques');
+        if (!response.ok) {
+            throw new Error('Erro ao buscar estoques');
+        }
+
+        const estoques = await response.json(); 
+        populateEstoqueSelect(estoques); 
+    } catch (error) {
+        console.error(error);
+        alert('Erro ao carregar os estoques.');
+    }
+};
+
+// Função para mostrar os nomes dos estoques no datalist
+const populateEstoqueSelect = (estoques) => {
+    const almoxerifadoDatalist = document.getElementById('estoques');
+    almoxerifadoDatalist.innerHTML = '';
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Selecione um estoque';
+    almoxerifadoDatalist.appendChild(defaultOption);
+    estoques.forEach(estoque => {
+        const option = document.createElement('option');
+        option.value = estoque.nome; 
+        almoxerifadoDatalist.appendChild(option);
+    });
+};
+
 // Validação do formulário e envio dos dados
 (() => {
     'use strict';
@@ -63,6 +93,8 @@ const submitForm = async (formData) => {
             localizacao: document.getElementById('localizacao').value || "Dom Amaury Castanho", 
             destino: document.getElementById('destino').value || null,
             almoxerifado: document.getElementById('almoxerifado').value || null,
+            peso: parseFloat(document.getElementById('pesoProduto').value),
+            volume: parseFloat(document.getElementById('volumeProduto').value),
             data_entrada: document.getElementById('dataEntrada').value.split('T')[0],
             data_saida: document.getElementById('dataSaida').value.split('T')[0] || null, 
             preco: parseFloat(document.getElementById('preco').value.replace(/\./g, '').replace(',', '.')),
@@ -199,6 +231,11 @@ document.getElementById('addSubgroup').addEventListener('click', () => {
     } else {
         alert('Selecione um grupo antes de adicionar um subgrupo.');
     }
+});
+
+// para mostrar os estoques
+document.addEventListener('DOMContentLoaded', () => {
+    Estoques();
 });
 
 // Atualiza as opções no carregamento da página
