@@ -233,6 +233,60 @@ document.getElementById('addSubgroup').addEventListener('click', () => {
     }
 });
 
+
+fetch('/produtos', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+})
+.then(response => {
+    if (!response.ok) {
+        throw new Error('Erro na requisição: ' + response.statusText);
+    }
+    return response.json();
+})
+.then(result => {
+    alert('Produto cadastrado com sucesso!');
+    
+    const produtoSalvo = result.produto;
+
+    // Se precisar gerar Excel, envia os dados para o Flask
+    if (exportarParaExcel) {
+        fetch('/produto/gerar-excel', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(produtoSalvo)
+        })
+        .then(response => {
+            if (!response.ok) {
+                console.error('Erro na resposta do Flask:', response.statusText);
+                throw new Error('Erro ao gerar Excel');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            console.log('Excel gerado com sucesso!');
+        })
+        .catch(error => {
+            console.error('Erro ao gerar Excel:', error);
+            alert('Erro ao gerar Excel: ' + error.message);
+        });
+    }
+})
+.catch(error => {
+    console.error('Erro ao cadastrar produto:', error);
+    alert('Erro ao cadastrar produto: ' + error.message);
+});
+
+
+
 // para mostrar os estoques
 document.addEventListener('DOMContentLoaded', () => {
     Estoques();

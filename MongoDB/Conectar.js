@@ -262,6 +262,61 @@ app.post('/api/produto', async (req, res) => {
         }
     });
 
+    // Rota para registrar produto
+app.post('/produtos', async (req, res) => {
+    const { nome, descricao, preco, codigo_produto, idFuncionario, exportarParaExcel } = req.body;
+
+    // Validação de campos obrigatórios
+    if (!nome || !descricao || !preco || !codigo_produto || !idFuncionario) {
+        return res.status(400).json({ 
+            mensagem: 'Campos obrigatórios estão faltando.', 
+            dados: req.body 
+        });
+    }
+
+    try {
+        const novoProduto = new Produto({
+            ...req.body,
+            idFuncionario,
+            dataCadastro: Date.now()  
+        });
+
+        const produtoSalvo = await novoProduto.save();
+
+        if (exportarParaExcel) {
+            // Enviar os dados completos para o Flask para gerar o Excel
+            const response = await fetch('http://localhost:5000/produto/gerar-excel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(produtoSalvo)
+            });
+
+            if (response.ok) {
+                const arrayBuffer = await response.arrayBuffer();
+                const buffer = Buffer.from(arrayBuffer);
+
+                res.setHeader('Content-Disposition', 'attachment; filename="produto.xlsx"');
+                res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                return res.status(200).send(buffer);
+            } else {
+                console.error('Erro ao gerar Excel no Flask:', response.statusText);
+                return res.status(500).json({ mensagem: 'Erro ao gerar o Excel.' });
+            }
+        } else {
+            res.status(201).json({ mensagem: 'Produto cadastrado com sucesso!', produto: produtoSalvo });
+        }
+
+    } catch (error) {
+        console.error('Erro ao cadastrar produto:', error);
+        res.status(400).json({ 
+            mensagem: 'Erro ao cadastrar produto.',
+            erro: error.message,
+            dados: req.body 
+         });
+    }
+});
+
+
 // Rota para listar todos os produtos cadastrados por um funcionário
 app.get('/funcionario/:id/produtos', async (req, res) => {
     try {
