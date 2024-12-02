@@ -1,17 +1,125 @@
+/* Estilos Gerais */
 body {
     background-color: #1a1a2e;
     color: #ffffff;
 }
+
 .card {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.1); 
     border: none;
     border-radius: 10px;
+    padding: 20px;
 }
+
+h3 {
+    color: #ffffff;
+}
+
+#progressoMeta {
+    font-weight: bold;
+    color: #8a2be2;
+}
+
+#metaRegistroValor {
+    font-weight: bold;
+    color: #ffcc00;
+}
+
 .btn-custom {
     background-color: #6a0dad;
     color: white;
     border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
 }
+
 .btn-custom:hover {
     background-color: #8a2be2;
+}
+
+.btn-link {
+    color: #ffffff;
+    font-size: 18px;
+}
+
+.btn-link:hover {
+    color: #8a2be2;
+}
+
+.bi-pencil {
+    font-size: 20px;
+    margin-right: 8px;
+}
+
+.modal-content {
+    background-color: #1a1a2e; 
+    color: #ffffff; 
+    border-radius: 10px;
+    border: none;
+}
+
+.modal-header {
+    border-bottom: none;
+    background-color: #333333;
+}
+
+.modal-title {
+    color: #ffffff; 
+    font-weight: bold;
+}
+
+.btn-close {
+    background-color: transparent; 
+    color: #ffffff; 
+    border: none;
+    font-size: 20px;
+}
+
+.modal-body {
+    background-color: #333333; 
+    padding: 20px;
+}
+
+input.form-control {
+    background-color: #333333; 
+    color: #ffffff; 
+    border-radius: 5px; 
+    border: 1px solid #444444; 
+}
+
+input.form-control:focus {
+    border-color: #8a2be2; 
+    box-shadow: 0 0 5px #8a2be2; 
+}
+
+.modal-footer {
+    background-color: #333333;
+}
+
+.btn-primary {
+    background-color: #6a0dad; 
+    color: #1a1a2e;
+    border-radius: 5px;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #6a0dad;
+}
+
+.btn-secondary {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+.btn-secondary:hover {
+    background-color: #ff3333;
+}
+
+#error-message {
+    font-size: 14px;
+    color: #ff4d4d;
+    display: none;
 }

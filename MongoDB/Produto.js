@@ -20,9 +20,7 @@ const produtoSchema = new mongoose.Schema({
     fragil: { type: Boolean, default: false },
     fotoProduto: { type: String },
     idFuncionario: { type: mongoose.Schema.Types.ObjectId, ref: 'Funcionario' },
-}, {
-    timestamps: true
-});
+}, {timestamps: true});
 
 produtoSchema.pre('save', function (next) {
     if (this.data_saida && this.data_saida < this.data_entrada) {

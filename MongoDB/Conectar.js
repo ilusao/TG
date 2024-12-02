@@ -2,11 +2,11 @@ const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const cron = require('node-cron');
-const { Funcionario, calcularTempoNaEmpresa } = require('./Funcionarios');
+const Funcionario = require('./Funcionarios');
 const fotoRouter = require('./Foto');
 const Produto = require('./Produto');
 const Fornecedor = require('./Fornecedor');
-const Estoque = require('./estoque');
+const Estoque = require ('./estoque');
 const app = express();
 const port = 3000;
 
@@ -547,10 +547,28 @@ app.post('/estoques', async (req, res) => {
 
     try {
         for (const estoqueData of estoques) {
-            const { nome, tipoEstante, tipoProduto, capacidadeTotal, numPrateleiras, espacoEntrePrateleiras, pesoMaximo, statusProduto, volumePorPrateleira, totalVolumeOcupado, numCaixas, capacidadeUtilizada } = estoqueData;
-
+            const { 
+                nome, tipoEstante, tipoProduto, capacidadeTotal, numPrateleiras, 
+                espacoEntrePrateleiras, pesoMaximo, statusProduto, volumePorPrateleira, 
+                totalVolumeOcupado, numCaixas, capacidadeUtilizada, metaRegistro 
+            } = estoqueData;
             const novoEstoque = new Estoque({
-                nome, tipoEstante, tipoProduto, capacidadeTotal, numPrateleiras, espacoEntrePrateleiras, pesoMaximo, statusProduto, volumePorPrateleira, totalVolumeOcupado, numCaixas, capacidadeUtilizada
+                nome,
+                tipoEstante,
+                tipoProduto,
+                capacidadeTotal,
+                numPrateleiras,
+                espacoEntrePrateleiras,
+                pesoMaximo,
+                statusProduto,
+                volumePorPrateleira,
+                totalVolumeOcupado,
+                numCaixas,
+                capacidadeUtilizada,
+                metasRegistro: {
+                    metaMensal: metaRegistro.metaMensal || 0,
+                    metaMensalAtual: 0,
+                }
             });
 
             await novoEstoque.save();
@@ -572,12 +590,15 @@ app.get('/estoques/:id', async (req, res) => {
         if (mongoose.Types.ObjectId.isValid(req.params.id)) {
             estoque = await Estoque.findById(req.params.id);
         }
+
         if (!estoque) {
             estoque = await Estoque.findOne({ nome: req.params.id });
         }
+
         if (!estoque) {
             return res.status(404).json({ message: 'Estoque não encontrado' });
         }
+
         res.status(200).json(estoque);
     } catch (error) {
         console.error('Erro ao buscar estoque:', error);
@@ -585,26 +606,35 @@ app.get('/estoques/:id', async (req, res) => {
     }
 });
 
-// Rota para buscar os produtos de um estoque específico
-app.get('/produtos/por-estoque/:almoxerifado', async (req, res) => {
+
+// Rota para buscar produtos de um estoque específico e produtos registrados no mês atual
+app.get('/produtos/por-estoque/:almoxerifado/registrados-mes', async (req, res) => {
     const { almoxerifado } = req.params;
 
     try {
-        // Buscando os produtos que possuem o almoxerifado correspondente
-        const produtos = await Produto.find({ almoxerifado });
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-        if (!produtos || produtos.length === 0) {
-            return res.status(404).json({ message: 'Nenhum produto encontrado para este estoque.' });
-        }
+        const produtosPorEstoque = await Produto.find({ almoxerifado });
+        const produtosRegistradosMes = await Produto.find({
+            almoxerifado,
+            createdAt: { $gte: startOfMonth, $lte: endOfMonth },
+        });
 
-        res.status(200).json(produtos);
+        res.status(200).json({
+            produtosPorEstoque,
+            produtosRegistradosMes,
+        });
     } catch (error) {
-        console.error('Erro ao buscar produtos:', error);
         res.status(500).json({ message: 'Erro ao buscar produtos.' });
     }
 });
 
-// Rota para consultar as informações do estoque
+
+
+
+// Rota para consultar as informações do estoque e calcular 
 app.get('/estoques/:almoxerifado', async (req, res) => {
     try {
         const almoxerifado = req.params.almoxerifado;
@@ -635,28 +665,36 @@ app.get('/estoques/:almoxerifado', async (req, res) => {
     }
 });
 
-// Função para atualizar o tempo de serviço de todos os funcionários
-async function atualizarTempoNaEmpresa() {
+// Rota para editar a meta de registro de produtos de um estoque
+app.put('/estoques/:id/metaRegistro', async (req, res) => {
+    const { metaMensal } = req.body;
+    const estoqueId = req.params.id;
+
     try {
-        const funcionarios = await Funcionario.find({});
+        const estoque = await Estoque.findById(estoqueId);
 
-        funcionarios.forEach(async (funcionario) => {
-            const tempo = calcularTempoNaEmpresa(funcionario.dataContratacao);
-            funcionario.tempoNaEmpresa = tempo;
+        if (!estoque) {
+            return res.status(404).json({ message: 'Estoque não encontrado' });
+        }
 
-            await funcionario.save();
+        estoque.metasRegistro.metaMensal = metaMensal;
+        estoque.metasRegistro.metaMensalAtual = 0;
+
+        await estoque.save();
+
+        res.status(200).json({
+            message: 'Meta de registro de produtos atualizada com sucesso!',
+            estoque: {
+                id: estoque._id,
+                metasRegistro: estoque.metasRegistro,
+                ...estoque.toObject(),
+            }
         });
-
-        console.log("Tempo de serviço atualizado para todos os funcionários");
-    } catch (err) {
-        console.error("Erro ao atualizar o tempo de serviço:", err);
+    } catch (error) {
+        console.error('Erro ao editar a meta de registro de produtos:', error);
+        res.status(500).json({ message: 'Erro ao editar a meta de registro de produtos' });
     }
-}
-
-// Tarefa cron para rodar todo dia à meia-noite
-cron.schedule('0 0 * * *', atualizarTempoNaEmpresa);
-
-
+});
 
 // Rota principal
 app.get('/', (req, res) => {

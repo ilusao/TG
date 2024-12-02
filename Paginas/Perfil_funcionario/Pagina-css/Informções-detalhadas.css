@@ -4,11 +4,11 @@ body {
 }
 
 .bg-purple {
-    background-color: #4B0082 !important; /* roxo forte */
+    background-color: #4B0082 !important;
 }
 
 .bg-light-purple {
-    background-color: rgba(98, 52, 184, 0.6) !important; /* roxo claro translúcido */
+    background-color: rgba(98, 52, 184, 0.6) !important;
 }
 
 .section-title {
@@ -47,7 +47,6 @@ body {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Gráfico (apenas estrutura) */
 .chart-box {
     background-color: #ffffff;
     border-radius: 15px;
@@ -66,7 +65,7 @@ body {
     margin: 10px 0;
 }
 
-/* Estilo da tabela de desempenho */
+
 .table-performance {
     width: 100%;
     margin-top: 20px;
