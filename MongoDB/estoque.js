@@ -10,6 +10,7 @@ const estoqueSchema = new mongoose.Schema({
     espacoEntrePrateleiras: { type: Number, required: true },
     pesoMaximo: { type: Number, required: true },
     statusProduto: { type: String, required: true },
+    localizacao: { type: String },
     produtos: [
         {
             type: mongoose.Schema.Types.ObjectId,

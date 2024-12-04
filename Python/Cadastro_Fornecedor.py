@@ -2,6 +2,17 @@ from flask import Blueprint, jsonify, request, send_file
 import xlsxwriter
 import os
 import re
+import logging
+
+# Configurar o logging
+logging.basicConfig(
+    level=logging.DEBUG,  # Nível de log: DEBUG, INFO, WARNING, ERROR, CRITICAL
+    format='%(asctime)s - %(levelname)s - %(message)s',  # Formato do log
+    handlers=[
+        logging.FileHandler("fornecedor.log"),  # Salva os logs em um arquivo
+        logging.StreamHandler()  # Exibe os logs no console
+    ]
+)
 
 # Definir o Blueprint
 fornecedor_bp = Blueprint('fornecedor', __name__)
@@ -22,13 +33,18 @@ def gerar_excel():
         # Dados do fornecedor recebidos do Node.js
         fornecedor = request.json
 
+        logging.info("Iniciando a geração do Excel para o fornecedor.")
+
         # Verifica se a pasta 'Fornecedores' existe, caso contrário, cria
         if not os.path.exists(pasta_fornecedores):
             os.makedirs(pasta_fornecedores)
+            logging.info(f"Criada a pasta para armazenar os arquivos Excel: {pasta_fornecedores}")
 
         # Nome do arquivo Excel: Usando o nome do fornecedor ou o código dele
         nome_arquivo = limpar_nome_arquivo(fornecedor['nome']) if fornecedor.get('nome') else f"fornecedor_{fornecedor['codigo_fornecedor']}"
         caminho_excel = os.path.join(pasta_fornecedores, f"fornecedor_{nome_arquivo}.xlsx")
+
+        logging.debug(f"Caminho para salvar o arquivo Excel: {caminho_excel}")
 
         # Criando o arquivo Excel no caminho desejado
         workbook = xlsxwriter.Workbook(caminho_excel)
@@ -83,16 +99,16 @@ def gerar_excel():
         # Fechando o arquivo Excel
         workbook.close()
 
-        # Adicionando o print para verificar o caminho do arquivo
-        print(f"Excel gerado com sucesso: {caminho_excel}")
+        logging.info(f"Excel gerado com sucesso: {caminho_excel}")
 
         # Usando send_file para enviar o arquivo ao invés de send_from_directory
         return send_file(caminho_excel, as_attachment=True)
 
     except Exception as e:
         # Log de erro detalhado para facilitar depuração
-        print(f"Erro ao gerar Excel para fornecedor {fornecedor.get('nome', fornecedor.get('codigo_fornecedor'))}: {str(e)}")
+        logging.error(f"Erro ao gerar Excel para fornecedor {fornecedor.get('nome', fornecedor.get('codigo_fornecedor'))}: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500
+
 
 
 # Abaixo segue a versão do código utilizando armazenamento em memória, sem salvar fisicamente o arquivo no servidor

@@ -11,7 +11,6 @@ pasta_produtos = os.path.join(os.getcwd(), 'Excel', 'Produtos')
 
 # Função para limpar o nome do arquivo, substituindo caracteres especiais por underscores
 def limpar_nome_arquivo(nome):
-    # Substitui caracteres especiais por underscores
     nome_limpo = re.sub(r'[^a-zA-Z0-9_]+', '_', nome)
     return nome_limpo
 
@@ -19,22 +18,24 @@ def limpar_nome_arquivo(nome):
 @produto_bp.route('/gerar-excel', methods=['POST'])
 def gerar_excel():
     try:
-        # Dados do produto recebidos do frontend
         produto = request.json
+
+        # Verificando os dados do produto recebidos
+        print("Dados recebidos:", produto)
 
         # Verifica se a pasta 'Produtos' existe, caso contrário, cria
         if not os.path.exists(pasta_produtos):
             os.makedirs(pasta_produtos)
 
-        # Nome do arquivo Excel: Usando o nome do produto ou o código dele
+        # Nome do arquivo Excel
         nome_arquivo = limpar_nome_arquivo(produto['nome']) if produto.get('nome') else f"produto_{produto['codigo_produto']}"
         caminho_excel = os.path.join(pasta_produtos, f"produto_{nome_arquivo}.xlsx")
 
-        # Criando o arquivo Excel no caminho desejado
+        # Criando o arquivo Excel
         workbook = xlsxwriter.Workbook(caminho_excel)
         worksheet = workbook.add_worksheet()
 
-        # Adicionando o cabeçalho (com todos os campos)
+        # Adicionando os cabeçalhos
         worksheet.write('A1', 'Código Produto')
         worksheet.write('B1', 'Nome')
         worksheet.write('C1', 'Descrição PDV')
@@ -55,7 +56,7 @@ def gerar_excel():
         worksheet.write('R1', 'Data de Criação')
         worksheet.write('S1', 'Data de Atualização')
 
-        # Preenchendo os dados do produto
+        # Preenchendo os dados
         worksheet.write(1, 0, produto['codigo_produto'])
         worksheet.write(1, 1, produto['nome'])
         worksheet.write(1, 2, produto.get('descricao_pdv', ''))
@@ -76,16 +77,15 @@ def gerar_excel():
         worksheet.write(1, 17, produto.get('createdAt', ''))
         worksheet.write(1, 18, produto.get('updatedAt', ''))
 
-        # Fechando o arquivo Excel
+        # Fechando o arquivo
         workbook.close()
 
-        # Adicionando o print para verificar o caminho do arquivo
         print(f"Excel gerado com sucesso: {caminho_excel}")
 
-        # Usando send_file para enviar o arquivo
+        # Enviando o arquivo gerado
         return send_file(caminho_excel, as_attachment=True)
 
     except Exception as e:
-        # Log de erro detalhado para facilitar depuração
-        print(f"Erro ao gerar Excel para produto {produto.get('nome', produto.get('codigo_produto'))}: {str(e)}")
+        # Log do erro detalhado
+        print(f"Erro ao gerar Excel: {str(e)}")
         return jsonify({"error": str(e)}), 500

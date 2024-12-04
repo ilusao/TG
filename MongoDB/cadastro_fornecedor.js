@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Evento para alternar o estado de exportação para Excel
     exportButton.addEventListener('click', function () {
-        exportarParaExcel = !exportarParaExcel; // Alterna o valor
+        exportarParaExcel = !exportarParaExcel;
         statusExportarExcel.textContent = exportarParaExcel ? 'Sim' : 'Não';
     });
 
@@ -105,10 +105,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Validação e ajuste de dados antes de enviar ao backend
         const codigoFornecedor = document.getElementById('codigo_fornecedor').value.trim();
 
-        // Montar os dados para envio
         const data = {
             nome: document.getElementById('nome').value,
             descricao: document.getElementById('descricao').value || null,
@@ -119,55 +117,49 @@ document.addEventListener('DOMContentLoaded', () => {
             estado: document.getElementById('estado').value,
             cep: document.getElementById('cep').value,
             numero: document.getElementById('numero').value,
-            telefone: document.getElementById('telefone').value, 
+            telefone: document.getElementById('telefone').value,
             site: document.getElementById('site').value || null,
             cnpj: cnpjInput.value.replace(/\D/g, ''),
             codigo_fornecedor: codigoFornecedor,
             inativo: document.getElementById('inativo').value === 'true',
-            iFuncidonario: funcionarioId,
-            exportarParaExcel: exportarParaExcel 
+            idFuncionario: funcionarioId,
+            exportarParaExcel
         };
+
         console.log(data); 
-        
-        fetch('/fornecedores', {
+
+        fetch('/api/fornecedor', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Erro na requisição: ' + response.statusText);
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(result => {
             alert('Fornecedor cadastrado com sucesso!');
-            
-            const fornecedorSalvo = result.fornecedor;
         
-            // Se precisar gerar Excel, envia os dados para o Flask
             if (exportarParaExcel) {
-                fetch('/fornecedor/gerar-excel', {
+                fetch('/fornecedores', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(fornecedorSalvo)
+                    body: JSON.stringify(data) 
+                    
                 })
-                .then(response => {
-                    if (!response.ok) {
-                        console.error('Erro na resposta do Flask:', response.statusText);
-                        throw new Error('Erro ao gerar Excel');
-                    }
-                    return response.blob();
-                })
+                .then(response => response.blob())
                 .then(blob => {
+                    console.log("Dados enviados ao Flask:", {
+                        ...req.body,
+                        _id: req.body._id,
+                        cnpj,
+                        idFuncionario
+                    });
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.style.display = 'none';
                     a.href = url;
+                    a.download = 'fornecedor.xlsx';
                     document.body.appendChild(a);
                     a.click();
                     window.URL.revokeObjectURL(url);
-                    console.log('Excel gerado com sucesso!');
                 })
                 .catch(error => {
                     console.error('Erro ao gerar Excel:', error);
@@ -177,8 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(error => {
             console.error('Erro ao cadastrar fornecedor:', error);
-            alert('Excel gerado com sucesso!');
-            //alert('Erro ao cadastrar fornecedor: ' + error.message);
+            alert('Erro ao cadastrar fornecedor: ' + error.message);
         });
     });
 });

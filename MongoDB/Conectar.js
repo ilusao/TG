@@ -230,65 +230,85 @@ app.get('/api/produtos', async (req, res) => {
 
 // Rota para cadastro
 app.post('/api/produto', async (req, res) => {
-    
-   
-    const { codigo_produto, idFuncionario } = req.body;
-    
-    
-        try {
-            // Verifica se o produto já existe
-            const produtoExistente = await Produto.findOne({ codigo_produto });
-            if (produtoExistente) {
-                return res.status(400).json({ message: 'Código do produto já está em uso.' });
-            }
-    
-            const funcionario = await Funcionario.findById(idFuncionario);
-            if (!funcionario) {
-                return res.status(404).json({ message: 'Funcionário não encontrado.' });
-            }
-
-            const novoProduto = new Produto({
-                ...req.body,  
-                idFuncionario 
-            });
-            await novoProduto.save();
-            funcionario.produtosCadastrados.push(novoProduto._id);
-            await funcionario.save();
-    
-            res.status(201).json({ message: 'Produto cadastrado com sucesso!' });
-        } catch (error) {
-            console.error('Erro ao cadastrar o produto:', error);
-            res.status(500).json({ error: 'Erro ao cadastrar o produto' });
-        }
-    });
-
-    // Rota para registrar produto
-app.post('/produtos', async (req, res) => {
-    const { nome, descricao, preco, codigo_produto, idFuncionario, exportarParaExcel } = req.body;
-
-    // Validação de campos obrigatórios
-    if (!nome || !descricao || !preco || !codigo_produto || !idFuncionario) {
-        return res.status(400).json({ 
-            mensagem: 'Campos obrigatórios estão faltando.', 
-            dados: req.body 
-        });
-    }
+    const { codigo_produto, idFuncionario, almoxerifado, localizacao } = req.body;
 
     try {
+        // Verifica se o produto já existe
+        const produtoExistente = await Produto.findOne({ codigo_produto });
+        if (produtoExistente) {
+            return res.status(400).json({ message: 'Código do produto já está em uso.' });
+        }
+
+        const funcionario = await Funcionario.findById(idFuncionario);
+        if (!funcionario) {
+            return res.status(404).json({ message: 'Funcionário não encontrado.' });
+        }
+
+        let movimentacao = 0;
+
+        if (almoxerifado && localizacao) {
+            const estoqueExistente = await Estoque.findOne({ localizacao: localizacao });
+
+            if (estoqueExistente) {
+                // Verifica se a localização do estoque é igual à localização do produto
+                if (estoqueExistente.localizacao === localizacao) {
+                    movimentacao = 1;
+                }
+            }
+        }
+
+
         const novoProduto = new Produto({
             ...req.body,
-            idFuncionario,
-            dataCadastro: Date.now()  
+            movimentacoes: movimentacao,
+            idFuncionario
         });
 
-        const produtoSalvo = await novoProduto.save();
+        await novoProduto.save();
+        funcionario.produtosCadastrados.push(novoProduto._id);
+        await funcionario.save();
 
-        if (exportarParaExcel) {
-            // Enviar os dados completos para o Flask para gerar o Excel
+        if (almoxerifado || localizacao) {
+            try {
+                const movimentacaoResponse = await fetch('http://localhost:3000/movimentacoes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        novoAlmoxerifado: almoxerifado, 
+                        novaLocalizacao: localizacao, 
+                        produtoId: novoProduto._id 
+                    }),
+                });
+                const movimentacaoData = await movimentacaoResponse.json();
+                console.log('Movimentação registrada ao cadastrar produto:', movimentacaoData);
+            } catch (error) {
+                console.error('Erro ao registrar movimentação no cadastro do produto:', error);
+            }
+        }
+
+        res.status(201).json({ message: 'Produto cadastrado com sucesso!' });
+    } catch (error) {
+        console.error('Erro ao cadastrar o produto:', error);
+        res.status(500).json({ error: 'Erro ao cadastrar o produto' });
+    }
+});
+
+
+// Rota para enviar dados ao Flask
+app.post('/produtos', async (req, res) => {
+    const { nome, descricao, preco, codigo_produto, idFuncionario, exportarParaExcel } = req.body;
+    if (exportarParaExcel) {
+        try {
             const response = await fetch('http://localhost:5000/produto/gerar-excel', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(produtoSalvo)
+                body: JSON.stringify({
+                    nome,
+                    descricao,
+                    preco,
+                    codigo_produto,
+                    idFuncionario
+                })
             });
 
             if (response.ok) {
@@ -302,17 +322,12 @@ app.post('/produtos', async (req, res) => {
                 console.error('Erro ao gerar Excel no Flask:', response.statusText);
                 return res.status(500).json({ mensagem: 'Erro ao gerar o Excel.' });
             }
-        } else {
-            res.status(201).json({ mensagem: 'Produto cadastrado com sucesso!', produto: produtoSalvo });
+        } catch (error) {
+            console.error('Erro ao conectar com o Flask:', error);
+            return res.status(500).json({ mensagem: 'Erro ao comunicar com o Flask.' });
         }
-
-    } catch (error) {
-        console.error('Erro ao cadastrar produto:', error);
-        res.status(400).json({ 
-            mensagem: 'Erro ao cadastrar produto.',
-            erro: error.message,
-            dados: req.body 
-         });
+    } else {
+        res.status(400).json({ mensagem: 'É necessário escolher a opção para exportar para Excel.' });
     }
 });
 
@@ -357,12 +372,53 @@ app.put('/api/produto/:id', async (req, res) => {
     const updates = req.body;
 
     try {
-        if (updates.codigo_produto) {
-            const codigoExistente = await Produto.findOne({ codigo_produto: updates.codigo_produto });
-            if (codigoExistente && codigoExistente._id.toString() !== id) {
-                return res.status(400).json({ message: 'Código do produto já está em uso.' });
+        // Primeiro tenta buscar o produto pelo ID
+        let produtoAtual = await Produto.findById(id);
+
+        if (!produtoAtual) {
+            // Se não encontrar pelo ID, tenta buscar com os critérios da API de busca
+            const { nome, grupo, marca, codigo_produto, fornecedor } = req.body;
+            const query = {};
+
+            if (nome) query.nome = { $regex: nome, $options: 'i' };
+            if (grupo) query.grupo = { $regex: grupo, $options: 'i' };
+            if (marca) query.marca = { $regex: marca, $options: 'i' };
+            if (codigo_produto) query.codigo_produto = codigo_produto;
+            if (fornecedor) query.fornecedor = { $regex: fornecedor, $options: 'i' };
+
+            // Agora realiza a busca com os critérios
+            produtoAtual = await Produto.findOne(query);
+        }
+
+        if (!produtoAtual) {
+            return res.status(404).json({ message: 'Produto não encontrado' });
+        }
+
+        // Verificar se houve mudanças nos campos de almoxarifado ou localização
+        const almoxerifadoAlterado = updates.almoxerifado && updates.almoxerifado !== produtoAtual.almoxerifado;
+        const localizacaoAlterada = updates.localizacao && updates.localizacao !== produtoAtual.localizacao;
+
+        // Se houver alteração, registrar movimentação
+        if (almoxerifadoAlterado || localizacaoAlterada) {
+            try {
+                // Chama a API de movimentação, passando os dados antigos e novos
+                const movimentacaoResponse = await fetch('http://localhost:3000/movimentacoes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        novoAlmoxerifado: updates.almoxerifado || produtoAtual.almoxerifado,
+                        novaLocalizacao: updates.localizacao || produtoAtual.localizacao,
+                        produtoId: produtoAtual._id // Passando o ID do produto correto
+                    }),
+                });
+                const movimentacaoData = await movimentacaoResponse.json();
+                console.log('Movimentação registrada ao atualizar produto:', movimentacaoData);
+            } catch (error) {
+                console.error('Erro ao registrar movimentação na atualização do produto:', error);
             }
         }
+
+        // Atualizar o produto no banco
         const produtoAtualizado = await Produto.findByIdAndUpdate(id, updates, { new: true });
 
         if (!produtoAtualizado) {
@@ -471,33 +527,55 @@ app.get('/fornecedores/:id', async (req, res) => {
     }
 });
 
-// Rota para registrar fornecedor
-app.post('/fornecedores', async (req, res) => {
-    const { nome, email, cnpj, codigo_fornecedor, idFuncionario, exportarParaExcel } = req.body;
-
-    // Validação de campos obrigatórios
-    if (!nome || !email || !cnpj || !codigo_fornecedor || !idFuncionario) {
-        return res.status(400).json({ 
-            mensagem: 'Campos obrigatórios estão faltando.', 
-            dados: req.body 
-        });
-    }
+// Rota para cadastro de fornecedor
+app.post('/api/fornecedor', async (req, res) => {
+    const { nome_fornecedor, cnpj, idFuncionario, endereco } = req.body;
 
     try {
+        // Verifica se o fornecedor já existe
+        const fornecedorExistente = await Fornecedor.findOne({ cnpj });
+        if (fornecedorExistente) {
+            return res.status(400).json({ message: 'CNPJ do fornecedor já está em uso.' });
+        }
+
+        const funcionario = await Funcionario.findById(idFuncionario);
+        if (!funcionario) {
+            return res.status(404).json({ message: 'Funcionário não encontrado.' });
+        }
+
         const novoFornecedor = new Fornecedor({
             ...req.body,
-            idFuncionario,
-            dataCadastro: Date.now()  
+            idFuncionario
         });
 
-        const fornecedorSalvo = await novoFornecedor.save();
+        await novoFornecedor.save();
+        funcionario.fornecedores.push(novoFornecedor._id);
+        await funcionario.save();
 
-        if (exportarParaExcel) {
-            // Enviar os dados completos para o Flask para gerar o Excel
+        res.status(201).json({ message: 'Fornecedor cadastrado com sucesso!' });
+    } catch (error) {
+        console.error('Erro ao cadastrar fornecedor:', error);
+        res.status(500).json({ error: 'Erro ao cadastrar fornecedor' });
+    }
+});
+
+// Rota para enviar dados ao Flask para gerar o Excel
+app.post('/fornecedores', async (req, res) => {
+    const { nome_fornecedor, cnpj, idFuncionario, exportarParaExcel } = req.body;
+    if (exportarParaExcel) {
+        try {
+            const payload = {
+                ...req.body,
+                _id: req.body._id,
+                cnpj,
+                idFuncionario
+            };
+            console.log("Dados enviados ao Flask:", payload);
+
             const response = await fetch('http://localhost:5000/fornecedor/gerar-excel', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(fornecedorSalvo)
+                body: JSON.stringify(payload)
             });
 
             if (response.ok) {
@@ -511,19 +589,15 @@ app.post('/fornecedores', async (req, res) => {
                 console.error('Erro ao gerar Excel no Flask:', response.statusText);
                 return res.status(500).json({ mensagem: 'Erro ao gerar o Excel.' });
             }
-        } else {
-            res.status(201).json({ mensagem: 'Fornecedor cadastrado com sucesso!', fornecedor: fornecedorSalvo });
+        } catch (error) {
+            console.error('Erro ao conectar com o Flask:', error);
+            return res.status(500).json({ mensagem: 'Erro ao comunicar com o Flask.' });
         }
-
-    } catch (error) {
-        console.error('Erro ao cadastrar fornecedor:', error);
-        res.status(400).json({ 
-            mensagem: 'Erro ao cadastrar fornecedor.',
-            erro: error.message,
-            dados: req.body 
-         });
+    } else {
+        res.status(400).json({ mensagem: 'É necessário escolher a opção para exportar para Excel.' });
     }
 });
+
 
 
 
@@ -605,7 +679,7 @@ app.post('/estoques', async (req, res) => {
             const { 
                 nome, tipoEstante, tipoProduto, capacidadeTotal, numPrateleiras, 
                 espacoEntrePrateleiras, pesoMaximo, statusProduto, volumePorPrateleira, 
-                totalVolumeOcupado, numCaixas, capacidadeUtilizada, metaRegistro 
+                totalVolumeOcupado, numCaixas, capacidadeUtilizada, metaRegistro, localizacao
             } = estoqueData;
             const novoEstoque = new Estoque({
                 nome,
@@ -615,14 +689,15 @@ app.post('/estoques', async (req, res) => {
                 numPrateleiras,
                 espacoEntrePrateleiras,
                 pesoMaximo,
+                localizacao,
                 statusProduto,
                 volumePorPrateleira,
                 totalVolumeOcupado,
                 numCaixas,
                 capacidadeUtilizada,
                 metasRegistro: {
-                    metaMensal: metaRegistro.metaMensal || 0,
-                    metaMensalAtual: 0,
+                    metaMensal: req.body.metasRegistro?.metaMensal || 0, 
+                    metaMensalAtual: req.body.metasRegistro?.metaMensalAtual || 0,
                 }
             });
 
@@ -661,33 +736,65 @@ app.get('/estoques/:id', async (req, res) => {
     }
 });
 
-
-// Rota para buscar produtos de um estoque específico e produtos registrados no mês atual
-app.get('/produtos/por-estoque/:almoxerifado/registrados-mes', async (req, res) => {
-    const { almoxerifado } = req.params;
-
+// Rota para atualizar um estoque
+app.patch('/estoques/:id', async (req, res) => {
     try {
-        const now = new Date();
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        const { nome, localizacao, tipoEstante, tipoProduto, capacidadeTotal, numPrateleiras, espacoEntrePrateleiras, pesoMaximo } = req.body;
 
-        const produtosPorEstoque = await Produto.find({ almoxerifado });
-        const produtosRegistradosMes = await Produto.find({
-            almoxerifado,
-            createdAt: { $gte: startOfMonth, $lte: endOfMonth },
-        });
+        const estoque = await Estoque.findById(req.params.id);
+        
+        if (!estoque) {
+            return res.status(404).json({ message: 'Estoque não encontrado' });
+        }
 
-        res.status(200).json({
-            produtosPorEstoque,
-            produtosRegistradosMes,
-        });
+        if (nome) estoque.nome = nome;
+        if (localizacao) estoque.localizacao = localizacao;
+        if (tipoEstante) estoque.tipoEstante = tipoEstante;
+        if (tipoProduto) estoque.tipoProduto = tipoProduto;
+        if (capacidadeTotal) estoque.capacidadeTotal = capacidadeTotal;
+        if (numPrateleiras) estoque.numPrateleiras = numPrateleiras;
+        if (espacoEntrePrateleiras) estoque.espacoEntrePrateleiras = espacoEntrePrateleiras;
+        if (pesoMaximo) estoque.pesoMaximo = pesoMaximo;
+
+        await estoque.save();
+
+        res.status(200).json(estoque);
     } catch (error) {
-        res.status(500).json({ message: 'Erro ao buscar produtos.' });
+        console.error('Erro ao atualizar estoque:', error);
+        res.status(500).json({ message: 'Erro ao atualizar estoque.' });
     }
 });
 
+// Rota para buscar produtos de um estoque específico
+app.get('/produtos/por-estoque/:almoxerifado', async (req, res) => {
+    const { almoxerifado } = req.params;
 
+    try {
+        const produtosPorEstoque = await Produto.find({ almoxerifado });
+        res.status(200).json(produtosPorEstoque);
+    } catch (error) {
+        res.status(500).json({ message: 'Erro ao buscar produtos por estoque.' });
+    }
+});
 
+// Endpoint para buscar produtos registrados no mês atual
+app.get('/produtos/registrados-mes', async (req, res) => {
+    try {
+        const inicioDoMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+        const fimDoMes = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0, 23, 59, 59); 
+        const produtos = await Produto.find({
+            createdAt: { 
+                $gte: inicioDoMes,
+                $lte: fimDoMes 
+            }
+        });
+
+        res.status(200).json(produtos);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Erro ao buscar produtos.' });
+    }
+});
 
 // Rota para consultar as informações do estoque e calcular 
 app.get('/estoques/:almoxerifado', async (req, res) => {
@@ -720,34 +827,136 @@ app.get('/estoques/:almoxerifado', async (req, res) => {
     }
 });
 
-// Rota para editar a meta de registro de produtos de um estoque
-app.put('/estoques/:id/metaRegistro', async (req, res) => {
+// Atualizar a meta de registro de produtos para todos os estoques
+app.put('/estoques/metaRegistro', async (req, res) => {
     const { metaMensal } = req.body;
-    const estoqueId = req.params.id;
+    
+    if (!metaMensal || metaMensal <= 0) {
+        return res.status(400).json({ error: "Meta mensal inválida." });
+    }
 
     try {
-        const estoque = await Estoque.findById(estoqueId);
+        const estoquesAtualizados = await Estoque.updateMany(
+            {},
+            { $set: { "metasRegistro.metaMensal": metaMensal } }
+        );
 
-        if (!estoque) {
-            return res.status(404).json({ message: 'Estoque não encontrado' });
+        return res.status(200).json({ message: "Metas de todos os estoques atualizadas." });
+    } catch (error) {
+        console.error("Erro ao atualizar as metas:", error);
+        return res.status(500).json({ error: "Erro ao atualizar as metas." });
+    }
+});
+// Rota para conseguirmos contar a movimentação dos produtos no estoque...
+app.post('/movimentacoes', async (req, res) => {
+    try {
+        console.log('Recebendo requisição na rota /movimentacoes');
+        console.log('Dados recebidos no corpo da requisição:', req.body);
+
+        const { novoAlmoxerifado, novaLocalizacao, produtoId } = req.body;
+
+        if (!produtoId) {
+            console.error('Erro: produtoId não fornecido.');
+            return res.status(400).json({ message: 'produtoId é obrigatório.' });
         }
 
-        estoque.metasRegistro.metaMensal = metaMensal;
-        estoque.metasRegistro.metaMensalAtual = 0;
+        console.log(`Buscando produto com ID: ${produtoId}`);
+        const produto = await Produto.findById(produtoId);
 
-        await estoque.save();
+        if (!produto) {
+            console.error(`Produto com ID ${produtoId} não encontrado.`);
+            return res.status(404).json({ message: 'Produto não encontrado.' });
+        }
 
-        res.status(200).json({
-            message: 'Meta de registro de produtos atualizada com sucesso!',
-            estoque: {
-                id: estoque._id,
-                metasRegistro: estoque.metasRegistro,
-                ...estoque.toObject(),
-            }
-        });
+        console.log('Produto encontrado:', produto);
+
+        const almoxerifadoAntigo = produto.almoxerifado;
+        const localizacaoAntiga = produto.localizacao;
+
+        let movimentacaoAtualizada = false;
+
+        if (novoAlmoxerifado && almoxerifadoAntigo !== novoAlmoxerifado) {
+            produto.almoxerifado = novoAlmoxerifado;
+            movimentacaoAtualizada = true;
+        }
+
+        if (novaLocalizacao && localizacaoAntiga !== novaLocalizacao) {
+            produto.localizacao = novaLocalizacao;
+            movimentacaoAtualizada = true;
+        }
+
+        if (movimentacaoAtualizada) {
+            produto.movimentacoes += 1;
+            produto.dataMovimentacao = new Date();
+
+            await Produto.updateOne(
+                { _id: produto._id },
+                {
+                    $set: {
+                        movimentacoes: produto.movimentacoes,
+                        dataMovimentacao: produto.dataMovimentacao,
+                        almoxerifado: produto.almoxerifado,
+                        localizacao: produto.localizacao,
+                    },
+                }
+            );
+            console.log('Produto salvo no banco de dados.');
+        }
+
+        res.status(200).json({ message: 'Movimentação atualizada com sucesso.' });
+
     } catch (error) {
-        console.error('Erro ao editar a meta de registro de produtos:', error);
-        res.status(500).json({ message: 'Erro ao editar a meta de registro de produtos' });
+        console.error('Erro ao processar movimentações:', error);
+        res.status(500).json({ message: 'Erro ao calcular movimentação.' });
+    }
+});
+
+
+// Rota para enviar para o front, somando todas as movimentações de todos os produtos
+app.get('/movimentacoes', async (req, res) => {
+    try {
+        console.log('Recebendo requisição na rota /movimentacoes (GET)');
+        const produtos = await Produto.find({});
+        console.log(`Produtos encontrados: ${produtos.length}`);
+        
+        if (produtos.length > 0) {
+            console.log('Produtos encontrados:', produtos);
+        }
+        const totalMovimentacoes = produtos.reduce((total, produto) => {
+            console.log(`Produto: ${produto.nome}, Movimentações: ${produto.movimentacoes}`);
+            return total + (produto.movimentacoes || 0);
+        }, 0);
+
+        console.log(`Total de movimentações de todos os produtos: ${totalMovimentacoes}`);
+        res.status(200).json({ totalMovimentacoes });
+    } catch (error) {
+        console.error('Erro ao calcular movimentações:', error);
+        res.status(500).json({ message: 'Erro ao calcular movimentações.' });
+    }
+});
+
+
+// Rota para obter os produtos cadastrados no mês e no período
+app.get('/produtos/contagem-funcionarios', async (req, res) => {
+    try {
+        const inicioDoMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+        const fimDoMes = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0, 23, 59, 59);
+        const produtosNoMes = await Produto.find({
+            createdAt: { 
+                $gte: inicioDoMes,
+                $lte: fimDoMes
+            }
+        }).populate('idFuncionario');
+
+        const produtosPorPeriodo = await Produto.find().populate('idFuncionario');
+        res.status(200).json({
+            produtosNoMes,
+            produtosPorPeriodo
+        });
+
+    } catch (error) {
+        console.error('Erro ao buscar produtos:', error);
+        res.status(500).json({ message: 'Erro ao buscar produtos.' });
     }
 });
 

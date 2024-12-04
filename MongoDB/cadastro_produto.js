@@ -1,4 +1,4 @@
-// Função para validação de cada campo individualmente 
+// Função para validar cada campo individualmente
 const validateField = (input) => {
     if (!input.value.trim()) {
         input.classList.add('is-invalid');
@@ -14,22 +14,53 @@ const validateField = (input) => {
 const form = document.getElementById('productForm');
 
 // Função para enviar os dados do produto ao backend
-const submitForm = async (formData) => {
+const submitForm = async (formData, exportarParaExcel) => {
     try {
-        const response = await fetch('/api/produto', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        });
+        console.log('Iniciando o envio dos dados para o backend...');
+        console.log('Dados:', formData);
+        console.log('Exportar para Excel:', exportarParaExcel);
 
-        if (response.ok) {
-            alert('Produto cadastrado com sucesso!');
-            form.reset();
+        if (exportarParaExcel) {
+            console.log('Enviando dados para gerar Excel...');
+            const response = await fetch('http://localhost:5000/produto/gerar-excel', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            console.log('Status da resposta:', response.status);
+
+            if (response.ok) {
+                const arrayBuffer = await response.arrayBuffer();
+                const blob = new Blob([arrayBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'produto.xlsx';
+                link.click();
+                console.log('Excel gerado e baixado com sucesso.');
+            } else {
+                console.error('Erro ao gerar Excel no Flask:', response.statusText);
+                alert('Erro ao gerar o Excel.');
+            }
         } else {
-            const errorData = await response.json();
-            alert(`Erro ao cadastrar o produto: ${errorData.error}`);
+            console.log('Enviando dados para MongoDB...');
+            const response = await fetch('/api/produto', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                alert('Produto cadastrado com sucesso!');
+                form.reset();
+            } else {
+                const errorData = await response.json();
+                alert(`Erro ao cadastrar o produto: ${errorData.error}`);
+            }
         }
     } catch (error) {
         alert('Erro ao conectar com o servidor.');
@@ -72,9 +103,8 @@ const populateEstoqueSelect = (estoques) => {
     'use strict';
 
     form.addEventListener('submit', (event) => {
-        event.preventDefault(); // Evita o envio padrão do formulário
+        event.preventDefault();
 
-        // Verifica se o formulário é válido
         if (!form.checkValidity()) {
             event.stopPropagation();
             form.classList.add('was-validated');
@@ -103,7 +133,6 @@ const populateEstoqueSelect = (estoques) => {
             idFuncionario: localStorage.getItem('funcionarioId')
         };
 
-        // Verifica se o grupo e subgrupo são válidos
         if (formData.grupo === '' || formData.grupo === 'Selecione um grupo') {
             alert('Por favor, selecione um grupo válido.');
             return;
@@ -114,14 +143,37 @@ const populateEstoqueSelect = (estoques) => {
             return;
         }
 
-        submitForm(formData);
+        const exportarParaExcel = document.getElementById('exportarExcel').classList.contains('btn-success');
+
+        console.log('Exportar para Excel:', exportarParaExcel); 
+
+        submitForm(formData, exportarParaExcel);
     });
 })();
 
+document.addEventListener('DOMContentLoaded', function () {
+    const exportarButton = document.getElementById('exportarExcel');
+    const statusSpan = document.getElementById('statusExportarExcel');
+    let exportarParaExcel = false;
+
+    exportarButton.addEventListener('click', function () {
+        exportarParaExcel = !exportarParaExcel;
+        if (exportarParaExcel) {
+            exportarButton.classList.add('btn-success');
+            exportarButton.classList.remove('btn-danger');
+        } else {
+            exportarButton.classList.remove('btn-success');
+            exportarButton.classList.add('btn-danger');
+        }
+        statusSpan.textContent = exportarParaExcel ? 'Sim' : 'Não';
+
+        console.log('Botão de exportação para Excel foi clicado. Novo estado:', exportarParaExcel);
+    });
+});
+
+// botão registrar
 document.addEventListener('DOMContentLoaded', function() {
     const inputs = form.querySelectorAll('input, select');
-
-    // Desabilitar o botão no início
     document.getElementById('Consult').disabled = true;
 
     function checkForm() {
@@ -140,7 +192,6 @@ document.addEventListener('DOMContentLoaded', function() {
         input.addEventListener('input', checkForm);
     });
 
-    // Verifica os campos ao carregar a página
     checkForm();
 });
 
@@ -232,60 +283,6 @@ document.getElementById('addSubgroup').addEventListener('click', () => {
         alert('Selecione um grupo antes de adicionar um subgrupo.');
     }
 });
-
-
-fetch('/produtos', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-})
-.then(response => {
-    if (!response.ok) {
-        throw new Error('Erro na requisição: ' + response.statusText);
-    }
-    return response.json();
-})
-.then(result => {
-    alert('Produto cadastrado com sucesso!');
-    
-    const produtoSalvo = result.produto;
-
-    // Se precisar gerar Excel, envia os dados para o Flask
-    if (exportarParaExcel) {
-        fetch('/produto/gerar-excel', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(produtoSalvo)
-        })
-        .then(response => {
-            if (!response.ok) {
-                console.error('Erro na resposta do Flask:', response.statusText);
-                throw new Error('Erro ao gerar Excel');
-            }
-            return response.blob();
-        })
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            console.log('Excel gerado com sucesso!');
-        })
-        .catch(error => {
-            console.error('Erro ao gerar Excel:', error);
-            alert('Erro ao gerar Excel: ' + error.message);
-        });
-    }
-})
-.catch(error => {
-    console.error('Erro ao cadastrar produto:', error);
-    alert('Erro ao cadastrar produto: ' + error.message);
-});
-
-
 
 // para mostrar os estoques
 document.addEventListener('DOMContentLoaded', () => {

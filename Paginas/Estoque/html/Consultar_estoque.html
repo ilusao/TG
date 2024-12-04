@@ -12,11 +12,12 @@
     <link href="../css/Consultar_estoque.css" rel="stylesheet">
 </head>
 <body>
+    
     <div class="container mt-5">
         <h1 class="text-center mb-4">Painel de Controle - Estoque</h1>
 
         <div class="card p-4 mb-4" id="estoque-selecionado">
-            <h3 class="mb-3">Escolher Estoque</h3>
+            <h3 class="mb-3 text-center">Escolher Estoque</h3>
             <div class="text-center">
                 <button class="btn btn-primary" onclick="mostrarEstoques()">Escolher Estoque</button>
             </div>
@@ -42,18 +43,41 @@
                 <i class="bi bi-pencil"></i>
             </button>
         </div>
-        <div id="metaRegistroContainer">
-        <p><strong>Meta de Ocupação:</strong> Não ultrapassar 90% da capacidade</p>
-        <p><strong>Produtos Movimentados Este Mês:</strong> 120</p>
-        <p><strong>Taxa de Perdas:</strong> 2% (10 produtos vencidos)</p>
-        <p><strong>Meta de Registro de Produtos:</strong> <span id="metaRegistroValor"></span> </p>
-        <p><strong>Produtos Registrados nesse Mês:</strong> <span id="produtos-registrados-no-mes">1500</span> produtos</p>
-        <p><strong>Progresso da Meta:</strong> <span id="progressoMeta">75%</span></p>
-        <p><strong>Funcionario que mais cadastrou Produtos (nesse mês)</strong> <span id="Funcionario-Mes">algum ai</span></p>
-        <p><strong>Funcionario que mais cadastrou Produtos (Qualquer periodo)</strong> <span id="Funcionario-Periodo">algum ai</span></p>
-
+        <div class="container mt-4">
+            <div class="card">
+                <h3>Meta de Ocupação</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Meta de Ocupação:</strong> Não ultrapassar 90% da capacidade</p>
+                        <p><strong>Produtos Movimentados Este Mês: </strong><span id="Movimentacao-produtos"></span></p>
+                        <p><strong>Taxa de Perdas:</strong> 2% (10 produtos vencidos)</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Meta de Registro de Produtos:</strong> <span id="metaRegistroValor">1500</span> </p>
+                        <p><strong>Produtos Registrados nesse Mês:</strong> <span id="produtos-registrados-no-mes">1500</span> produtos</p>
+                        <p><strong>Progresso da Meta:</strong> <span id="progressoMeta">75%</span></p>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="card mt-4">
+                <h3>Funcionários Cadastradores</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Funcionario que mais cadastrou Produtos (nesse mês):</strong></p>
+                        <p><span id="Funcionario-Mes">Nome do Funcionário</span>
+                        <p><strong>Codigo do funcionário:</strong> <span id="Codigo-Mes">Código do Funcionário</span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Funcionario que mais cadastrou Produtos (Qualquer período):</strong></p>
+                        <p><span id="Funcionario-Periodo">Nome do Funcionário</span>
+                        <p><strong>Codigo do funcionário:</strong> <span id="Codigo-Periodo">Código do Funcionário</span></p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+    
     
     
 

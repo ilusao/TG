@@ -1,8 +1,8 @@
-// Função para gerar formulários de estoques
 function gerarFormulariosEstoques() {
     const numEstoques = parseInt(document.getElementById("numEstoques").value);
     const estoquesContainer = document.getElementById("estoques");
-    estoquesContainer.innerHTML = ''; // Limpar conteúdo anterior
+    estoquesContainer.innerHTML = '';
+
 
     for (let i = 1; i <= numEstoques; i++) {
         const estoqueDiv = document.createElement("div");
@@ -13,6 +13,10 @@ function gerarFormulariosEstoques() {
                 <label for="nomeEstoque${i}" class="form-label">Nome do Estoque</label>
                 <input type="text" id="nomeEstoque${i}" class="form-control" required>
             </div>
+             <div class="mb-3">
+                 <label for="localizacao${i}" class="form-label">Localização do Estoque (Dom Amaury Castanho)</label>
+                 <input type="text" id="localizacao${i}" class="form-control" required>
+             </div>
             <div class="mb-3">
                 <label for="tipoEstante${i}" class="form-label">Tipo de Estantes ou Sistemas Utilizados</label>
                 <select id="tipoEstante${i}" class="form-select" required onchange="atualizarDimensaoPrateleira(${i})">
@@ -25,7 +29,6 @@ function gerarFormulariosEstoques() {
                 </select>
             </div>
             <div id="descricaoTipoEstante${i}" class="mb-3">
-                <!-- Descrição será inserida aqui -->
             </div>
             <div class="mb-3">
                 <label for="tipoProduto${i}" class="form-label">Tipo de Bens Armazenados</label>
@@ -58,7 +61,6 @@ function gerarFormulariosEstoques() {
         `;
         estoquesContainer.appendChild(estoqueDiv);
         
-        // Chama a função para atualizar a descrição e a capacidade para o tipo inicial selecionado
         atualizarDimensaoPrateleira(i);
     }
 }
@@ -106,38 +108,38 @@ function calcularEspaco(estoqueIndex) {
     if (capacidadeTotal > 0 && numPrateleiras > 0 && pesoMaximoPorPrateleira > 0) {
         let volumePorPrateleira = 0;
 
-        // Definir a capacidade por prateleira dependendo do tipo de estante
         switch(tipoEstante) {
             case "convencional":
-                volumePorPrateleira = 5;  // Exemplo: 5 m³ por prateleira
+                volumePorPrateleira = 5;
                 break;
             case "porta-paletes":
-                volumePorPrateleira = 10; // Exemplo: 10 m³ por prateleira
+                volumePorPrateleira = 10;
                 break;
             case "drive-in":
-                volumePorPrateleira = 8;  // Exemplo: 8 m³ por prateleira
+                volumePorPrateleira = 8;
                 break;
             case "cantilever":
-                volumePorPrateleira = 15; // Exemplo: 15 m³ por prateleira
+                volumePorPrateleira = 15;
                 break;
             case "prateleira-flutuante":
-                volumePorPrateleira = 6;  // Exemplo: 6 m³ por prateleira
+                volumePorPrateleira = 6;
                 break;
             case "estante-movel":
-                volumePorPrateleira = 7;  // Exemplo: 7 m³ por prateleira
+                volumePorPrateleira = 7;
                 break;
             default:
                 volumePorPrateleira = 0;
         }
 
-        // Cálculo do espaço total ocupado pelas prateleiras no estoque
-        const totalVolumeOcupado = numPrateleiras * volumePorPrateleira;  // Volume total ocupado pelas prateleiras
+        const totalVolumeOcupado = numPrateleiras * volumePorPrateleira; 
+        const comprimentoCaixa = 22.5 / 100;
+        const larguraCaixa = 33.0 / 100;  
+        const alturaCaixa = 16.5 / 100;    
 
-        // Cálculo do número de caixas baseado no peso máximo
-        const numCaixasPorPrateleira = Math.floor(pesoMaximoPorPrateleira / 500); // Exemplo: 500kg por caixa
-        const numCaixas = numPrateleiras * numCaixasPorPrateleira;
+        const volumeCaixa = comprimentoCaixa * larguraCaixa * alturaCaixa;
 
-        // Exibir o resultado detalhado
+        const numCaixasTotal = Math.floor(capacidadeTotal / volumeCaixa);
+
         const resultadoTexto = `
             <h5>Estoque ${estoqueIndex}:</h5>
             <p><strong>Capacidade Total do Estoque:</strong> ${capacidadeTotal} m³</p>
@@ -145,7 +147,7 @@ function calcularEspaco(estoqueIndex) {
             <p><strong>Número de Prateleiras:</strong> ${numPrateleiras}</p>
             <p><strong>Volume por Prateleira:</strong> ${volumePorPrateleira} m³</p>
             <p><strong>Total de Volume Ocupado pelas Prateleiras:</strong> ${totalVolumeOcupado} m³</p>
-            <p><strong>Total de Caixas que Podem Ser Armazenadas:</strong> ${numCaixas}</p>
+            <p><strong>Total de Caixas que Podem Ser Armazenadas (caixas padrão):</strong> ${numCaixasTotal}</p>
             <p><strong>Peso Máximo por Prateleira:</strong> ${pesoMaximoPorPrateleira} kg</p>
             <p><strong>Capacidade Utilizada:</strong> ${((totalVolumeOcupado / capacidadeTotal) * 100).toFixed(2)}% do volume total do estoque</p>
         `;
@@ -169,6 +171,7 @@ function salvarEstoques() {
         const numPrateleiras = parseInt(document.getElementById(`numPrateleiras${i}`).value);
         const espacoEntrePrateleiras = parseInt(document.getElementById(`espacoEntrePrateleiras${i}`).value);
         const pesoMaximo = parseFloat(document.getElementById(`pesoMaximo${i}`).value);
+        const localizacao = document.getElementById(`localizacao${i}`).value; 
         let volumePorPrateleira = 0;
         switch (tipoEstante) {
             case "convencional": volumePorPrateleira = 5; break;
@@ -194,6 +197,7 @@ function salvarEstoques() {
             numPrateleiras,
             espacoEntrePrateleiras,
             pesoMaximo,
+            localizacao,
             statusProduto: "ativo",
             produtos: [],
             volumePorPrateleira,
@@ -262,9 +266,9 @@ function listarEstoques() {
 // Função para exibir informações de um estoque específico e permitir edição
 function exibirEdicaoEstoque(estoqueId) {
     const estoquesContainer = document.getElementById("estoques");
-    estoquesContainer.innerHTML = ''; // Limpar conteúdo anterior
+    estoquesContainer.innerHTML = '';
 
-    fetch(`estoques/${estoqueId}`)
+    fetch(`/estoques/${estoqueId}`)
         .then(response => {
             if (!response.ok) throw new Error("Erro ao buscar estoque.");
             return response.json();
@@ -274,34 +278,45 @@ function exibirEdicaoEstoque(estoqueId) {
             estoqueDiv.classList.add("card", "p-4", "mb-4");
             estoqueDiv.innerHTML = `
                 <h4>Editando Estoque: ${estoque.tipoEstante}</h4>
+                <form id="formEdicaoEstoque">
                 <div class="mb-3">
-                    <label for="editTipoEstante" class="form-label">Tipo de Estantes</label>
-                    <select id="editTipoEstante" class="form-select">
-                        <option value="convencional" ${estoque.tipoEstante === 'convencional' ? 'selected' : ''}>Convencional</option>
-                        <option value="porta-paletes" ${estoque.tipoEstante === 'porta-paletes' ? 'selected' : ''}>Porta-Paletes</option>
-                        <option value="drive-in" ${estoque.tipoEstante === 'drive-in' ? 'selected' : ''}>Drive-In</option>
-                        <option value="cantilever" ${estoque.tipoEstante === 'cantilever' ? 'selected' : ''}>Cantilever</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="editTipoProduto" class="form-label">Tipo de Produto</label>
-                    <select id="editTipoProduto" class="form-select">
-                        <option value="solido" ${estoque.tipoProduto === 'solido' ? 'selected' : ''}>Sólidos</option>
-                        <option value="liquido" ${estoque.tipoProduto === 'liquido' ? 'selected' : ''}>Líquidos</option>
-                        <option value="perecivel" ${estoque.tipoProduto === 'perecivel' ? 'selected' : ''}>Perecíveis</option>
-                        <option value="geral" ${estoque.tipoProduto === 'geral' ? 'selected' : ''}>Outros</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="editCapacidadeTotal" class="form-label">Capacidade Total</label>
-                    <input type="number" id="editCapacidadeTotal" class="form-control" value="${estoque.capacidadeTotal}">
-                </div>
-                <div class="mb-3">
-                    <label for="editNumPrateleiras" class="form-label">Número de Prateleiras</label>
-                    <input type="number" id="editNumPrateleiras" class="form-control" value="${estoque.numPrateleiras}">
-                </div>
-                <button type="button" class="btn btn-success" onclick="salvarEdicaoEstoque('${estoque._id}')">Salvar Alterações</button>
-                <button type="button" class="btn btn-secondary" onclick="listarEstoques()">Voltar</button>
+                        <label for="editNome" class="form-label">Nome do estoque</label>
+                        <input type="text" id="NomeEstoque" class="form-control" value="${estoque.nome}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editNome" class="form-label">Local onde o produto esta</label>
+                        <input type="text" id="NomeEstoque" class="form-control" value="${estoque.localizacao}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editTipoEstante" class="form-label">Tipo de Estantes</label>
+                        <select id="editTipoEstante" class="form-select">
+                            <option value="convencional" ${estoque.tipoEstante === 'convencional' ? 'selected' : ''}>Convencional</option>
+                            <option value="porta-paletes" ${estoque.tipoEstante === 'porta-paletes' ? 'selected' : ''}>Porta-Paletes</option>
+                            <option value="drive-in" ${estoque.tipoEstante === 'drive-in' ? 'selected' : ''}>Drive-In</option>
+                            <option value="cantilever" ${estoque.tipoEstante === 'cantilever' ? 'selected' : ''}>Cantilever</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editTipoProduto" class="form-label">Tipo de Produto</label>
+                        <select id="editTipoProduto" class="form-select">
+                            <option value="solido" ${estoque.tipoProduto === 'solido' ? 'selected' : ''}>Sólidos</option>
+                            <option value="liquido" ${estoque.tipoProduto === 'liquido' ? 'selected' : ''}>Líquidos</option>
+                            <option value="perecivel" ${estoque.tipoProduto === 'perecivel' ? 'selected' : ''}>Perecíveis</option>
+                            <option value="geral" ${estoque.tipoProduto === 'geral' ? 'selected' : ''}>Outros</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editCapacidadeTotal" class="form-label">Capacidade Total</label>
+                        <input type="number" id="editCapacidadeTotal" class="form-control" value="${estoque.capacidadeTotal}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editNumPrateleiras" class="form-label">Número de Prateleiras</label>
+                        <input type="number" id="editNumPrateleiras" class="form-control" value="${estoque.numPrateleiras}">
+                    </div>
+                </form>
+                <button type="button" class="btn btn-success btn-custom" onclick="salvarEdicaoEstoque('${estoque._id}')">Salvar Alterações</button>
+                <br>
+                <button type="button" class="btn btn-secondary btn-custom" onclick="listarEstoques()">Voltar</button>
             `;
             estoquesContainer.appendChild(estoqueDiv);
         })
@@ -311,15 +326,15 @@ function exibirEdicaoEstoque(estoqueId) {
         });
 }
 
-// Função para salvar as alterações de um estoque
+// Atualiza o estoque 
 function salvarEdicaoEstoque(estoqueId) {
     const tipoEstante = document.getElementById("editTipoEstante").value;
     const tipoProduto = document.getElementById("editTipoProduto").value;
     const capacidadeTotal = parseFloat(document.getElementById("editCapacidadeTotal").value);
     const numPrateleiras = parseInt(document.getElementById("editNumPrateleiras").value);
 
-    fetch(`estoques/${estoqueId}`, {
-        method: 'PUT',
+    fetch(`/estoques/${estoqueId}`, {
+        method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
         },
@@ -327,28 +342,19 @@ function salvarEdicaoEstoque(estoqueId) {
             tipoEstante,
             tipoProduto,
             capacidadeTotal,
-            numPrateleiras,
-            volumePorPrateleira,
-            totalVolumeOcupado,
-            numCaixas,
-            capacidadeUtilizada
+            numPrateleiras
         }),
     })
-    .then(response => {
-        if (!response.ok) throw new Error("Erro ao salvar alterações.");
-        return response.json();
-    })
-    .then(() => {
-        alert('Estoque atualizado com sucesso!');
-        listarEstoques();
-    })
-    .catch(error => {
-        console.error('Erro ao salvar alterações:', error);
-        alert('Erro ao salvar alterações do estoque.');
-    })
-    .then(data => {
-        mostrarMensagem("success", data.message);
-        listarEstoques();
-        document.getElementById("estoques").innerHTML = '';
-    });
+        .then(response => {
+            if (!response.ok) throw new Error("Erro ao salvar alterações.");
+            return response.json();
+        })
+        .then(() => {
+            alert('Estoque atualizado com sucesso!');
+            listarEstoques();
+        })
+        .catch(error => {
+            console.error('Erro ao salvar alterações:', error);
+            alert('Erro ao salvar alterações do estoque.');
+        });
 }
