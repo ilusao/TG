@@ -4,7 +4,7 @@ from flask_cors import CORS
 # Importando os Blueprints de cada módulo
 from Cadastro_Fornecedor import fornecedor_bp
 from Cadastro_Produto import produto_bp
-from Consultar_Produto import Consultar_produto_bp
+from Consultar_Produto import Consultar_produto_bp  # consultar produto
 from Consultar_Estoque import estoque_bp
 
 app = Flask(__name__)
