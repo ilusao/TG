@@ -4,7 +4,8 @@ from flask_cors import CORS
 # Importando os Blueprints de cada módulo
 from Cadastro_Fornecedor import fornecedor_bp
 from Cadastro_Produto import produto_bp
-from Consultar_Produto import Consultar_produto_bp  # consultar produto
+from Consultar_Produto import Consultar_produto_bp
+from Consultar_Fornecedor import Consultar_fornecedor_bp
 from Consultar_Estoque import estoque_bp
 
 app = Flask(__name__)
@@ -14,6 +15,7 @@ CORS(app)
 app.register_blueprint(fornecedor_bp, url_prefix='/fornecedor')
 app.register_blueprint(produto_bp, url_prefix='/produto')
 app.register_blueprint(Consultar_produto_bp, url_prefix='/Cproduto')
+app.register_blueprint(Consultar_fornecedor_bp, url_prefix='/Cfornecedor')
 app.register_blueprint(estoque_bp, url_prefix='/estoque')
 
 if __name__ == '__main__':

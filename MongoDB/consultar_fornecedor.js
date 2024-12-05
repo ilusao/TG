@@ -373,6 +373,29 @@ function validarFormulario() {
     salvarAlteracoes();
 }
 
+
+// Função para enviar os dados do produto ao backend e gerar consigo uma lista
+function Excell() {
+    fetch('http://localhost:5000/Cproduto/gerar-list-excel', { 
+        method: 'POST',
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.blob();
+        }
+        throw new Error('Falha ao gerar Excel');
+    })
+    .then(blob => {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'fornecedores_list.xlsx';
+        link.click();
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+    });
+}
+
 // Função para validar CNPJ (Regra simples de validação de CNPJ)
 function validarCNPJ(cnpj) {
     cnpj = cnpj.replace(/[^\d]+/g, '');
