@@ -96,7 +96,7 @@
                     </button>
                     <br>
                     <button type="button" class="btn btn-primary btn-custom right bg-purple-800"
-                        id="consultar-button" onclick="window.location.href='/Estoque/html/Consultar_estoque.html';">
+                        id="estoque-button" onclick="window.location.href='/Estoque/html/Consultar_estoque.html';">
                         Consultar Estoque <i class="bi bi-arrow-right"></i>
                     </button>
                 </div>
@@ -117,6 +117,7 @@
             if (cargo === "Funcionário de Estoque") {
                 document.getElementById('fornecedor-button').classList.add('disabled');
                 document.getElementById('cadastro-button').classList.add('disabled');
+                document.getElementById('estoque-button').classList.add('disabled');
 
                 /* caso seja melhor azer os botões desaparecerem, só colocar esse codigo.
                 document.getElementById('fornecedor-button').style.display = 'none';
@@ -129,6 +130,7 @@
                 document.getElementById('localidade-button').classList.add('disabled');
                 document.getElementById('produto-button').classList.add('disabled');
                 document.getElementById('consultar-button').classList.add('disabled');
+                document.getElementById('estoque-button').classList.add('disabled');
 
 
                 /*

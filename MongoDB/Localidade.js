@@ -56,7 +56,7 @@ var map = L.map('map').setView([-23.2644, -47.2992], 13);
                 for (let produto of produtos) {
                     if (produto.destino && produto.data_entrada) {
                         const dataEntrada = new Date(produto.data_entrada).toISOString().split("T")[0];
-                        if (dataEntrada === hoje) {
+                        if (dataEntrada <= hoje) {
                             produto.localizacao = produto.destino;
                             produto.destino = "";
                             await atualizarLocalizacaoProduto(produto.codigo_produto, produto.localizacao, produto.destino);
