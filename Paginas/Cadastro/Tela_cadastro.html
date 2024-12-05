@@ -133,7 +133,7 @@
                 inativo: document.querySelector('input[name="inativo"]:checked').value === 'sim',
                 cargo: document.getElementById('cargo').value,
                 senha: gerarSenhaAleatoria(),
-                dataContratacao: new Date().value.split('T')[0],
+                dataContratacao: new Date().toISOString().split('T')[0],
             };
     
             try {

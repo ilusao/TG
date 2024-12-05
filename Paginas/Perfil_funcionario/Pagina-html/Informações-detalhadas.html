@@ -141,29 +141,39 @@
         produtosCadastradosMesAtual = produtosCadastradosNoMes;
 
         // Carregar a meta mensal do estoque
-        if (cargo === 'Funcionário de Estoque') {
-            const estoqueResponse = await fetch('/estoques');
-            if (!estoqueResponse.ok) {
-                throw new Error('Erro ao buscar os estoques: ' + estoqueResponse.status);
-            }
-            const estoques = await estoqueResponse.json();
-            if (estoques && estoques.length > 0) {
-                const estoque = estoques[0];
-                const metasRegistro = estoque.metasRegistro;
-                if (metasRegistro) {
-                    metaMensal = metasRegistro.metaMensal; // Atualizando a meta mensal
-                    document.getElementById('meta-mensal').textContent = `Meta mensal (Produtos): ${metaMensal} Produtos durante o mês`;
-                }
-            } else {
-                alert('Nenhum estoque encontrado para carregar as metas.');
-            }
+        // Carregar a meta mensal do estoque
+if (cargo === 'Funcionario de Estoque') {
+    try {
+        const estoqueResponse = await fetch('/estoques');
+        if (!estoqueResponse.ok) {
+            throw new Error('Erro ao buscar os estoques: ' + estoqueResponse.status);
         }
+        const estoques = await estoqueResponse.json();
+        if (estoques && estoques.length > 0) {
+            const estoque = estoques[0];
+            const metasRegistro = estoque.metasRegistro;
+            if (metasRegistro) {
+                metaMensal = metasRegistro.metaMensal; // Atualizando a meta mensal
+                document.getElementById('meta-mensal').textContent = `Meta mensal (Produtos): ${metaMensal} Produtos durante o mês`;
+            }
+        } else {
+            // Não faz nada se não for funcionário de estoque, ou seja, sem erro
+            document.getElementById('meta-mensal').textContent = 'Sem meta mensal definida.';
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Erro ao buscar as metas de estoque: ' + error.message);
+    }
+} else {
+    // Para outros cargos, não exibe a meta mensal
+    document.getElementById('meta-mensal').textContent = 'Não aplicável para este cargo.';
+    document.getElementById('produtos-cadastrados').textContent = 'Não aplicável para este cargo.';
+}
 
         // Atualizar tabela de desempenho
         atualizarTabelaDesempenho(funcionario.metasCumpridas);
     } catch (error) {
         console.error(error);
-        alert('Não foi possível carregar as informações do funcionário: ' + error.message);
     }
 }
 

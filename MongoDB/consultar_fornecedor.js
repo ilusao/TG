@@ -462,19 +462,15 @@ function salvarAlteracoes() {
     const formData = new FormData(fornecedorForm);
     const dadosAlterados = {};
 
-    // Coleta os dados do formulário
     formData.forEach((value, key) => {
-        if (key !== 'foto') {  // Não precisa enviar a foto diretamente, pode tratá-la separadamente, se necessário
+        if (key !== 'foto') { 
             dadosAlterados[key] = value;
         }
     });
 
     dadosAlterados.produtos = window.produtosIds || [];
-
-    // Criando a estrutura do payload de forma simples em JSON
     const payload = JSON.stringify(dadosAlterados);
 
-    // Fazendo a requisição
     fetch(`/fornecedores/${idFornecedorOriginal}`, {
         method: 'PUT',
         headers: {
