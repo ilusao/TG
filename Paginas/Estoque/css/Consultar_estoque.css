@@ -134,3 +134,28 @@ input.form-control:focus {
         margin-bottom: 15px;
     }
 }
+
+.alert.bg-danger {
+    background-color: #ff4d4d !important; 
+    animation: pulse 1.5s infinite;
+}
+
+.alert.bg-warning {
+    background-color: #ffcc00 !important;
+}
+
+.alert.bg-info {
+    background-color: #6a0dad !important;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 5px #ff4d4d;
+    }
+    50% {
+        box-shadow: 0 0 20px #ff1a1a;
+    }
+    100% {
+        box-shadow: 0 0 5px #ff4d4d;
+    }
+}

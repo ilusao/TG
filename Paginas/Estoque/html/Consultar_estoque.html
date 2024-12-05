@@ -78,48 +78,51 @@
         </div>
     </div>
     
-    
-    
-
-        <div class="row" id="graficos" style="display: none;">
-            <!-- Gráfico de Ocupação -->
-            <div class="col-md-6">
-                <div class="card p-4">
-                    <h4>Gráfico de Ocupação</h4>
-                    <canvas id="graficoOcupacao"></canvas>
-                </div>
-            </div>
-            
-            <!-- Gráfico de Produtos por Categoria -->
-            <div class="col-md-6">
-                <div class="card p-4">
-                    <h4>Distribuição por Categoria</h4>
-                    <canvas id="graficoCategoria"></canvas>
-                </div>
+    <div class="row" id="graficos" style="display: none;">
+        <!-- Gráfico de Ocupação -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card p-4">
+                <h4>Gráfico de Ocupação</h4>
+                <canvas id="graficoOcupacao"></canvas>
             </div>
         </div>
-
-        <div class="row mt-4" id="produtos-vencimento-custo" style="display: none;">
-            <!-- Produtos Perto do Vencimento -->
-            <div class="col-md-6">
-                <div class="card p-4">
-                    <h4>Produtos Perto do Vencimento</h4>
-                    <div class="alert alert-warning text-dark">Produto X - Vence em 3 dias!</div>
-                    <div class="alert alert-warning text-dark">Produto Y - Vence em 5 dias!</div>
-                </div>
+        
+        <!-- Gráfico de Produtos por Categoria -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card p-4">
+                <h4>Distribuição por Categoria</h4>
+                <canvas id="graficoCategoria"></canvas>
             </div>
-
-            <!-- Custo do Estoque ao Longo do Tempo -->
-            <div class="col-md-6">
-                <div class="card p-4">
-                    <h4>Custo Total ao Longo do Tempo</h4>
-                    <canvas id="graficoCusto"></canvas>
-                </div>
+        </div>
+    
+        <!-- Gráfico de Subcategorias -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card p-4">
+                <h4>Subcategorias do Grupo Selecionado</h4>
+                <canvas id="graficoSubcategoria"></canvas>
             </div>
         </div>
     </div>
-
-
+    
+    <div class="row mt-4" id="produtos-vencimento-custo" style="display: none;">
+        <!-- Produtos Perto do Vencimento -->
+        <div class="col-md-6">
+            <div class="card p-4">
+                <h4>Produtos Perto do Vencimento</h4>
+                <div id="produtos-vencimento-alertas" style="max-height: 400px; overflow-y: auto;">
+                </div>
+            </div>
+        </div>
+    
+        <!-- Custo do Estoque ao Longo do Tempo -->
+        <div class="col-md-6">
+            <div class="card p-4">
+                <h4>Custo Total ao Longo do Tempo</h4>
+                <canvas id="graficoCusto"></canvas>
+            </div>
+        </div>
+    </div>
+    
     <div class="modal fade" id="editarMetaModal" tabindex="-1" aria-labelledby="editarMetaModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -139,6 +142,26 @@
             </div>
         </div>
     </div>
+
+
+<div class="modal fade" id="alertaCriticoModal" tabindex="-1" aria-labelledby="alertaCriticoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="alertaCriticoLabel">
+                    <i class="bi bi-exclamation-triangle"></i> Atenção!
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Existem produtos com **10 ou menos dias** para o vencimento. Por favor, notifique o gerente imediatamente!
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Entendido</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/Consultar_estoque.js"></script>
 

@@ -918,19 +918,11 @@ app.post('/movimentacoes', async (req, res) => {
 // Rota para enviar para o front, somando todas as movimentações de todos os produtos
 app.get('/movimentacoes', async (req, res) => {
     try {
-        console.log('Recebendo requisição na rota /movimentacoes (GET)');
         const produtos = await Produto.find({});
-        console.log(`Produtos encontrados: ${produtos.length}`);
-        
-        if (produtos.length > 0) {
-            console.log('Produtos encontrados:', produtos);
-        }
         const totalMovimentacoes = produtos.reduce((total, produto) => {
-            console.log(`Produto: ${produto.nome}, Movimentações: ${produto.movimentacoes}`);
             return total + (produto.movimentacoes || 0);
         }, 0);
 
-        console.log(`Total de movimentações de todos os produtos: ${totalMovimentacoes}`);
         res.status(200).json({ totalMovimentacoes });
     } catch (error) {
         console.error('Erro ao calcular movimentações:', error);
@@ -962,6 +954,91 @@ app.get('/produtos/contagem-funcionarios', async (req, res) => {
         res.status(500).json({ message: 'Erro ao buscar produtos.' });
     }
 });
+
+// Rota para produtos perto do vencimento
+app.get('/api/produtos/alertas', async (req, res) => {
+    try {
+        const hoje = new Date();
+        const produtos = await Produto.find();
+
+        const produtosComAlertas = produtos.map(produto => {
+            const dataValidade = produto.data_validade ? new Date(produto.data_validade) : null;
+            if (!dataValidade || isNaN(dataValidade)) {
+                console.error(`Data inválida para o produto ${produto.nome}:`, produto.data_validade);
+                return null; // Ignorar produtos com validade inválida
+            }
+            
+            const diffTime = dataValidade - hoje;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            let alerta = null;
+
+            if (diffDays <= 10 && diffDays > 0) {
+                alerta = 'super-alerta';
+            } else if (diffDays <= 20 && diffDays > 10) {
+                alerta = 'alerta';
+            } else if (diffDays <= 30 && diffDays > 20) {
+                alerta = 'alerta-modificado';
+            }
+
+            if (alerta) {
+                return {
+                    nome: produto.nome,
+                    data_validade: produto.data_validade,
+                    diasRestantes: diffDays,
+                    alerta: alerta
+                };
+            }
+            return null;
+        }).filter(produto => produto !== null);
+
+        res.json(produtosComAlertas);
+    } catch (error) {
+        console.error('Erro ao buscar produtos perto do vencimento:', error);
+        res.status(500).json({ message: 'Erro ao buscar produtos perto do vencimento' });
+    }
+});
+
+// Rota para juntar os grupos dos produtos
+app.get('/produtos/grupos', async (req, res) => {
+    const { estoqueNome } = req.query;
+    try {
+        if (!estoqueNome) {
+            return res.status(400).send({ error: "Nome do estoque não fornecido." });
+        }
+
+        const produtos = await Produto.aggregate([
+            { $match: { almoxerifado: estoqueNome } },
+            { $group: { _id: "$grupo", total: { $sum: 1 } } },
+            { $sort: { total: -1 } }
+        ]);
+        res.json(produtos);
+    } catch (error) {
+        console.error("Erro ao agrupar produtos por grupo:", error);
+        res.status(500).send({ error: "Erro ao agrupar produtos por grupo." });
+    }
+});
+
+//Rota para juntar os subgrupos
+app.get('/produtos/subgrupos', async (req, res) => {
+    const { estoqueNome, grupo } = req.query;
+    try {
+        if (!estoqueNome || !grupo) {
+            return res.status(400).send({ error: "Nome do estoque ou grupo não fornecidos." });
+        }
+        const produtos = await Produto.aggregate([
+            { $match: { almoxerifado: estoqueNome, grupo: grupo } },
+            { $group: { _id: "$sub_grupo", total: { $sum: 1 } } },
+            { $sort: { total: -1 } }
+        ]);
+        res.json(produtos);
+    } catch (error) {
+        console.error("Erro ao agrupar produtos por subgrupo:", error);
+        res.status(500).send({ error: "Erro ao agrupar produtos por subgrupo." });
+    }
+});
+
+
 
 // Rota principal
 app.get('/', (req, res) => {

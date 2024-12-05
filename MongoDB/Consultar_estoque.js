@@ -1,10 +1,12 @@
 let estoqueIdSelecionado = null;
+let custosTotaisMes = [60000, 65000, 70000, 75000, 80000];
+let graficoCategoria;
+let graficoSubcategoria;
 
 // Função para mostrar os estoques
 async function mostrarEstoques() {
     const estoques = await fetch('/estoques');
     const estoquesData = await estoques.json();
-    console.log('Dados de estoques recebidos:', estoquesData);
     const listaEstoques = estoquesData.map(estoque => {
         return `<button class="btn btn-secondary m-2" onclick="selecionarEstoque('${estoque._id}')">${estoque.nome}</button>`;
     }).join('');
@@ -20,7 +22,6 @@ async function selecionarEstoque(id) {
         return;
     }
     estoqueIdSelecionado = id;
-    console.log('Estoque selecionado:', estoqueIdSelecionado);
 
     await carregarEstoque(id);
 
@@ -34,75 +35,29 @@ async function selecionarEstoque(id) {
     graficosContainer.classList.add('row');
     const produtosContainer = document.getElementById('produtos-vencimento-custo');
     produtosContainer.classList.add('row');
+
     await atualizarProdutosRegistradosMes();
     atualizarMetas();
     atualizarFuncionarios();
     mostrarMovimentacoes();
+    buscarAlertasProdutos();
+    atualizarGraficoCusto();
+    carregarGraficoCategorias(estoqueIdSelecionado);
 }
-
-
-
-// Dados fictícios para os gráficos
-const dadosOcupacao = {
-    labels: ["Capacidade Total", "Ocupação Atual"],
-    datasets: [{
-        data: [500, 350],
-        backgroundColor: ["#8a2be2", "#6a0dad"]
-    }]
-};
-
-const dadosCategoria = {
-    labels: ["Eletrônicos", "Alimentos", "Medicamentos", "Outros"],
-    datasets: [{
-        data: [150, 100, 50, 50],
-        backgroundColor: ["#8a2be2", "#6a0dad", "#1a1a2e", "#ffffff"]
-    }]
-};
-
-const dadosCusto = {
-    labels: ["Jan", "Fev", "Mar", "Abr", "Mai"],
-    datasets: [{
-        label: "Custo Total (R$)",
-        data: [60000, 65000, 70000, 75000, 80000],
-        borderColor: "#8a2be2",
-        backgroundColor: "rgba(138, 43, 226, 0.2)"
-    }]
-};
-
-// Renderizar gráficos
-new Chart(document.getElementById("graficoOcupacao"), {
-    type: "pie",
-    data: dadosOcupacao
-});
-
-new Chart(document.getElementById("graficoCategoria"), {
-    type: "doughnut",
-    data: dadosCategoria
-});
-
-new Chart(document.getElementById("graficoCusto"), {
-    type: "line",
-    data: dadosCusto
-});
 
 // Função para carregar os dados do estoque
 async function carregarEstoque(estoqueId) {
     try {
-        console.log('Carregando dados do estoque para o ID:', estoqueId);
         const estoqueResponse = await fetch(`/estoques/${estoqueId}`);
         if (!estoqueResponse.ok) {
             throw new Error(`Erro ao buscar estoque: ${estoqueResponse.statusText}`);
         }
         const estoque = await estoqueResponse.json();
-        console.log('Dados do estoque:', estoque);
-
         const produtosResponse = await fetch(`/produtos/por-estoque/${encodeURIComponent(estoque.nome)}`);
         if (!produtosResponse.ok) {
             throw new Error(`Erro ao buscar produtos: ${produtosResponse.statusText}`);
         }
         const produtosPorEstoque = await produtosResponse.json();
-        console.log('Produtos por estoque:', produtosPorEstoque);
-
         const capacidadeTotal = estoque.capacidadeTotal || 0;
         const volumeOcupado = produtosPorEstoque.reduce((total, produto) => total + (produto.volume || 0), 0);
         const ocupacaoAtual = capacidadeTotal > 0 ? ((volumeOcupado / capacidadeTotal) * 100).toFixed(2) : 0;
@@ -114,6 +69,8 @@ async function carregarEstoque(estoqueId) {
         document.getElementById('custo-total').innerText = custoTotal;
         document.getElementById('num-produtos').innerText = produtosPorEstoque.length;
 
+        atualizarGraficos(capacidadeTotal, volumeOcupado, ocupacaoAtual);
+
     } catch (error) {
         console.error('Erro ao carregar dados do estoque:', error);
         alert(`Erro ao carregar os dados do estoque: ${error.message}`);
@@ -124,14 +81,12 @@ async function carregarEstoque(estoqueId) {
 // Função para atualizar o número total de produtos registrados no mês globalmente
 async function atualizarProdutosRegistradosMes() {
     try {
-        console.log('Atualizando produtos registrados no mês...');
         const response = await fetch('/produtos/registrados-mes'); 
         if (!response.ok) {
             throw new Error(`Erro ao buscar produtos registrados no mês: ${response.statusText}`);
         }
 
         const produtosRegistradosMesGlobal = await response.json(); 
-        console.log('Produtos registrados no mês:', produtosRegistradosMesGlobal);
         const produtosRegistradosElement = document.getElementById('produtos-registrados-no-mes');
         if (produtosRegistradosElement) {
             produtosRegistradosElement.innerText = produtosRegistradosMesGlobal.length; 
@@ -213,18 +168,14 @@ async function atualizarFuncionarios() {
 async function mostrarMovimentacoes() {
     try {
         const url = '/movimentacoes';
-        console.log(`Chamando a URL: ${url}`);
-
         const response = await fetch(url, {
             method: 'GET',
         });
-        console.log(`Status da resposta: ${response.status}`);
-        console.log(`Resposta completa: ${response}`);
+
         if (!response.ok) {
             throw new Error(`Erro: ${response.status} - ${response.statusText}`);
         }
         const movimentacoesData = await response.json();
-        console.log('Dados recebidos da API:', movimentacoesData);
 
         const movimentacoesElement = document.getElementById('Movimentacao-produtos');
         if (movimentacoesElement) {
@@ -312,3 +263,326 @@ async function atualizarMetas() {
     }
 }
 
+let produtosAlertas = []; // Todos os alertas de produtos
+let produtosAlertasExibidos = 0; // Número de alertas já exibidos
+const produtosPorPagina = 10; // Quantidade de alertas por vez
+
+
+// Função para carregar os alertas de vencimento
+function carregarAlertas() {
+    const alertasDiv = document.getElementById('produtos-vencimento-alertas');
+
+    // Calcula o próximo lote de alertas a serem carregados
+    let alertasHTML = '';
+    for (let i = produtosAlertasExibidos; i < produtosAlertasExibidos + produtosPorPagina && i < produtosAlertas.length; i++) {
+        const produto = produtosAlertas[i];
+        const diasParaVencimento = calcularDiasParaVencimento(produto.data_validade);
+
+        if (diasParaVencimento !== null) {
+            const alertElement = document.createElement('div');
+            alertElement.classList.add('alert', 'text-dark', 'mb-3', 'p-3', 'rounded');
+
+            // Estilo com base nos dias restantes
+            if (diasParaVencimento <= 10) {
+                alertElement.classList.add('bg-danger', 'text-white');
+            } else if (diasParaVencimento <= 20) {
+                alertElement.classList.add('bg-warning');
+            } else if (diasParaVencimento <= 30) {
+                alertElement.classList.add('bg-info', 'text-white');
+            }
+
+            // Adiciona ícone de alerta
+            alertElement.innerHTML = `
+                <i class="bi bi-exclamation-triangle"></i> 
+                Produto ${produto.nome} - Vence em ${diasParaVencimento} dias!
+            `;
+            alertasDiv.appendChild(alertElement);
+        }
+    }
+
+    // Atualiza o número de alertas exibidos
+    produtosAlertasExibidos += produtosPorPagina;
+}
+
+async function buscarAlertasProdutos() {
+    try {
+        const response = await fetch('/api/produtos/alertas');
+        const alertas = await response.json();
+
+        produtosAlertas = alertas;
+        produtosAlertasExibidos = 0;
+
+        produtosAlertas.sort((a, b) => a.diasRestantes - b.diasRestantes);
+
+        const alertasDiv = document.getElementById('produtos-vencimento-alertas');
+        alertasDiv.innerHTML = '';
+
+        if (!produtosAlertas || produtosAlertas.length === 0) {
+            alertasDiv.style.display = 'none';
+            return;
+        }
+
+        let alertaCritico = false;
+
+        const calcularDiasParaVencimento = (dataValidade) => {
+            const hoje = new Date();
+            const vencimento = new Date(dataValidade);
+            const diffTime = vencimento - hoje;
+            return diffTime > 0 ? Math.ceil(diffTime / (1000 * 60 * 60 * 24)) : null;
+        };
+
+        const carregarAlertas = () => {
+            const alertasParaExibir = produtosAlertas.slice(produtosAlertasExibidos, produtosAlertasExibidos + 10);
+            produtosAlertasExibidos += alertasParaExibir.length;
+
+            alertasParaExibir.forEach(produto => {
+                const diasParaVencimento = calcularDiasParaVencimento(produto.data_validade);
+                if (diasParaVencimento !== null) {
+                    const alertElement = document.createElement('div');
+                    alertElement.classList.add('alert', 'text-dark', 'mb-3', 'p-3', 'rounded');
+
+                    if (diasParaVencimento <= 10) {
+                        alertElement.classList.add('bg-danger', 'text-white');
+                        alertaCritico = true;
+                    } else if (diasParaVencimento <= 20) {
+                        alertElement.classList.add('bg-warning');
+                    } else if (diasParaVencimento <= 30) {
+                        alertElement.classList.add('bg-info', 'text-white');
+                    }
+
+                    alertElement.innerHTML = `
+                        <i class="bi bi-exclamation-triangle"></i> 
+                        Produto ${produto.nome} - Vence em ${diasParaVencimento} dias!
+                    `;
+                    alertasDiv.appendChild(alertElement);
+                }
+            });
+
+            if (alertaCritico) {
+                const alertaModal = new bootstrap.Modal(document.getElementById('alertaCriticoModal'));
+                alertaModal.show();
+            }
+
+            alertasDiv.style.display = 'block';
+        };
+        carregarAlertas();
+
+        alertasDiv.addEventListener('scroll', function() {
+            const div = this;
+            if (div.scrollTop + div.clientHeight >= div.scrollHeight) {
+                // Se chegou no final da lista, carrega mais alertas
+                if (produtosAlertasExibidos < produtosAlertas.length) {
+                    carregarAlertas();
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('Erro ao buscar alertas de produtos:', error);
+        alert('Erro ao buscar alertas de produtos.');
+    }
+}
+
+
+function calcularDiasParaVencimento(dataVencimento) {
+    if (!dataVencimento) return null;
+    const hoje = new Date();
+    const vencimento = new Date(dataVencimento);
+    if (isNaN(vencimento)) return null;
+    const diffTime = vencimento - hoje;
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+}
+
+// Função para atualizar o gráfico de custo total ao longo do tempo
+function atualizarGraficoCusto() {
+    if (custosTotaisMes.length < 12) {
+        const custoAtual = parseFloat(document.getElementById('custo-total').innerText.replace('R$', '').trim());
+        custosTotaisMes.push(custoAtual);
+
+        const meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+        
+        // Simulação para os 3 meses anteriores
+        const mesesFicticios = [55000, 58000, 62000];
+        const custosTotaisSimulados = [...mesesFicticios, custoAtual];
+
+        // Meses do gráfico, colocando Set, Out e Nov antes de Dezembro
+        const mesesSimulados = ["Set", "Out", "Nov"];
+        mesesSimulados.push("Dez");
+
+        const dadosCusto = {
+            labels: mesesSimulados,
+            datasets: [{
+                label: "Custo Total (R$)",
+                data: custosTotaisSimulados,
+                borderColor: "#8a2be2",
+                backgroundColor: "rgba(138, 43, 226, 0.2)"
+            }]
+        };
+        
+        const ctx = document.getElementById("graficoCusto").getContext("2d");
+        
+        if (window.chartCusto) {
+            window.chartCusto.data = dadosCusto;
+            window.chartCusto.update();
+        } else {
+            window.chartCusto = new Chart(ctx, {
+                type: "line",
+                data: dadosCusto
+            });
+        }
+    }
+}
+
+// Função para atualizar os gráficos com os dados calculados
+function atualizarGraficos(capacidadeTotal, volumeOcupado, ocupacaoAtual) {
+    const dadosOcupacao = {
+        labels: ["Capacidade Total", "Ocupação Atual"],
+        datasets: [{
+            data: [capacidadeTotal, volumeOcupado],
+            backgroundColor: ["#8a2be2", "#6a0dad"]
+        }]
+    };
+
+    new Chart(document.getElementById("graficoOcupacao"), {
+        type: "pie",
+        data: dadosOcupacao
+    });
+    const dadosOcupacaoPercentual = {
+        labels: ["Capacidade Total", "Ocupação Atual"],
+        datasets: [{
+            data: [ocupacaoAtual, 100 - ocupacaoAtual],
+            backgroundColor: ["#8a2be2", "#6a0dad"]
+        }]
+    };
+
+    new Chart(document.getElementById("graficoOcupacaoPercentual"), {
+        type: "doughnut",
+        data: dadosOcupacaoPercentual
+    });
+}
+
+// Função para criar gráfico de categorias
+// Na função carregarGraficoCategorias:
+async function carregarGraficoCategorias(estoqueId) {
+    if (!estoqueId) {
+        console.error('O estoqueId não foi definido!');
+        return;
+    }
+
+    const estoqueResponse = await fetch(`/estoques/${estoqueId}`);
+    if (!estoqueResponse.ok) {
+        throw new Error(`Erro ao buscar estoque: ${estoqueResponse.statusText}`);
+    }
+
+    try {
+        const estoque = await estoqueResponse.json();
+        const produtosResponse = await fetch(`/produtos/grupos?estoqueNome=${encodeURIComponent(estoque.nome)}`);
+        if (!produtosResponse.ok) {
+            throw new Error(`Erro ao buscar produtos do estoque: ${produtosResponse.statusText}`);
+        }
+        const produtos = await produtosResponse.json();
+        console.log('Grupos de produtos:', produtos);
+
+        const categorias = produtos.reduce((acc, produto) => {
+            const categoria = produto._id || "Sem Categoria";
+            acc[categoria] = (acc[categoria] || 0) + produto.total;
+            return acc;
+        }, {});
+
+        const labels = Object.keys(categorias);
+        const data = Object.values(categorias);
+
+        const ctx = document.getElementById("graficoCategoria").getContext("2d");
+
+        if (graficoCategoria) {
+            graficoCategoria.destroy();
+        }
+
+        graficoCategoria = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels,
+                datasets: [{
+                    data,
+                    backgroundColor: ["#8a2be2", "#6a0dad", "#1a1a2e", "#ffffff", "#ff6347", "#3cb371"]
+                }]
+            },
+            options: {
+                onClick: async (event, elements) => {
+                    if (elements.length > 0) {
+                        const index = elements[0].index;
+                        const categoriaSelecionada = labels[index];
+                        await carregarGraficoSubcategorias(estoqueId, categoriaSelecionada);
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Erro ao carregar gráfico de categorias:', error);
+        alert('Erro ao carregar gráfico de categorias.');
+    }
+}
+
+async function carregarGraficoSubcategorias(estoqueId, grupo) {
+    if (!estoqueId) {
+        console.error('O estoqueId não foi definido!');
+        return;
+    }
+
+    const estoqueResponse = await fetch(`/estoques/${estoqueId}`);
+    if (!estoqueResponse.ok) {
+        throw new Error(`Erro ao buscar estoque: ${estoqueResponse.statusText}`);
+    }
+
+    try {
+        const estoque = await estoqueResponse.json();
+        const subgruposResponse = await fetch(`/produtos/subgrupos?estoqueNome=${encodeURIComponent(estoque.nome)}&grupo=${encodeURIComponent(grupo)}`);
+        if (!subgruposResponse.ok) {
+            throw new Error(`Erro ao buscar subgrupos do estoque: ${subgruposResponse.statusText}`);
+        }
+        const subgrupos = await subgruposResponse.json();
+        console.log('Subgrupos de produtos:', subgrupos);
+        const labels = subgrupos.map(subgrupo => subgrupo._id || "Sem Subgrupo");
+        const data = subgrupos.map(subgrupo => subgrupo.total);
+
+        const ctx = document.getElementById("graficoSubcategoria").getContext("2d");
+
+        if (graficoSubcategoria) {
+            graficoSubcategoria.destroy();
+        }
+
+        // Criando o gráfico
+        graficoSubcategoria = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                    data,
+                    backgroundColor: [
+                        "#8a2be2", "#6a0dad", "#1a1a2e", "#ffffff", "#ff6347", "#3cb371"
+                    ]
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        labels: {
+                            generateLabels: function(chart) {
+                                const labels = chart.data.labels;
+                                return labels.map((label, index) => {
+                                    return {
+                                        text: label || "Sem Subgrupo", // Corrigir rótulos
+                                        fillStyle: chart.data.datasets[0].backgroundColor[index]
+                                    };
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Erro ao carregar gráfico de subcategorias:', error);
+        alert('Erro ao carregar gráfico de subcategorias.');
+    }
+}
