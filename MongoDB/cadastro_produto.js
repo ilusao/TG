@@ -62,6 +62,7 @@ const submitForm = async (formData, exportarParaExcel) => {
     }
 };
 
+
 const Estoques = async () => {
     try {
         const response = await fetch('/estoques');
