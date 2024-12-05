@@ -82,7 +82,7 @@
 
     <script>
        async function loadFuncionarioInfo() {
-    const funcionarioId = localStorage.getItem('funcionarioId'); 
+    const funcionarioId = localStorage.getItem('funcionarioId');
     const cargo = localStorage.getItem('cargo');
 
     if (!funcionarioId) {
@@ -96,6 +96,22 @@
             throw new Error('Erro ao buscar informações do funcionário: ' + response.status);
         }
         const funcionario = await response.json();
+
+        // Exibir/ocultar a tabela e gráfico com base no cargo
+        const tabelaDesempenho = document.querySelector('.table-performance');
+        const graficoDesempenho = document.querySelector('.chart-box');
+        
+        if (cargo === 'Funcionario de Estoque') {
+            // Mostrar a tabela e gráfico se for Funcionario de Estoque
+            tabelaDesempenho.style.display = 'table';
+            graficoDesempenho.style.display = 'block';
+        } else {
+            // Ocultar a tabela e gráfico para outros cargos
+            tabelaDesempenho.style.display = 'none';
+            graficoDesempenho.style.display = 'none';
+        }
+
+        // O resto do seu código permanece o mesmo
 
         if (funcionario.dataContratacao) {
             const dataContratacao = new Date(funcionario.dataContratacao).toLocaleDateString('pt-BR', {
@@ -140,37 +156,32 @@
         document.getElementById('produtos-cadastrados').textContent = `Produtos cadastrados neste mês: ${produtosCadastradosNoMes}`;
         produtosCadastradosMesAtual = produtosCadastradosNoMes;
 
-        // Carregar a meta mensal do estoque
-        // Carregar a meta mensal do estoque
-if (cargo === 'Funcionario de Estoque') {
-    try {
-        const estoqueResponse = await fetch('/estoques');
-        if (!estoqueResponse.ok) {
-            throw new Error('Erro ao buscar os estoques: ' + estoqueResponse.status);
-        }
-        const estoques = await estoqueResponse.json();
-        if (estoques && estoques.length > 0) {
-            const estoque = estoques[0];
-            const metasRegistro = estoque.metasRegistro;
-            if (metasRegistro) {
-                metaMensal = metasRegistro.metaMensal; // Atualizando a meta mensal
-                document.getElementById('meta-mensal').textContent = `Meta mensal (Produtos): ${metaMensal} Produtos durante o mês`;
+        if (cargo === 'Funcionario de Estoque') {
+            try {
+                const estoqueResponse = await fetch('/estoques');
+                if (!estoqueResponse.ok) {
+                    throw new Error('Erro ao buscar os estoques: ' + estoqueResponse.status);
+                }
+                const estoques = await estoqueResponse.json();
+                if (estoques && estoques.length > 0) {
+                    const estoque = estoques[0];
+                    const metasRegistro = estoque.metasRegistro;
+                    if (metasRegistro) {
+                        metaMensal = metasRegistro.metaMensal;
+                        document.getElementById('meta-mensal').textContent = `Meta mensal (Produtos): ${metaMensal} Produtos durante o mês`;
+                    }
+                } else {
+                    document.getElementById('meta-mensal').textContent = 'Sem meta mensal definida.';
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Erro ao buscar as metas de estoque: ' + error.message);
             }
         } else {
-            // Não faz nada se não for funcionário de estoque, ou seja, sem erro
-            document.getElementById('meta-mensal').textContent = 'Sem meta mensal definida.';
+            document.getElementById('meta-mensal').textContent = 'Não aplicável para este cargo.';
+            document.getElementById('produtos-cadastrados').textContent = 'Não aplicável para este cargo.';
         }
-    } catch (error) {
-        console.error(error);
-        alert('Erro ao buscar as metas de estoque: ' + error.message);
-    }
-} else {
-    // Para outros cargos, não exibe a meta mensal
-    document.getElementById('meta-mensal').textContent = 'Não aplicável para este cargo.';
-    document.getElementById('produtos-cadastrados').textContent = 'Não aplicável para este cargo.';
-}
 
-        // Atualizar tabela de desempenho
         atualizarTabelaDesempenho(funcionario.metasCumpridas);
     } catch (error) {
         console.error(error);

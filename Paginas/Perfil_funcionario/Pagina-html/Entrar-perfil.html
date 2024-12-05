@@ -114,9 +114,9 @@
 
                     const cargo = localStorage.getItem('cargo');
                    // aqui eu fiz a separação dos cargos ao acessar o perfil, funcionario vai acessar o perfil normal ou seja não vão consegui mudar nada, e RH e gerente para a tela de RH.
-                    if (cargo === 'Funcionário de Estoque') {
+                    if (cargo === 'Funcionario de Estoque') {
                         window.location.href = 'Normal-Perfil.html';
-                    } else if (cargo === 'Funcionário do RH' || cargo === 'Gerente') {
+                    } else if (cargo === 'Funcionario do RH' || cargo === 'Gerente') {
                         window.location.href = 'RH-Perfil.html';
                     } else {
                         alert('Cargo não reconhecido para visualização do perfil.');
