@@ -2,7 +2,7 @@ let idFornecedorOriginal = null;
 // Função para carregar fornecedores no dropdown
 function carregarFornecedoresDropdown() {
     console.log("Carregando fornecedores...");
-    
+
     fetch('/fornecedores')
         .then(response => {
             if (!response.ok) {
@@ -13,7 +13,7 @@ function carregarFornecedoresDropdown() {
         })
         .then(fornecedores => {
             console.log('Fornecedores encontrados:', fornecedores);
-            
+
             const dropdown = document.getElementById('fornecedor-select');
             dropdown.innerHTML = '';
 
@@ -52,7 +52,6 @@ function carregarFornecedoresDropdown() {
                         .then(fornecedor => {
                             console.log('Detalhes do fornecedor:', fornecedor);
                             preencherCamposFornecedor(fornecedor);
-
                             fetch('/api/FornecedorProduto', {
                                 method: 'POST',
                                 headers: {
@@ -73,9 +72,13 @@ function carregarFornecedoresDropdown() {
                                     console.log('Produtos encontrados:', produtos);
                                     const campoProdutos = document.getElementById('produtos');
                                     if (produtos.length > 0) {
+                                        const produtosIds = produtos.map(produto => produto._id);
                                         campoProdutos.value = produtos.map(produto => produto.nome).join(', ');
+
+                                        window.produtosIds = produtosIds;
                                     } else {
                                         campoProdutos.value = 'Nenhum produto encontrado';
+                                        window.produtosIds = [];
                                     }
                                 })
                                 .catch(error => console.error('Erro ao buscar produtos:', error));
@@ -448,7 +451,7 @@ function validarCNPJ(cnpj) {
     return true;
 }
 
-// Função para salvar as alterações no fornecedor (sem a parte de foto)
+// Função para salvar as alterações no fornecedor
 function salvarAlteracoes() {
     if (!idFornecedorOriginal) {
         alert('Nenhum fornecedor selecionado. Por favor, selecione um fornecedor antes de salvar.');
@@ -457,18 +460,27 @@ function salvarAlteracoes() {
 
     const fornecedorForm = document.getElementById('fornecedorForm');
     const formData = new FormData(fornecedorForm);
-    const fotoInput = document.getElementById('fotoFornecedorInput');
     const dadosAlterados = {};
+
+    // Coleta os dados do formulário
     formData.forEach((value, key) => {
-        if (key !== 'foto') {
+        if (key !== 'foto') {  // Não precisa enviar a foto diretamente, pode tratá-la separadamente, se necessário
             dadosAlterados[key] = value;
         }
     });
-    formData.append('dados', JSON.stringify(dadosAlterados));
 
+    dadosAlterados.produtos = window.produtosIds || [];
+
+    // Criando a estrutura do payload de forma simples em JSON
+    const payload = JSON.stringify(dadosAlterados);
+
+    // Fazendo a requisição
     fetch(`/fornecedores/${idFornecedorOriginal}`, {
         method: 'PUT',
-        body: formData,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: payload,
     })
         .then(response => {
             if (!response.ok) {

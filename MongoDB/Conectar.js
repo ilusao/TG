@@ -630,14 +630,28 @@ app.post('/api/buscarFornecedores', async (req, res) => {
 
 // Rota para atualizar fornecedor
 app.put('/fornecedores/:id', async (req, res) => {
-    const { nome, email, cnpj, codigo_fornecedor, idFuncionario } = req.body;
+    const { nome, email, cnpj, codigo_fornecedor, produtos } = req.body;
 
-    if (!nome || !email || !cnpj || !codigo_fornecedor || !idFuncionario) {
+    if (!nome || !email || !cnpj || !codigo_fornecedor) {
         return res.status(400).json({ mensagem: 'Campos obrigatórios estão faltando.' });
     }
 
+    if (produtos && !Array.isArray(produtos)) {
+        return res.status(400).json({ mensagem: 'O campo produtos deve ser um array de IDs de produtos.' });
+    }
+
     try {
-        const fornecedorAtualizado = await Fornecedor.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const fornecedorAtualizado = await Fornecedor.findByIdAndUpdate(
+            req.params.id,
+            {
+                nome,
+                email,
+                cnpj,
+                codigo_fornecedor,
+                produtos, 
+            },
+            { new: true }
+        );
 
         if (!fornecedorAtualizado) {
             return res.status(404).json({ mensagem: 'Fornecedor não encontrado.' });
