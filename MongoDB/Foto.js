@@ -1,6 +1,6 @@
 const express = require('express');
 const multer = require('multer');
-const { Funcionario, calcularTempoNaEmpresa } = require('./Funcionarios');
+const Funcionario = require('./Funcionarios');
 const Produto = require('./Produto');
 const Fornecedor = require('./Fornecedor');
 const router = express.Router();
