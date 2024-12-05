@@ -473,7 +473,7 @@ app.put('/api/produto/:id/enviar', async (req, res) => {
 
 // Rota para enviar um produto para uma nova localização e atualizar destino
 app.post('/api/enviarProduto', async (req, res) => {
-    const { codigo_produto, localizacao, destino } = req.body;
+    const { codigo_produto, localizacao, destino, volume, peso} = req.body;
 
     if (!codigo_produto || !localizacao) {
         return res.status(400).json({ message: 'Dados incompletos. Forneça código_produto e localizacao.' });
@@ -485,6 +485,9 @@ app.post('/api/enviarProduto', async (req, res) => {
         if (!produto) {
             return res.status(404).json({ message: 'Produto não encontrado' });
         }
+
+        produto.volume = volume || 1;
+        produto.peso = peso || 1;  
 
         produto.localizacao = localizacao;
         produto.destino = destino === "" ? null : destino;
