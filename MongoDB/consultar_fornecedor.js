@@ -86,7 +86,7 @@ function carregarFornecedoresDropdown() {
                         .catch(error => console.error('Erro ao carregar os detalhes do fornecedor:', error));
 
                     const mudarFotoBtn = document.getElementById('mudarFotoBtn');
-                    mudarFotoBtn.disabled = true;
+                    mudarFotoBtn.disabled = false;
                 } else {
                     idFornecedorOriginal = null;
                     desabilitarSalvar();
