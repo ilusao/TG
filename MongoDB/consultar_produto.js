@@ -290,8 +290,6 @@ function enviarFormulario() {
     });
 }
 
-
-
 // Função para enviar os dados do produto ao backend e gerar consigo uma lista
 function Excell() {
     fetch('http://localhost:5000/Cproduto/gerar-list-excel', { 
