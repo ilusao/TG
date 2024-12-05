@@ -256,8 +256,6 @@ app.post('/api/produto', async (req, res) => {
                 }
             }
         }
-
-
         const novoProduto = new Produto({
             ...req.body,
             movimentacoes: movimentacao,
@@ -280,7 +278,6 @@ app.post('/api/produto', async (req, res) => {
                     }),
                 });
                 const movimentacaoData = await movimentacaoResponse.json();
-                console.log('Movimentação registrada ao cadastrar produto:', movimentacaoData);
             } catch (error) {
                 console.error('Erro ao registrar movimentação no cadastro do produto:', error);
             }
@@ -292,7 +289,6 @@ app.post('/api/produto', async (req, res) => {
         res.status(500).json({ error: 'Erro ao cadastrar o produto' });
     }
 });
-
 
 // Rota para enviar dados ao Flask
 app.post('/produtos', async (req, res) => {
@@ -307,7 +303,8 @@ app.post('/produtos', async (req, res) => {
                     descricao,
                     preco,
                     codigo_produto,
-                    idFuncionario
+                    idFuncionario,
+                    ...req.body
                 })
             });
 
@@ -529,13 +526,12 @@ app.get('/fornecedores/:id', async (req, res) => {
 
 // Rota para cadastro de fornecedor
 app.post('/api/fornecedor', async (req, res) => {
-    const { nome_fornecedor, cnpj, idFuncionario, endereco } = req.body;
+    const { idFuncionario, codigo_fornecedor } = req.body;
 
     try {
-        // Verifica se o fornecedor já existe
-        const fornecedorExistente = await Fornecedor.findOne({ cnpj });
-        if (fornecedorExistente) {
-            return res.status(400).json({ message: 'CNPJ do fornecedor já está em uso.' });
+        const fornecedorExistenteCodigo = await Fornecedor.findOne({ codigo_fornecedor });
+        if (fornecedorExistenteCodigo) {
+            return res.status(400).json({ message: 'Código do fornecedor já está em uso.' });
         }
 
         const funcionario = await Funcionario.findById(idFuncionario);
@@ -543,34 +539,51 @@ app.post('/api/fornecedor', async (req, res) => {
             return res.status(404).json({ message: 'Funcionário não encontrado.' });
         }
 
+        const dataCadastro = new Date();
+
         const novoFornecedor = new Fornecedor({
             ...req.body,
-            idFuncionario
+            idFuncionario,
+            dataCadastro
         });
 
-        await novoFornecedor.save();
-        funcionario.fornecedores.push(novoFornecedor._id);
-        await funcionario.save();
+        const fornecedorSalvo = await novoFornecedor.save();
 
-        res.status(201).json({ message: 'Fornecedor cadastrado com sucesso!' });
+        res.status(201).json({
+            message: 'Fornecedor cadastrado com sucesso!',
+            fornecedor: {
+                ...fornecedorSalvo.toObject(),
+                _id: fornecedorSalvo._id.toString(),
+                dataCadastro: fornecedorSalvo.dataCadastro
+            }
+        });
     } catch (error) {
-        console.error('Erro ao cadastrar fornecedor:', error);
         res.status(500).json({ error: 'Erro ao cadastrar fornecedor' });
     }
 });
 
 // Rota para enviar dados ao Flask para gerar o Excel
 app.post('/fornecedores', async (req, res) => {
-    const { nome_fornecedor, cnpj, idFuncionario, exportarParaExcel } = req.body;
+    const { cnpj, idFuncionario, exportarParaExcel, _id } = req.body;
+
+    // Validar campos obrigatórios
+    if (!cnpj || !idFuncionario || exportarParaExcel === undefined || !_id) {
+        return res.status(400).json({ mensagem: 'Faltando dados obrigatórios.' });
+    }
+
     if (exportarParaExcel) {
         try {
+            // Recuperar fornecedor do banco para garantir que `dataCadastro` está correto
+            const fornecedor = await Fornecedor.findById(_id);
+
+            if (!fornecedor) {
+                return res.status(404).json({ mensagem: 'Fornecedor não encontrado.' });
+            }
+
             const payload = {
                 ...req.body,
-                _id: req.body._id,
-                cnpj,
-                idFuncionario
+                dataCadastro: fornecedor.dataCadastro.toISOString()
             };
-            console.log("Dados enviados ao Flask:", payload);
 
             const response = await fetch('http://localhost:5000/fornecedor/gerar-excel', {
                 method: 'POST',
@@ -584,20 +597,18 @@ app.post('/fornecedores', async (req, res) => {
 
                 res.setHeader('Content-Disposition', 'attachment; filename="fornecedor.xlsx"');
                 res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+
                 return res.status(200).send(buffer);
             } else {
-                console.error('Erro ao gerar Excel no Flask:', response.statusText);
-                return res.status(500).json({ mensagem: 'Erro ao gerar o Excel.' });
+                return res.status(500).json({ mensagem: 'Erro ao gerar o Excel no Flask.' });
             }
-        } catch (error) {
-            console.error('Erro ao conectar com o Flask:', error);
+        } catch (err) {
             return res.status(500).json({ mensagem: 'Erro ao comunicar com o Flask.' });
         }
     } else {
-        res.status(400).json({ mensagem: 'É necessário escolher a opção para exportar para Excel.' });
+        return res.status(400).json({ mensagem: 'É necessário escolher a opção para exportar para Excel.' });
     }
 });
-
 
 
 
@@ -847,28 +858,21 @@ app.put('/estoques/metaRegistro', async (req, res) => {
         return res.status(500).json({ error: "Erro ao atualizar as metas." });
     }
 });
+
 // Rota para conseguirmos contar a movimentação dos produtos no estoque...
 app.post('/movimentacoes', async (req, res) => {
     try {
-        console.log('Recebendo requisição na rota /movimentacoes');
-        console.log('Dados recebidos no corpo da requisição:', req.body);
-
         const { novoAlmoxerifado, novaLocalizacao, produtoId } = req.body;
 
         if (!produtoId) {
-            console.error('Erro: produtoId não fornecido.');
             return res.status(400).json({ message: 'produtoId é obrigatório.' });
         }
 
-        console.log(`Buscando produto com ID: ${produtoId}`);
         const produto = await Produto.findById(produtoId);
 
         if (!produto) {
-            console.error(`Produto com ID ${produtoId} não encontrado.`);
             return res.status(404).json({ message: 'Produto não encontrado.' });
         }
-
-        console.log('Produto encontrado:', produto);
 
         const almoxerifadoAntigo = produto.almoxerifado;
         const localizacaoAntiga = produto.localizacao;
@@ -900,7 +904,6 @@ app.post('/movimentacoes', async (req, res) => {
                     },
                 }
             );
-            console.log('Produto salvo no banco de dados.');
         }
 
         res.status(200).json({ message: 'Movimentação atualizada com sucesso.' });

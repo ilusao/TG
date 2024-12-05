@@ -55,6 +55,7 @@ def gerar_excel():
         worksheet.write('Q1', 'ID Funcionário')
         worksheet.write('R1', 'Data de Criação')
         worksheet.write('S1', 'Data de Atualização')
+        worksheet.write('T1', 'Data de Validade')
 
         # Preenchendo os dados
         worksheet.write(1, 0, produto['codigo_produto'])
@@ -66,7 +67,7 @@ def gerar_excel():
         worksheet.write(1, 6, produto.get('marca', ''))
         worksheet.write(1, 7, produto.get('localizacao', ''))
         worksheet.write(1, 8, produto.get('destino', ''))
-        worksheet.write(1, 9, produto.get('almoxarifado', ''))
+        worksheet.write(1, 9, produto.get('almoxerifado', ''))
         worksheet.write(1, 10, produto.get('data_entrada', ''))
         worksheet.write(1, 11, produto.get('data_saida', ''))
         worksheet.write(1, 12, produto.get('preco', 0))
@@ -76,6 +77,7 @@ def gerar_excel():
         worksheet.write(1, 16, produto.get('idFuncionario', ''))
         worksheet.write(1, 17, produto.get('createdAt', ''))
         worksheet.write(1, 18, produto.get('updatedAt', ''))
+        worksheet.write(1, 19, produto.get('data_validade', ''))
 
         # Fechando o arquivo
         workbook.close()

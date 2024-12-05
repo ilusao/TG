@@ -15,6 +15,7 @@ const produtoSchema = new mongoose.Schema({
     almoxerifado: { type: String },
     data_entrada: { type: Date, default: Date.now },
     data_saida: { type: Date },
+    data_validade: {type: Date, default: Date.now},
     preco: { type: Number, min: 0 },
     inflamavel: { type: Boolean, default: false },
     fragil: { type: Boolean, default: false },

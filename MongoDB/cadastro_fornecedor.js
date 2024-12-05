@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportButton = document.getElementById('exportarExcel');
     const statusExportarExcel = document.getElementById('statusExportarExcel');
 
-    let exportarParaExcel = false; // Inicializa como 'false'
+    let exportarParaExcel = false;
 
     if (!form) {
         console.error('Formulário não encontrado');
@@ -77,13 +77,13 @@ document.addEventListener('DOMContentLoaded', () => {
         this.value = formatarCNPJ(cnpjValue);
     });
 
-    // Evento para alternar o estado de exportação para Excel
+    // Evento para alternar a exportação para Excel
     exportButton.addEventListener('click', function () {
         exportarParaExcel = !exportarParaExcel;
         statusExportarExcel.textContent = exportarParaExcel ? 'Sim' : 'Não';
     });
 
-    // Validação do formulário ao submeter
+    // Validação do formulário e envio para o back-end
     form.addEventListener('submit', (event) => {
         event.preventDefault();
 
@@ -101,11 +101,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const funcionarioId = localStorage.getItem('funcionarioId');
         if (!funcionarioId) {
             alert('Erro: ID do funcionário não encontrado. Faça login novamente.');
-            console.error('Erro: ID do funcionário não encontrado');
             return;
         }
-
-        const codigoFornecedor = document.getElementById('codigo_fornecedor').value.trim();
 
         const data = {
             nome: document.getElementById('nome').value,
@@ -120,56 +117,55 @@ document.addEventListener('DOMContentLoaded', () => {
             telefone: document.getElementById('telefone').value,
             site: document.getElementById('site').value || null,
             cnpj: cnpjInput.value.replace(/\D/g, ''),
-            codigo_fornecedor: codigoFornecedor,
+            codigo_fornecedor: document.getElementById('codigo_fornecedor').value.trim(),
             inativo: document.getElementById('inativo').value === 'true',
             idFuncionario: funcionarioId,
             exportarParaExcel
         };
 
-        console.log(data); 
+    fetch('/api/fornecedor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        alert('Fornecedor cadastrado com sucesso!');
+        const fornecedorId = result.fornecedor._id;
+        const dataCadastro = result.fornecedor.dataCadastro;
 
-        fetch('/api/fornecedor', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(result => {
-            alert('Fornecedor cadastrado com sucesso!');
-        
-            if (exportarParaExcel) {
-                fetch('/fornecedores', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data) 
-                    
-                })
-                .then(response => response.blob())
-                .then(blob => {
-                    console.log("Dados enviados ao Flask:", {
-                        ...req.body,
-                        _id: req.body._id,
-                        cnpj,
-                        idFuncionario
-                    });
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.style.display = 'none';
-                    a.href = url;
-                    a.download = 'fornecedor.xlsx';
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                })
-                .catch(error => {
-                    console.error('Erro ao gerar Excel:', error);
-                    alert('Erro ao gerar Excel: ' + error.message);
-                });
-            }
-        })
-        .catch(error => {
-            console.error('Erro ao cadastrar fornecedor:', error);
-            alert('Erro ao cadastrar fornecedor: ' + error.message);
-        });
+        if (exportarParaExcel) {
+            const exportData = { 
+                ...data, 
+                _id: fornecedorId, 
+                dataCadastro: dataCadastro
+            };
+
+            fetch('/fornecedores', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(exportData)
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'fornecedor.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => {
+                console.error('Erro ao gerar Excel:', error);
+                alert('Erro ao gerar Excel: ' + error.message);
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao cadastrar fornecedor:', error);
+        alert('Erro ao cadastrar fornecedor: ' + error.message);
     });
+});
 });

@@ -16,13 +16,22 @@ const form = document.getElementById('productForm');
 // Função para enviar os dados do produto ao backend
 const submitForm = async (formData, exportarParaExcel) => {
     try {
-        console.log('Iniciando o envio dos dados para o backend...');
-        console.log('Dados:', formData);
-        console.log('Exportar para Excel:', exportarParaExcel);
+        const responseMongo = await fetch('/api/produto', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        if (!responseMongo.ok) {
+            const errorData = await responseMongo.json();
+            alert(`Erro ao cadastrar o produto: ${errorData.error}`);
+            return;
+        }
 
         if (exportarParaExcel) {
-            console.log('Enviando dados para gerar Excel...');
-            const response = await fetch('http://localhost:5000/produto/gerar-excel', {
+            const responseExcel = await fetch('http://localhost:5000/produto/gerar-excel', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -30,38 +39,23 @@ const submitForm = async (formData, exportarParaExcel) => {
                 body: JSON.stringify(formData)
             });
 
-            console.log('Status da resposta:', response.status);
+            console.log('Status da resposta do Excel:', responseExcel.status);
 
-            if (response.ok) {
-                const arrayBuffer = await response.arrayBuffer();
+            if (responseExcel.ok) {
+                const arrayBuffer = await responseExcel.arrayBuffer();
                 const blob = new Blob([arrayBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
                 link.download = 'produto.xlsx';
                 link.click();
-                console.log('Excel gerado e baixado com sucesso.');
             } else {
-                console.error('Erro ao gerar Excel no Flask:', response.statusText);
+                console.error('Erro ao gerar Excel no Flask:', responseExcel.statusText);
                 alert('Erro ao gerar o Excel.');
             }
-        } else {
-            console.log('Enviando dados para MongoDB...');
-            const response = await fetch('/api/produto', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            });
-
-            if (response.ok) {
-                alert('Produto cadastrado com sucesso!');
-                form.reset();
-            } else {
-                const errorData = await response.json();
-                alert(`Erro ao cadastrar o produto: ${errorData.error}`);
-            }
         }
+
+        alert('Produto cadastrado com sucesso!');
+        form.reset();
     } catch (error) {
         alert('Erro ao conectar com o servidor.');
         console.error('Erro:', error);
@@ -74,7 +68,6 @@ const Estoques = async () => {
         if (!response.ok) {
             throw new Error('Erro ao buscar estoques');
         }
-
         const estoques = await response.json(); 
         populateEstoqueSelect(estoques); 
     } catch (error) {
@@ -127,6 +120,7 @@ const populateEstoqueSelect = (estoques) => {
             volume: parseFloat(document.getElementById('volumeProduto').value),
             data_entrada: document.getElementById('dataEntrada').value.split('T')[0],
             data_saida: document.getElementById('dataSaida').value.split('T')[0] || null, 
+            data_validade: document.getElementById('dataVencimento').value.split('T')[0],
             preco: parseFloat(document.getElementById('preco').value.replace(/\./g, '').replace(',', '.')),
             inflamavel: document.getElementById('inflamavel').value === 'sim',
             fragil: document.getElementById('fragil').value === 'sim',
