@@ -293,31 +293,26 @@ function enviarFormulario() {
 
 
 // Função para enviar os dados do produto ao backend e gerar consigo uma lista
-
-function Excell (){
-    const gerarExcel = async () => {
-        try {
-            const response = await fetch('http://localhost:5000/produto/gerar-list-excel', {
-                method: 'POST'
-            });
-    
-            if (response.ok) {
-                const blob = await response.blob();
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = 'produtos_list.xlsx';
-                link.click();
-            } else {
-                const error = await response.json();
-                alert(`Erro ao gerar Excel: ${error.error}`);
-            }
-        } catch (error) {
-            console.error('Erro:', error);
-            alert('Erro ao conectar com o servidor.');
+function Excell() {
+    fetch('http://localhost:5000/Cproduto/gerar-list-excel', { 
+        method: 'POST',
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.blob();
         }
-    };
+        throw new Error('Falha ao gerar Excel');
+    })
+    .then(blob => {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'produtos_list.xlsx';
+        link.click();
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+    });
 }
-
 
 
 // Função para habilitar a busca (primeiro clique no botão "Buscar")
