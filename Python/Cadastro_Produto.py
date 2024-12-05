@@ -9,82 +9,97 @@ produto_bp = Blueprint('produto', __name__)
 # Caminho onde os arquivos Excel serão armazenados
 pasta_produtos = os.path.join(os.getcwd(), 'Excel', 'Produtos')
 
+
 # Função para limpar o nome do arquivo, substituindo caracteres especiais por underscores
 def limpar_nome_arquivo(nome):
-    nome_limpo = re.sub(r'[^a-zA-Z0-9_]+', '_', nome)
-    return nome_limpo
+    return re.sub(r'[^a-zA-Z0-9_]+', '_', nome)
+
+
+# Função para criar a pasta, caso ela não exista
+def criar_pasta_se_necessario(caminho):
+    if not os.path.exists(caminho):
+        os.makedirs(caminho)
+
+
+# Função para configurar as colunas e cabeçalhos da planilha
+def configurar_planilha(workbook):
+    worksheet = workbook.add_worksheet()
+
+    # Definir os cabeçalhos
+    headers = [
+        'Código Produto', 'Nome', 'Descrição PDV', 'Grupo', 'Sub-Grupo', 'Fornecedor',
+        'Marca', 'Localização', 'Destino', 'Almoxarifado', 'Data Entrada', 'Data Saída',
+        'Preço', 'Inflamável', 'Frágil', 'Foto Produto', 'ID Funcionário',
+        'Data de Criação', 'Data de Atualização', 'Data de Validade'
+    ]
+
+    # Estilo para os cabeçalhos
+    header_format = workbook.add_format({'bold': True, 'bg_color': '#D3D3D3', 'border': 1, 'align': 'center'})
+
+    # Adicionar os cabeçalhos e ajustar largura das colunas
+    for col_num, header in enumerate(headers):
+        worksheet.write(0, col_num, header, header_format)
+        worksheet.set_column(col_num, col_num, 20)  # Ajustar largura das colunas
+
+    return worksheet
+
+
+# Função para preencher os dados do produto na planilha
+def preencher_dados(worksheet, produto):
+    # Dados do produto
+    valores = [
+        produto.get('codigo_produto', ''),
+        produto.get('nome', ''),
+        produto.get('descricao_pdv', ''),
+        produto.get('grupo', ''),
+        produto.get('sub_grupo', ''),
+        produto.get('fornecedor', ''),
+        produto.get('marca', ''),
+        produto.get('localizacao', ''),
+        produto.get('destino', ''),
+        produto.get('almoxerifado', ''),
+        produto.get('data_entrada', ''),
+        produto.get('data_saida', ''),
+        produto.get('preco', 0),
+        "Sim" if produto.get('inflamavel', False) else "Não",
+        "Sim" if produto.get('fragil', False) else "Não",
+        produto.get('fotoProduto', ''),
+        produto.get('idFuncionario', ''),
+        produto.get('createdAt', ''),
+        produto.get('updatedAt', ''),
+        produto.get('data_validade', '')
+    ]
+
+    # Escrever os valores na segunda linha (linha 1 no índice zero-based)
+    for col_num, valor in enumerate(valores):
+        worksheet.write(1, col_num, valor)
+
 
 # Rota para gerar o Excel com os dados do produto específico
 @produto_bp.route('/gerar-excel', methods=['POST'])
 def gerar_excel():
     try:
+        # Recuperar os dados do produto do corpo da requisição
         produto = request.json
 
-        # Verificando os dados do produto recebidos
-        print("Dados recebidos:", produto)
+        # Verificar se os dados foram recebidos
+        if not produto:
+            return jsonify({"error": "Nenhum dado foi enviado"}), 400
 
-        # Verifica se a pasta 'Produtos' existe, caso contrário, cria
-        if not os.path.exists(pasta_produtos):
-            os.makedirs(pasta_produtos)
+        # Verificar se a pasta 'Produtos' existe, caso contrário, criá-la
+        criar_pasta_se_necessario(pasta_produtos)
 
         # Nome do arquivo Excel
-        nome_arquivo = limpar_nome_arquivo(produto['nome']) if produto.get('nome') else f"produto_{produto['codigo_produto']}"
-        caminho_excel = os.path.join(pasta_produtos, f"produto_{nome_arquivo}.xlsx")
+        nome_arquivo = limpar_nome_arquivo(produto.get('nome', f"produto_{produto['codigo_produto']}"))
+        caminho_excel = os.path.join(pasta_produtos, f"{nome_arquivo}.xlsx")
 
-        # Criando o arquivo Excel
+        # Criar o arquivo Excel
         workbook = xlsxwriter.Workbook(caminho_excel)
-        worksheet = workbook.add_worksheet()
-
-        # Adicionando os cabeçalhos
-        worksheet.write('A1', 'Código Produto')
-        worksheet.write('B1', 'Nome')
-        worksheet.write('C1', 'Descrição PDV')
-        worksheet.write('D1', 'Grupo')
-        worksheet.write('E1', 'Sub-Grupo')
-        worksheet.write('F1', 'Fornecedor')
-        worksheet.write('G1', 'Marca')
-        worksheet.write('H1', 'Localização')
-        worksheet.write('I1', 'Destino')
-        worksheet.write('J1', 'Almoxarifado')
-        worksheet.write('K1', 'Data Entrada')
-        worksheet.write('L1', 'Data Saída')
-        worksheet.write('M1', 'Preço')
-        worksheet.write('N1', 'Inflamável')
-        worksheet.write('O1', 'Frágil')
-        worksheet.write('P1', 'Foto Produto')
-        worksheet.write('Q1', 'ID Funcionário')
-        worksheet.write('R1', 'Data de Criação')
-        worksheet.write('S1', 'Data de Atualização')
-        worksheet.write('T1', 'Data de Validade')
-
-        # Preenchendo os dados
-        worksheet.write(1, 0, produto['codigo_produto'])
-        worksheet.write(1, 1, produto['nome'])
-        worksheet.write(1, 2, produto.get('descricao_pdv', ''))
-        worksheet.write(1, 3, produto.get('grupo', ''))
-        worksheet.write(1, 4, produto.get('sub_grupo', ''))
-        worksheet.write(1, 5, produto.get('fornecedor', ''))
-        worksheet.write(1, 6, produto.get('marca', ''))
-        worksheet.write(1, 7, produto.get('localizacao', ''))
-        worksheet.write(1, 8, produto.get('destino', ''))
-        worksheet.write(1, 9, produto.get('almoxerifado', ''))
-        worksheet.write(1, 10, produto.get('data_entrada', ''))
-        worksheet.write(1, 11, produto.get('data_saida', ''))
-        worksheet.write(1, 12, produto.get('preco', 0))
-        worksheet.write(1, 13, produto.get('inflamavel', False))
-        worksheet.write(1, 14, produto.get('fragil', False))
-        worksheet.write(1, 15, produto.get('fotoProduto', ''))
-        worksheet.write(1, 16, produto.get('idFuncionario', ''))
-        worksheet.write(1, 17, produto.get('createdAt', ''))
-        worksheet.write(1, 18, produto.get('updatedAt', ''))
-        worksheet.write(1, 19, produto.get('data_validade', ''))
-
-        # Fechando o arquivo
+        worksheet = configurar_planilha(workbook)
+        preencher_dados(worksheet, produto)
         workbook.close()
 
-        print(f"Excel gerado com sucesso: {caminho_excel}")
-
-        # Enviando o arquivo gerado
+        # Retornar o arquivo gerado para download
         return send_file(caminho_excel, as_attachment=True)
 
     except Exception as e:
